@@ -10,7 +10,7 @@ const config = {
 	kit: {
 		adapter: adapter({
 			// see https://kit.svelte.dev/docs/adapter-vercel for options
-			runtime: 'nodejs18.x'
+			runtime: 'nodejs20.x'
 		})
 	}
 };
