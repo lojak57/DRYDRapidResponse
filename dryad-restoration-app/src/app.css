@@ -1,0 +1,28 @@
+@import 'tailwindcss';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Import fonts */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@800&family=Mulish&family=Roboto+Slab:wght@300&display=swap');
+
+/* Define base styles */
+@layer base {
+  html {
+    font-family: 'Mulish', system-ui, sans-serif;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 800;
+  }
+}
+
+/* Custom utility classes */
+@layer utilities {
+  .bg-dryd-gradient {
+    background: linear-gradient(135deg, #61C3E2, #264F8E);
+  }
+  .bg-dryd-burgundy-gradient {
+    background: linear-gradient(135deg, #9A3667, #751D44);
+  }
+}
