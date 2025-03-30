@@ -209,4 +209,27 @@ export function resetFilters(): void {
   customerFilter.set(null);
   technicianFilter.set(null);
   searchQuery.set('');
-} 
+}
+
+/**
+ * Fetch all jobs
+ */
+async function fetchJobs(): Promise<void> {
+  await loadJobs();
+}
+
+// Export a consolidated jobStore object
+export const jobStore = {
+  jobs,
+  isLoading,
+  error,
+  filteredJobs,
+  dashboardJobs,
+  jobStatusCounts,
+  userJobCounts,
+  loadJobs,
+  loadJobById,
+  resetFilters,
+  fetchJobs,
+  get loading() { return isLoading }
+}; 
