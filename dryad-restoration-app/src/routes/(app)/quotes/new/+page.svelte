@@ -2153,7 +2153,7 @@
     <div class="flex justify-between mt-8">
       <button
         type="button"
-        class="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 disabled:opacity-50"
+        class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 disabled:opacity-50 shadow-sm"
         on:click={prevStep}
         disabled={currentStep === 1}
       >
@@ -2168,7 +2168,7 @@
       {#if currentStep < 4}
         <button
           type="button"
-          class="px-4 py-2 bg-dryd-blue text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-dryd-blue"
+          class="px-4 py-2 bg-dryd-blue text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-dryd-blue shadow-sm"
           on:click={nextStep}
         >
           <span class="flex items-center">

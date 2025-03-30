@@ -7,7 +7,7 @@ export default {
         dryd: {
           blue: {
             light: '#61C3E2', // Light blue from logo
-            DEFAULT: '#3D9FD0', // Medium blue
+            DEFAULT: '#2980B9', // Medium blue (updated for better contrast)
             dark: '#264F8E'    // Dark blue from gradient
           },
           burgundy: {
