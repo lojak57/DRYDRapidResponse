@@ -9,13 +9,13 @@
   export let iconPosition = "left";
   
   const colors = {
-    primary: "bg-dryd-blue hover:bg-dryd-blue-dark focus:ring-dryd-blue text-white border border-transparent",
-    secondary: "bg-gray-200 hover:bg-gray-300 focus:ring-gray-500 text-gray-800 border border-transparent",
-    success: "bg-green-600 hover:bg-green-700 focus:ring-green-500 text-white border border-transparent",
-    danger: "bg-red-600 hover:bg-red-700 focus:ring-red-500 text-white border border-transparent",
-    warning: "bg-amber-500 hover:bg-amber-600 focus:ring-amber-400 text-white border border-transparent",
-    info: "bg-blue-500 hover:bg-blue-600 focus:ring-blue-400 text-white border border-transparent",
-    default: "bg-white hover:bg-gray-50 focus:ring-gray-300 text-gray-700 border border-gray-300"
+    primary: "bg-dryd-blue hover:bg-dryd-blue-dark hover:shadow-md focus:ring-dryd-blue text-white border border-transparent",
+    secondary: "bg-gray-200 hover:bg-gray-300 hover:shadow-sm focus:ring-gray-500 text-gray-800 border border-transparent",
+    success: "bg-green-600 hover:bg-green-700 hover:shadow-md focus:ring-green-500 text-white border border-transparent",
+    danger: "bg-red-600 hover:bg-red-700 hover:shadow-md focus:ring-red-500 text-white border border-transparent",
+    warning: "bg-amber-500 hover:bg-amber-600 hover:shadow-md focus:ring-amber-400 text-white border border-transparent",
+    info: "bg-blue-500 hover:bg-blue-600 hover:shadow-md focus:ring-blue-400 text-white border border-transparent",
+    default: "bg-white hover:bg-gray-50 hover:shadow-sm focus:ring-gray-300 text-gray-700 border border-gray-300"
   };
   
   const sizes = {

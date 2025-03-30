@@ -4,8 +4,8 @@
   import { writable } from 'svelte/store';
   import { goto } from '$app/navigation';
   import type { Quote } from '$lib/types/Quote';
-  import { QuoteStatus } from '$lib/types/Quote';
-  import type { Customer } from '$lib/types/Customer';
+  import { QuoteStatus, QuoteType, type ScopeOfWorkData } from '$lib/types/Quote';
+  import type { Customer, Address } from '$lib/types/Customer';
   import { getQuoteById, updateQuote } from '$lib/services/quotes';
   import { getCustomerById } from '$lib/services/customers';
   import { createJob } from '$lib/services/jobs';
@@ -120,7 +120,10 @@
       const newJob = await createJob({
         customerId: $currentQuote.customerId,
         title: `Quote ${$currentQuote.quoteNumber}`,
-        description: $currentQuote.scopeOfWork,
+        // Convert ScopeOfWorkData to string format for the job description
+        description: typeof $currentQuote.scopeOfWork === 'string' 
+          ? $currentQuote.scopeOfWork 
+          : formatScopeOfWorkForPDF($currentQuote.scopeOfWork),
         siteAddress: $currentQuote.siteAddress,
         jobType: JobType.OTHER, // Default job type
         priority: 3, // Default medium priority
@@ -144,6 +147,98 @@
     } finally {
       actionLoading.set(false);
     }
+  }
+
+  // Function to format address for display
+  function formatAddress(address: Address): string {
+    if (!address) return 'N/A';
+    return `${address.street}, ${address.city}, ${address.state} ${address.zip}`;
+  }
+
+  async function generatePDF() {
+    if (!$currentQuote) return;
+    
+    // Convert the scope of work to string if it's an object
+    let scopeOfWorkText: string;
+    if (typeof $currentQuote.scopeOfWork === 'string') {
+      scopeOfWorkText = $currentQuote.scopeOfWork;
+    } else {
+      // Format the structured scope of work into a single string
+      scopeOfWorkText = formatScopeOfWorkForPDF($currentQuote.scopeOfWork);
+    }
+    
+    // Build the PDF content
+    const content = {
+      title: `Quote #${$currentQuote.quoteNumber}`,
+      customer: $customer ? $customer.name : 'Unknown Customer',
+      address: formatAddress($currentQuote.siteAddress),
+      status: $currentQuote.status,
+      date: new Date($currentQuote.dateCreated).toLocaleDateString(),
+      description: scopeOfWorkText,
+      items: $currentQuote.lineItems.map(item => ({
+        description: item.description,
+        quantity: item.quantity,
+        rate: item.unitPrice,
+        total: item.total,
+        isEstimate: item.isEstimate || false
+      })),
+      subtotal: $currentQuote.subtotal,
+      tax: $currentQuote.taxAmount || 0,
+      total: $currentQuote.total
+    };
+    
+    try {
+      // Generate and open the PDF (implementation depends on your PDF generation library)
+      console.log('Generating PDF with content:', content);
+      
+      // Here you would call your actual PDF generation service
+      alert('PDF Generation: This would generate and open a PDF with the quote details in a real app.');
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+    }
+  }
+
+  // Function to format structured scope of work for PDF
+  function formatScopeOfWorkForPDF(scopeOfWork: ScopeOfWorkData): string {
+    const sections = [];
+    
+    if (scopeOfWork.summary) {
+      sections.push(`PROJECT SUMMARY:\n${scopeOfWork.summary}`);
+    }
+    
+    if (scopeOfWork.waterMitigation) {
+      sections.push(`WATER MITIGATION:\n${scopeOfWork.waterMitigation}`);
+    }
+    
+    if (scopeOfWork.containment) {
+      sections.push(`CONTAINMENT:\n${scopeOfWork.containment}`);
+    }
+    
+    if (scopeOfWork.affectedMaterials) {
+      sections.push(`AFFECTED MATERIALS:\n${scopeOfWork.affectedMaterials}`);
+    }
+    
+    if (scopeOfWork.dryingProcess) {
+      sections.push(`DRYING PROCESS:\n${scopeOfWork.dryingProcess}`);
+    }
+    
+    if (scopeOfWork.demolition) {
+      sections.push(`DEMOLITION:\n${scopeOfWork.demolition}`);
+    }
+    
+    if (scopeOfWork.cleaningSanitizing) {
+      sections.push(`CLEANING & SANITIZING:\n${scopeOfWork.cleaningSanitizing}`);
+    }
+    
+    if (scopeOfWork.reconstruction) {
+      sections.push(`RECONSTRUCTION:\n${scopeOfWork.reconstruction}`);
+    }
+    
+    if (scopeOfWork.exclusions) {
+      sections.push(`EXCLUSIONS / NOT INCLUDED:\n${scopeOfWork.exclusions}`);
+    }
+    
+    return sections.join('\n\n');
   }
 
   onMount(() => {
@@ -310,7 +405,122 @@
       <!-- Scope of Work -->
       <div class="p-6 border-t border-gray-200">
         <h2 class="text-lg font-semibold mb-3 text-gray-800">Scope of Work</h2>
-        <p class="whitespace-pre-line text-gray-700">{$currentQuote.scopeOfWork}</p>
+        
+        {#if typeof $currentQuote.scopeOfWork === 'string'}
+          <!-- Handle legacy quotes with string scopeOfWork -->
+          <p class="whitespace-pre-line text-gray-700">{$currentQuote.scopeOfWork}</p>
+        {:else}
+          <!-- Display structured scope of work -->
+          <div class="space-y-4">
+            {#if $currentQuote.scopeOfWork.summary}
+              <div class="mb-4">
+                <h3 class="text-md font-medium text-gray-800 mb-1 flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1.5 text-dryd-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Project Summary
+                </h3>
+                <p class="whitespace-pre-line text-gray-700 ml-6">{$currentQuote.scopeOfWork.summary}</p>
+              </div>
+            {/if}
+            
+            {#if $currentQuote.scopeOfWork.waterMitigation}
+              <div class="mb-4">
+                <h3 class="text-md font-medium text-gray-800 mb-1 flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1.5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                  </svg>
+                  Water Mitigation / Initial Steps
+                </h3>
+                <p class="whitespace-pre-line text-gray-700 ml-6">{$currentQuote.scopeOfWork.waterMitigation}</p>
+              </div>
+            {/if}
+            
+            {#if $currentQuote.scopeOfWork.containment}
+              <div class="mb-4">
+                <h3 class="text-md font-medium text-gray-800 mb-1 flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1.5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M20.618 5.984A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016zM12 9v2m0 4h.01" />
+                  </svg>
+                  Containment / Control Measures
+                </h3>
+                <p class="whitespace-pre-line text-gray-700 ml-6">{$currentQuote.scopeOfWork.containment}</p>
+              </div>
+            {/if}
+            
+            {#if $currentQuote.scopeOfWork.affectedMaterials}
+              <div class="mb-4">
+                <h3 class="text-md font-medium text-gray-800 mb-1 flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1.5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                  </svg>
+                  Affected Materials
+                </h3>
+                <p class="whitespace-pre-line text-gray-700 ml-6">{$currentQuote.scopeOfWork.affectedMaterials}</p>
+              </div>
+            {/if}
+            
+            {#if $currentQuote.scopeOfWork.dryingProcess}
+              <div class="mb-4">
+                <h3 class="text-md font-medium text-gray-800 mb-1 flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1.5 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                  </svg>
+                  Drying Process
+                </h3>
+                <p class="whitespace-pre-line text-gray-700 ml-6">{$currentQuote.scopeOfWork.dryingProcess}</p>
+              </div>
+            {/if}
+            
+            {#if $currentQuote.scopeOfWork.demolition}
+              <div class="mb-4">
+                <h3 class="text-md font-medium text-gray-800 mb-1 flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1.5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                  Demolition Requirements
+                </h3>
+                <p class="whitespace-pre-line text-gray-700 ml-6">{$currentQuote.scopeOfWork.demolition}</p>
+              </div>
+            {/if}
+            
+            {#if $currentQuote.scopeOfWork.cleaningSanitizing}
+              <div class="mb-4">
+                <h3 class="text-md font-medium text-gray-800 mb-1 flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1.5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                  </svg>
+                  Cleaning & Sanitizing
+                </h3>
+                <p class="whitespace-pre-line text-gray-700 ml-6">{$currentQuote.scopeOfWork.cleaningSanitizing}</p>
+              </div>
+            {/if}
+            
+            {#if $currentQuote.scopeOfWork.reconstruction}
+              <div class="mb-4">
+                <h3 class="text-md font-medium text-gray-800 mb-1 flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1.5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                  Reconstruction / Build-Back
+                </h3>
+                <p class="whitespace-pre-line text-gray-700 ml-6">{$currentQuote.scopeOfWork.reconstruction}</p>
+              </div>
+            {/if}
+            
+            {#if $currentQuote.scopeOfWork.exclusions}
+              <div class="mb-4">
+                <h3 class="text-md font-medium text-gray-800 mb-1 flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1.5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Exclusions / Not Included
+                </h3>
+                <p class="whitespace-pre-line text-gray-700 ml-6">{$currentQuote.scopeOfWork.exclusions}</p>
+              </div>
+            {/if}
+          </div>
+        {/if}
       </div>
       
       <!-- Line Items -->

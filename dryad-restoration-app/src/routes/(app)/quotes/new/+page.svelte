@@ -1018,6 +1018,30 @@
     { id: 3, title: 'Line Items' },
     { id: 4, title: 'Review & Submit' }
   ];
+
+  // Service types for display
+  const serviceTypes = [
+    { id: 'water-damage', label: 'Water Damage' },
+    { id: 'fire-damage', label: 'Fire Damage' },
+    { id: 'mold-remediation', label: 'Mold Remediation' },
+    { id: 'storm-damage', label: 'Storm Damage' },
+    { id: 'biohazard', label: 'Biohazard' },
+    { id: 'reconstruction', label: 'Reconstruction' }
+  ];
+
+  // Urgency options
+  const urgencyOptions = [
+    { value: 'emergency', label: 'Emergency', desc: 'Needs immediate attention' },
+    { value: 'urgent', label: 'Urgent', desc: 'Should be started within 24-48 hours' },
+    { value: 'standard', label: 'Standard', desc: 'Can be scheduled normally' }
+  ];
+
+  // Size options
+  const sizeOptions = [
+    { label: 'Small', desc: 'Single room or area' },
+    { label: 'Medium', desc: 'Multiple rooms' },
+    { label: 'Large', desc: 'Entire property' }
+  ];
 </script>
 
 <div class="container mx-auto px-4 py-8">
@@ -1334,23 +1358,23 @@
             <div>
               <p class="font-medium text-gray-700 mb-2">What type of project is this?</p>
               <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                {#each ['Water Damage', 'Fire Damage', 'Mold Remediation', 'Storm Damage', 'Biohazard', 'Reconstruction'] as projectType}
+                {#each serviceTypes as projectType}
                   <button
                     type="button"
                     class="border rounded-lg p-3 text-left hover:bg-blue-50 hover:border-blue-300 transition-all focus:outline-none focus:ring-2 focus:ring-blue-300
-                    {selectedProjectTypes.includes(projectType) ? 'border-blue-500 bg-blue-50 shadow-sm' : 'border-gray-300'}"
-                    on:click={() => toggleProjectType(projectType)}
+                    {selectedProjectTypes.includes(projectType.id) ? 'border-blue-500 bg-blue-50 shadow-sm' : 'border-gray-300'}"
+                    on:click={() => toggleProjectType(projectType.id)}
                   >
                     <div class="font-medium flex items-center">
                       <div class="w-5 h-5 border rounded mr-2 flex items-center justify-center
-                        {selectedProjectTypes.includes(projectType) ? 'bg-blue-500 border-blue-500' : 'border-gray-400'}">
-                        {#if selectedProjectTypes.includes(projectType)}
+                        {selectedProjectTypes.includes(projectType.id) ? 'bg-blue-500 border-blue-500' : 'border-gray-400'}">
+                        {#if selectedProjectTypes.includes(projectType.id)}
                           <svg class="w-3 h-3 text-white" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                           </svg>
                         {/if}
                       </div>
-                      {projectType}
+                      {projectType.label}
                     </div>
                     <p class="text-sm text-gray-500 mt-1 ml-7">Click to select</p>
                   </button>
@@ -1361,21 +1385,17 @@
             <div>
               <p class="font-medium text-gray-700 mb-2">How urgent is this project?</p>
               <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                {#each [
-                  { label: 'Emergency', desc: 'Needs immediate attention' },
-                  { label: 'Urgent', desc: 'Should be started within 24-48 hours' },
-                  { label: 'Standard', desc: 'Can be scheduled normally' }
-                ] as urgency}
+                {#each urgencyOptions as urgency}
                   <button
                     type="button"
                     class="border rounded-lg p-3 text-left hover:bg-blue-50 hover:border-blue-300 transition-all focus:outline-none focus:ring-2 focus:ring-blue-300
-                    {selectedUrgency === urgency.label ? 'border-blue-500 bg-blue-50 shadow-sm' : 'border-gray-300'}"
-                    on:click={() => selectUrgency(urgency.label)}
+                    {selectedUrgency === urgency.value ? 'border-blue-500 bg-blue-50 shadow-sm' : 'border-gray-300'}"
+                    on:click={() => selectUrgency(urgency.value)}
                   >
                     <div class="font-medium flex items-center">
                       <div class="w-5 h-5 border rounded-full mr-2 flex items-center justify-center
-                        {selectedUrgency === urgency.label ? 'bg-blue-500 border-blue-500' : 'border-gray-400'}">
-                        {#if selectedUrgency === urgency.label}
+                        {selectedUrgency === urgency.value ? 'bg-blue-500 border-blue-500' : 'border-gray-400'}">
+                        {#if selectedUrgency === urgency.value}
                           <div class="w-2.5 h-2.5 bg-white rounded-full"></div>
                         {/if}
                       </div>
@@ -1390,11 +1410,7 @@
             <div>
               <p class="font-medium text-gray-700 mb-2">Estimated project size?</p>
               <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                {#each [
-                  { label: 'Small', desc: 'Single room or area' },
-                  { label: 'Medium', desc: 'Multiple rooms' },
-                  { label: 'Large', desc: 'Entire property' }
-                ] as size}
+                {#each sizeOptions as size}
                   <button
                     type="button"
                     class="border rounded-lg p-3 text-left hover:bg-blue-50 hover:border-blue-300 transition-all focus:outline-none focus:ring-2 focus:ring-blue-300
@@ -2149,261 +2165,260 @@
       </Card>
     {/if}
     
-    <!-- Form Navigation Buttons -->
-    <div class="flex justify-between mt-8">
-      <button
-        type="button"
-        class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 disabled:opacity-50 shadow-sm"
-        on:click={prevStep}
-        disabled={currentStep === 1}
-      >
-        <span class="flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
-          </svg>
-          Previous
-        </span>
-      </button>
+    <!-- Navigation Buttons -->
+    <div class="flex justify-between mt-8 mb-4">
+      {#if currentStep > 1}
+        <button 
+          type="button" 
+          class="px-6 py-2.5 bg-white text-dryd-blue border border-dryd-blue rounded-lg hover:bg-gray-50 hover:shadow-sm transition-all duration-200"
+          on:click={prevStep}
+        >
+          <span class="flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+            </svg>
+            Previous
+          </span>
+        </button>
+      {:else}
+        <div></div> <!-- Empty div for flex layout -->
+      {/if}
       
-      {#if currentStep < 4}
-        <button
-          type="button"
-          class="px-4 py-2 bg-dryd-blue text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-dryd-blue shadow-sm"
+      {#if currentStep < totalSteps}
+        <button 
+          type="button" 
+          class="px-6 py-2.5 bg-dryd-blue text-white rounded-lg hover:bg-dryd-blue-dark hover:shadow-md transition-all duration-200"
           on:click={nextStep}
         >
           <span class="flex items-center">
             Next
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-1" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-2" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
             </svg>
           </span>
         </button>
       {:else}
-        <button
-          type="button"
-          class="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-70"
-          on:click={submitQuote}
+        <button 
+          type="submit" 
+          class="px-6 py-2.5 bg-dryd-blue text-white rounded-lg hover:bg-dryd-blue-dark hover:shadow-md transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed"
           disabled={isSubmitting}
         >
-          <span class="flex items-center">
-            {#if isSubmitting}
+          {#if isSubmitting}
+            <span class="flex items-center">
               <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
-              Saving...
-            {:else}
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-              </svg>
-              Create Quote
-            {/if}
-          </span>
+              Submitting...
+            </span>
+          {:else}
+            Submit Quote
+          {/if}
         </button>
       {/if}
     </div>
+    
+    <!-- New Customer Modal -->
+    {#if showNewCustomerForm}
+      <div class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-screen overflow-y-auto">
+          <div class="p-6">
+            <div class="flex justify-between items-center mb-4">
+              <h2 class="text-xl font-semibold text-gray-800">Create New Customer</h2>
+              <button 
+                type="button"
+                class="text-gray-500 hover:text-gray-700"
+                on:click={() => showNewCustomerForm = false}
+                aria-label="Close"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <form on:submit|preventDefault={createNewCustomer} class="space-y-4">
+              <!-- Customer Name -->
+              <div>
+                <label for="newCustomerName" class="block text-sm font-medium text-gray-700 mb-1">
+                  Customer Name <span class="text-red-500">*</span>
+                </label>
+                <input 
+                  id="newCustomerName"
+                  type="text"
+                  bind:value={newCustomer.name}
+                  class="w-full p-2 border {newCustomerValidationErrors.name ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-dryd-blue focus:border-dryd-blue"
+                  placeholder="Enter customer name"
+                />
+                {#if newCustomerValidationErrors.name}
+                  <p class="mt-1 text-sm text-red-600">{newCustomerValidationErrors.name}</p>
+                {/if}
+              </div>
+              
+              <!-- Contact Person -->
+              <div>
+                <label for="newCustomerContact" class="block text-sm font-medium text-gray-700 mb-1">
+                  Contact Person
+                </label>
+                <input 
+                  id="newCustomerContact"
+                  type="text"
+                  bind:value={newCustomer.contactPerson}
+                  class="w-full p-2 border border-gray-300 rounded-lg focus:ring-dryd-blue focus:border-dryd-blue"
+                  placeholder="Enter contact person's name"
+                />
+              </div>
+              
+              <!-- Email and Phone - Two columns -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label for="newCustomerEmail" class="block text-sm font-medium text-gray-700 mb-1">
+                    Email <span class="text-red-500">*</span>
+                  </label>
+                  <input 
+                    id="newCustomerEmail"
+                    type="email"
+                    bind:value={newCustomer.email}
+                    class="w-full p-2 border {newCustomerValidationErrors.email ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-dryd-blue focus:border-dryd-blue"
+                    placeholder="Enter email address"
+                  />
+                  {#if newCustomerValidationErrors.email}
+                    <p class="mt-1 text-sm text-red-600">{newCustomerValidationErrors.email}</p>
+                  {/if}
+                </div>
+                <div>
+                  <label for="newCustomerPhone" class="block text-sm font-medium text-gray-700 mb-1">
+                    Phone <span class="text-red-500">*</span>
+                  </label>
+                  <input 
+                    id="newCustomerPhone"
+                    type="tel"
+                    bind:value={newCustomer.phone}
+                    class="w-full p-2 border {newCustomerValidationErrors.phone ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-dryd-blue focus:border-dryd-blue"
+                    placeholder="Enter phone number"
+                  />
+                  {#if newCustomerValidationErrors.phone}
+                    <p class="mt-1 text-sm text-red-600">{newCustomerValidationErrors.phone}</p>
+                  {/if}
+                </div>
+              </div>
+              
+              <!-- Address Section -->
+              <div>
+                <h3 class="text-md font-medium text-gray-700 mb-2">Primary Address</h3>
+                
+                <!-- Street -->
+                <div class="mb-3">
+                  <label for="newCustomerStreet" class="block text-sm font-medium text-gray-700 mb-1">
+                    Street <span class="text-red-500">*</span>
+                  </label>
+                  <input 
+                    id="newCustomerStreet"
+                    type="text"
+                    bind:value={newCustomer.primaryAddress.street}
+                    class="w-full p-2 border {newCustomerValidationErrors.street ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-dryd-blue focus:border-dryd-blue"
+                    placeholder="Enter street address"
+                  />
+                  {#if newCustomerValidationErrors.street}
+                    <p class="mt-1 text-sm text-red-600">{newCustomerValidationErrors.street}</p>
+                  {/if}
+                </div>
+                
+                <!-- City, State, ZIP -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <div class="col-span-2">
+                    <label for="newCustomerCity" class="block text-sm font-medium text-gray-700 mb-1">
+                      City <span class="text-red-500">*</span>
+                    </label>
+                    <input 
+                      id="newCustomerCity"
+                      type="text"
+                      bind:value={newCustomer.primaryAddress.city}
+                      class="w-full p-2 border {newCustomerValidationErrors.city ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-dryd-blue focus:border-dryd-blue"
+                      placeholder="City"
+                    />
+                    {#if newCustomerValidationErrors.city}
+                      <p class="mt-1 text-sm text-red-600">{newCustomerValidationErrors.city}</p>
+                    {/if}
+                  </div>
+                  <div>
+                    <label for="newCustomerState" class="block text-sm font-medium text-gray-700 mb-1">
+                      State <span class="text-red-500">*</span>
+                    </label>
+                    <input 
+                      id="newCustomerState"
+                      type="text"
+                      bind:value={newCustomer.primaryAddress.state}
+                      class="w-full p-2 border {newCustomerValidationErrors.state ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-dryd-blue focus:border-dryd-blue"
+                      placeholder="State"
+                    />
+                    {#if newCustomerValidationErrors.state}
+                      <p class="mt-1 text-sm text-red-600">{newCustomerValidationErrors.state}</p>
+                    {/if}
+                  </div>
+                  <div>
+                    <label for="newCustomerZip" class="block text-sm font-medium text-gray-700 mb-1">
+                      ZIP <span class="text-red-500">*</span>
+                    </label>
+                    <input 
+                      id="newCustomerZip"
+                      type="text"
+                      bind:value={newCustomer.primaryAddress.zip}
+                      class="w-full p-2 border {newCustomerValidationErrors.zip ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-dryd-blue focus:border-dryd-blue"
+                      placeholder="ZIP"
+                    />
+                    {#if newCustomerValidationErrors.zip}
+                      <p class="mt-1 text-sm text-red-600">{newCustomerValidationErrors.zip}</p>
+                    {/if}
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Notes -->
+              <div>
+                <label for="newCustomerNotes" class="block text-sm font-medium text-gray-700 mb-1">
+                  Notes
+                </label>
+                <textarea 
+                  id="newCustomerNotes"
+                  bind:value={newCustomer.notes}
+                  class="w-full p-2 border border-gray-300 rounded-lg focus:ring-dryd-blue focus:border-dryd-blue"
+                  rows="3"
+                  placeholder="Enter any additional notes about this customer"
+                ></textarea>
+              </div>
+              
+              <!-- Action Buttons -->
+              <div class="flex justify-end space-x-3 pt-4">
+                <button 
+                  type="button"
+                  class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-dryd-blue"
+                  on:click={() => showNewCustomerForm = false}
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit"
+                  class="px-4 py-2 text-sm font-medium text-white bg-dryd-blue border border-transparent rounded-md shadow-sm hover:bg-dryd-blue-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-dryd-blue"
+                  disabled={isCreatingCustomer}
+                >
+                  {#if isCreatingCustomer}
+                    <span class="inline-flex items-center">
+                      <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Creating...
+                    </span>
+                  {:else}
+                    Create Customer
+                  {/if}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    {/if}
   </form>
 </div>
-
-{#if showNewCustomerForm}
-  <!-- New Customer Modal -->
-  <div class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-screen overflow-y-auto">
-      <div class="p-6">
-        <div class="flex justify-between items-center mb-4">
-          <h2 class="text-xl font-semibold text-gray-800">Create New Customer</h2>
-          <button 
-            type="button"
-            class="text-gray-500 hover:text-gray-700"
-            on:click={() => showNewCustomerForm = false}
-            aria-label="Close"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-        
-        <form on:submit|preventDefault={createNewCustomer} class="space-y-4">
-          <!-- Customer Name -->
-          <div>
-            <label for="newCustomerName" class="block text-sm font-medium text-gray-700 mb-1">
-              Customer Name <span class="text-red-500">*</span>
-            </label>
-            <input 
-              id="newCustomerName"
-              type="text"
-              bind:value={newCustomer.name}
-              class="w-full p-2 border {newCustomerValidationErrors.name ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-dryd-blue focus:border-dryd-blue"
-              placeholder="Enter customer name"
-            />
-            {#if newCustomerValidationErrors.name}
-              <p class="mt-1 text-sm text-red-600">{newCustomerValidationErrors.name}</p>
-            {/if}
-          </div>
-          
-          <!-- Contact Person -->
-          <div>
-            <label for="newCustomerContact" class="block text-sm font-medium text-gray-700 mb-1">
-              Contact Person
-            </label>
-            <input 
-              id="newCustomerContact"
-              type="text"
-              bind:value={newCustomer.contactPerson}
-              class="w-full p-2 border border-gray-300 rounded-lg focus:ring-dryd-blue focus:border-dryd-blue"
-              placeholder="Enter contact person's name"
-            />
-          </div>
-          
-          <!-- Email and Phone - Two columns -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label for="newCustomerEmail" class="block text-sm font-medium text-gray-700 mb-1">
-                Email <span class="text-red-500">*</span>
-              </label>
-              <input 
-                id="newCustomerEmail"
-                type="email"
-                bind:value={newCustomer.email}
-                class="w-full p-2 border {newCustomerValidationErrors.email ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-dryd-blue focus:border-dryd-blue"
-                placeholder="Enter email address"
-              />
-              {#if newCustomerValidationErrors.email}
-                <p class="mt-1 text-sm text-red-600">{newCustomerValidationErrors.email}</p>
-              {/if}
-            </div>
-            <div>
-              <label for="newCustomerPhone" class="block text-sm font-medium text-gray-700 mb-1">
-                Phone <span class="text-red-500">*</span>
-              </label>
-              <input 
-                id="newCustomerPhone"
-                type="tel"
-                bind:value={newCustomer.phone}
-                class="w-full p-2 border {newCustomerValidationErrors.phone ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-dryd-blue focus:border-dryd-blue"
-                placeholder="Enter phone number"
-              />
-              {#if newCustomerValidationErrors.phone}
-                <p class="mt-1 text-sm text-red-600">{newCustomerValidationErrors.phone}</p>
-              {/if}
-            </div>
-          </div>
-          
-          <!-- Address Section -->
-          <div>
-            <h3 class="text-md font-medium text-gray-700 mb-2">Primary Address</h3>
-            
-            <!-- Street -->
-            <div class="mb-3">
-              <label for="newCustomerStreet" class="block text-sm font-medium text-gray-700 mb-1">
-                Street <span class="text-red-500">*</span>
-              </label>
-              <input 
-                id="newCustomerStreet"
-                type="text"
-                bind:value={newCustomer.primaryAddress.street}
-                class="w-full p-2 border {newCustomerValidationErrors.street ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-dryd-blue focus:border-dryd-blue"
-                placeholder="Enter street address"
-              />
-              {#if newCustomerValidationErrors.street}
-                <p class="mt-1 text-sm text-red-600">{newCustomerValidationErrors.street}</p>
-              {/if}
-            </div>
-            
-            <!-- City, State, ZIP -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-              <div class="col-span-2">
-                <label for="newCustomerCity" class="block text-sm font-medium text-gray-700 mb-1">
-                  City <span class="text-red-500">*</span>
-                </label>
-                <input 
-                  id="newCustomerCity"
-                  type="text"
-                  bind:value={newCustomer.primaryAddress.city}
-                  class="w-full p-2 border {newCustomerValidationErrors.city ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-dryd-blue focus:border-dryd-blue"
-                  placeholder="City"
-                />
-                {#if newCustomerValidationErrors.city}
-                  <p class="mt-1 text-sm text-red-600">{newCustomerValidationErrors.city}</p>
-                {/if}
-              </div>
-              <div>
-                <label for="newCustomerState" class="block text-sm font-medium text-gray-700 mb-1">
-                  State <span class="text-red-500">*</span>
-                </label>
-                <input 
-                  id="newCustomerState"
-                  type="text"
-                  bind:value={newCustomer.primaryAddress.state}
-                  class="w-full p-2 border {newCustomerValidationErrors.state ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-dryd-blue focus:border-dryd-blue"
-                  placeholder="State"
-                />
-                {#if newCustomerValidationErrors.state}
-                  <p class="mt-1 text-sm text-red-600">{newCustomerValidationErrors.state}</p>
-                {/if}
-              </div>
-              <div>
-                <label for="newCustomerZip" class="block text-sm font-medium text-gray-700 mb-1">
-                  ZIP <span class="text-red-500">*</span>
-                </label>
-                <input 
-                  id="newCustomerZip"
-                  type="text"
-                  bind:value={newCustomer.primaryAddress.zip}
-                  class="w-full p-2 border {newCustomerValidationErrors.zip ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-dryd-blue focus:border-dryd-blue"
-                  placeholder="ZIP"
-                />
-                {#if newCustomerValidationErrors.zip}
-                  <p class="mt-1 text-sm text-red-600">{newCustomerValidationErrors.zip}</p>
-                {/if}
-              </div>
-            </div>
-          </div>
-          
-          <!-- Notes -->
-          <div>
-            <label for="newCustomerNotes" class="block text-sm font-medium text-gray-700 mb-1">
-              Notes
-            </label>
-            <textarea 
-              id="newCustomerNotes"
-              bind:value={newCustomer.notes}
-              class="w-full p-2 border border-gray-300 rounded-lg focus:ring-dryd-blue focus:border-dryd-blue"
-              rows="3"
-              placeholder="Enter any additional notes about this customer"
-            ></textarea>
-          </div>
-          
-          <!-- Action Buttons -->
-          <div class="flex justify-end space-x-3 pt-4">
-            <button 
-              type="button"
-              class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-dryd-blue"
-              on:click={() => showNewCustomerForm = false}
-            >
-              Cancel
-            </button>
-            <button 
-              type="submit"
-              class="px-4 py-2 text-sm font-medium text-white bg-dryd-blue border border-transparent rounded-md shadow-sm hover:bg-dryd-blue-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-dryd-blue"
-              disabled={isCreatingCustomer}
-            >
-              {#if isCreatingCustomer}
-                <span class="inline-flex items-center">
-                  <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Creating...
-                </span>
-              {:else}
-                Create Customer
-              {/if}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
-{/if}

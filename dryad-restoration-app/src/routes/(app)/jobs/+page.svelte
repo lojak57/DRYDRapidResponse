@@ -79,7 +79,9 @@
       >
         <option value="ALL">All Statuses</option>
         <option value="NEW">New</option>
+        <option value="SCHEDULED">Scheduled</option>
         <option value="IN_PROGRESS">In Progress</option>
+        <option value="PENDING_COMPLETION">Pending Completion</option>
         <option value="ON_HOLD">On Hold</option>
         <option value="COMPLETED">Completed</option>
         <option value="CANCELLED">Cancelled</option>

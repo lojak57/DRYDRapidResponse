@@ -20,6 +20,30 @@ export enum QuoteType {
 }
 
 /**
+ * Structure for scope of work details
+ */
+export interface ScopeOfWorkData {
+  /** Optional brief overview */
+  summary?: string;
+  /** Extraction, initial steps */
+  waterMitigation?: string;
+  /** Setup, negative air, etc. */
+  containment?: string;
+  /** What needs demo/treatment (drywall, carpet, etc.) */
+  affectedMaterials?: string;
+  /** Equipment setup, monitoring plan */
+  dryingProcess?: string;
+  /** Specific demo tasks */
+  demolition?: string;
+  /** Post-demo/drying cleaning */
+  cleaningSanitizing?: string;
+  /** PUT-BACK / REBUILD SCOPE (Optional for initial quote maybe) */
+  reconstruction?: string;
+  /** What is NOT included */
+  exclusions?: string;
+}
+
+/**
  * Represents a line item within a quote
  */
 export interface QuoteLineItem {
@@ -58,7 +82,7 @@ export interface Quote {
   /** Address where the work will be performed */
   siteAddress: Address;
   /** Detailed description of the work to be performed */
-  scopeOfWork: string;
+  scopeOfWork: ScopeOfWorkData;
   /** Individual line items making up the quote */
   lineItems: QuoteLineItem[];
   /** Sum of all line item totals */

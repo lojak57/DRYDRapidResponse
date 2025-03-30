@@ -9,6 +9,7 @@
     { status: JobStatus.NEW, label: 'New', icon: 'M12 4v16m8-8H4' },
     { status: JobStatus.SCHEDULED, label: 'Scheduled', icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' },
     { status: JobStatus.IN_PROGRESS, label: 'In Progress', icon: 'M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' },
+    { status: JobStatus.PENDING_COMPLETION, label: 'Pending Completion', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2' },
     { status: JobStatus.COMPLETED, label: 'Completed', icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' },
     { status: JobStatus.INVOICED, label: 'Invoiced', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01' },
     { status: JobStatus.PAID, label: 'Paid', icon: 'M9 8l3 5m0 0l3-5m-3 5v4m-3-5h6m-6 3h6m6-3a9 9 0 11-18 0 9 9 0 0118 0z' }
@@ -40,6 +41,8 @@
         return { bg: 'bg-green-100', text: 'text-green-800', border: 'border-green-300', icon: 'text-green-600' };
       case JobStatus.ON_HOLD:
         return { bg: 'bg-amber-100', text: 'text-amber-800', border: 'border-amber-300', icon: 'text-amber-600' };
+      case JobStatus.PENDING_COMPLETION:
+        return { bg: 'bg-blue-100', text: 'text-blue-800', border: 'border-blue-300', icon: 'text-blue-600' };
       case JobStatus.COMPLETED:
         return { bg: 'bg-gray-100', text: 'text-gray-800', border: 'border-gray-300', icon: 'text-gray-600' };
       case JobStatus.INVOICED:

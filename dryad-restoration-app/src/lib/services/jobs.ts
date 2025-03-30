@@ -1,6 +1,6 @@
 import mockJobs from '$lib/mock/jobs.json';
 import type { Job } from '$lib/types/Job';
-import { JobStatus, type JobType } from '$lib/types/Job';
+import { JobStatus, type JobType, type CompletionTasks } from '$lib/types/Job';
 import { getCustomers } from '$lib/services/customers';
 import { customers } from '$lib/stores/customerStore';
 import { get } from 'svelte/store';
@@ -170,7 +170,12 @@ export async function createJob(jobData: Omit<Job, 'id' | 'createdAt' | 'status'
     status: JobStatus.NEW,
     createdAt: new Date().toISOString(),
     equipmentIds: [],
-    completedDate: null
+    completedDate: null,
+    completionTasks: {
+      finalReadingsLogged: false,
+      afterPhotosTaken: false,
+      allEquipmentRemoved: false
+    }
   };
   
   // Add the new job to the mock data
@@ -201,4 +206,73 @@ export async function updateJob(id: string, updates: Partial<Job>): Promise<Job 
   };
   
   return parseJobDates((mockJobs as any[])[index]);
+}
+
+/**
+ * Update a job's completion task
+ * @param jobId The ID of the job to update
+ * @param taskKey The key of the completion task to update
+ * @param value The new value for the task
+ * @returns Promise resolving to the updated job
+ */
+export async function updateJobCompletionTask(
+  jobId: string, 
+  taskKey: keyof CompletionTasks, 
+  value: boolean
+): Promise<Job | null> {
+  // Simulate API delay
+  await simulateDelay();
+  
+  // Find the job in our data
+  const jobsData = get(jobs);
+  const jobIndex = jobsData.findIndex(job => job.id === jobId);
+  
+  if (jobIndex === -1) {
+    console.error(`Job with ID ${jobId} not found.`);
+    return null;
+  }
+  
+  const job = jobsData[jobIndex];
+  
+  // If completionTasks doesn't exist yet, initialize it
+  if (!job.completionTasks) {
+    job.completionTasks = {
+      finalReadingsLogged: false,
+      afterPhotosTaken: false,
+      allEquipmentRemoved: false
+    };
+  }
+  
+  // Create updated job with the updated task
+  const updatedJob = {
+    ...job,
+    completionTasks: {
+      ...job.completionTasks,
+      [taskKey]: value
+    }
+  };
+  
+  // Update in the mock data
+  const mockIndex = (mockJobs as any[]).findIndex(job => job.id === jobId);
+  if (mockIndex !== -1) {
+    if (!(mockJobs as any[])[mockIndex].completionTasks) {
+      (mockJobs as any[])[mockIndex].completionTasks = {
+        finalReadingsLogged: false,
+        afterPhotosTaken: false,
+        allEquipmentRemoved: false
+      };
+    }
+    
+    (mockJobs as any[])[mockIndex].completionTasks[taskKey] = value;
+  }
+  
+  // Update the store
+  jobs.update(currentJobs => {
+    const newJobs = [...currentJobs];
+    newJobs[jobIndex] = updatedJob;
+    return newJobs;
+  });
+  
+  // Return a copy of the updated job
+  return JSON.parse(JSON.stringify(updatedJob));
 } 

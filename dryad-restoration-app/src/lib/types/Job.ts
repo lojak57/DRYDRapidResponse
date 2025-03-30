@@ -8,6 +8,7 @@ export enum JobStatus {
   SCHEDULED = 'SCHEDULED',
   IN_PROGRESS = 'IN_PROGRESS',
   ON_HOLD = 'ON_HOLD',
+  PENDING_COMPLETION = 'PENDING_COMPLETION',
   COMPLETED = 'COMPLETED',
   INVOICED = 'INVOICED',
   PAID = 'PAID',
@@ -46,6 +47,18 @@ export interface InsuranceInfo {
   isInsuranceClaim: boolean;
   /** Deductible amount in dollars */
   deductible?: number;
+}
+
+/**
+ * Represents the completion tasks that must be done before a job can be marked as complete
+ */
+export interface CompletionTasks {
+  /** Flag indicating that final moisture readings have been logged */
+  finalReadingsLogged: boolean;
+  /** Flag indicating that after photos have been taken */
+  afterPhotosTaken: boolean;
+  /** Flag indicating that all equipment has been removed from the site */
+  allEquipmentRemoved: boolean;
 }
 
 /**
@@ -94,4 +107,6 @@ export interface Job {
   tags?: string[];
   /** ID of the quote this job was created from */
   originatingQuoteId?: string | null;
+  /** Optional tasks that must be completed before job can be marked complete */
+  completionTasks?: CompletionTasks;
 } 

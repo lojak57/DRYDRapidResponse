@@ -91,6 +91,7 @@ export const jobStatusCounts = derived(jobs, $jobs => {
     [JobStatus.SCHEDULED]: 0,
     [JobStatus.IN_PROGRESS]: 0,
     [JobStatus.ON_HOLD]: 0,
+    [JobStatus.PENDING_COMPLETION]: 0,
     [JobStatus.COMPLETED]: 0,
     [JobStatus.INVOICED]: 0,
     [JobStatus.PAID]: 0,
