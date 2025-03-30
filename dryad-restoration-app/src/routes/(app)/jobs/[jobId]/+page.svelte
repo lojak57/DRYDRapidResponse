@@ -343,30 +343,44 @@
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
                   <button 
                     on:click={() => showForm = 'note'}
-                    class="flex items-center justify-center px-4 py-3 bg-white border border-gray-300 rounded-lg"
+                    class="flex flex-col items-center justify-center px-4 py-3 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-blue-50 hover:border-blue-300 hover:shadow active:bg-blue-100 active:shadow-inner active:transform active:scale-[0.98] transition-all duration-150"
                   >
-                    Add Note
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                    <span class="font-medium text-gray-700 hover:text-blue-700 transition-colors duration-150">Add Note</span>
                   </button>
                   
                   <button 
                     on:click={() => showForm = 'photo'}
-                    class="flex items-center justify-center px-4 py-3 bg-white border border-gray-300 rounded-lg"
+                    class="flex flex-col items-center justify-center px-4 py-3 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-purple-50 hover:border-purple-300 hover:shadow active:bg-purple-100 active:shadow-inner active:transform active:scale-[0.98] transition-all duration-150"
                   >
-                    Add Photo
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <span class="font-medium text-gray-700 hover:text-purple-700 transition-colors duration-150">Add Photo</span>
                   </button>
                   
                   <button 
                     on:click={() => showForm = 'reading'}
-                    class="flex items-center justify-center px-4 py-3 bg-white border border-gray-300 rounded-lg"
+                    class="flex flex-col items-center justify-center px-4 py-3 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-indigo-50 hover:border-indigo-300 hover:shadow active:bg-indigo-100 active:shadow-inner active:transform active:scale-[0.98] transition-all duration-150"
                   >
-                    Add Reading
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                    </svg>
+                    <span class="font-medium text-gray-700 hover:text-indigo-700 transition-colors duration-150">Add Reading</span>
                   </button>
                   
                   <button
                     on:click={() => showForm = 'equipment'}
-                    class="flex items-center justify-center px-4 py-3 bg-white border border-gray-300 rounded-lg"
+                    class="flex flex-col items-center justify-center px-4 py-3 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-green-50 hover:border-green-300 hover:shadow active:bg-green-100 active:shadow-inner active:transform active:scale-[0.98] transition-all duration-150"
                   >
-                    Equipment Log
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <span class="font-medium text-gray-700 hover:text-green-700 transition-colors duration-150">Equipment Log</span>
                   </button>
                 </div>
                 
