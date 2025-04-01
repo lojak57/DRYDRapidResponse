@@ -4,7 +4,7 @@
   import { dashboardJobs, isLoading, error, jobStatusCounts, userJobCounts, jobs } from '$lib/stores/jobStore';
   import { currentUser } from '$lib/stores/authStore';
   import { Role } from '$lib/types/User';
-  import { JobStatus } from '$lib/types/Job';
+  import { JobStatus, type Job } from '$lib/types/Job';
   import Logo from '$lib/components/common/Logo.svelte';
   import TechJobFocusWidget from '$lib/components/dashboard/TechJobFocusWidget.svelte';
   import AdminControlsWidget from '$lib/components/dashboard/AdminControlsWidget.svelte';
@@ -342,7 +342,7 @@
     <!-- Quotes Section - Only visible to Admin/Office -->
     {#if $currentUser && ($currentUser.role === Role.ADMIN || $currentUser.role === Role.OFFICE)}
       <div class="mb-6 card-glass rounded-lg card-shadow overflow-hidden">
-        <div class="p-5 bg-purple-gradient text-white">
+        <div class="p-5 bg-dryd-gradient text-white">
           <div class="flex justify-between items-center">
             <h2 class="font-bold text-xl flex items-center">
               <div class="bg-white/20 text-white p-2 rounded-lg mr-3 shadow-sm">
@@ -352,7 +352,7 @@
               </div>
               <span>Quotes</span>
             </h2>
-            <a href="/quotes" class="btn-purple text-sm px-4 py-2 rounded-lg font-medium shadow-sm transition-all duration-200 hover:shadow hover:scale-105">View All</a>
+            <a href="/quotes" class="btn-teal text-sm px-4 py-2 rounded-lg font-medium shadow-sm transition-all duration-200 hover:shadow hover:scale-105">View All</a>
           </div>
         </div>
 
@@ -361,30 +361,30 @@
             <p class="text-gray-700 leading-relaxed">Create and manage quotes for potential customers. Track their status from draft to accepted or converted to jobs.</p>
           </div>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <a href="/quotes/new" class="flex items-center p-4 card-header-purple rounded-lg transition-all duration-200 group hover:shadow-md">
-              <div class="bg-purple-gradient text-white p-3 rounded-full mr-4">
+            <a href="/quotes/new" class="flex items-center p-4 card-header-teal rounded-lg transition-all duration-200 group hover:shadow-md">
+              <div class="bg-dryd-gradient text-white p-3 rounded-full mr-4">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                 </svg>
               </div>
               <div>
-                <div class="font-semibold text-purple-800">Create a new quote</div>
-                <div class="text-sm text-purple-600">Start a new customer quote</div>
+                <div class="font-semibold text-blue-800">Create a new quote</div>
+                <div class="text-sm text-blue-600">Start a new customer quote</div>
               </div>
-              <div class="ml-auto text-purple-500 group-hover:translate-x-1 transition-transform">→</div>
+              <div class="ml-auto text-blue-500 group-hover:translate-x-1 transition-transform">→</div>
             </a>
             
             <a href="/quotes" class="flex items-center p-4 card-header-teal rounded-lg transition-all duration-200 group hover:shadow-md">
-              <div class="bg-teal-gradient text-white p-3 rounded-full mr-4">
+              <div class="bg-dryd-gradient text-white p-3 rounded-full mr-4">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
                 </svg>
               </div>
               <div>
-                <div class="font-semibold text-teal-800">Manage existing quotes</div>
-                <div class="text-sm text-teal-600">View and edit your quotes</div>
+                <div class="font-semibold text-blue-800">Manage existing quotes</div>
+                <div class="text-sm text-blue-600">View and edit your quotes</div>
               </div>
-              <div class="ml-auto text-teal-500 group-hover:translate-x-1 transition-transform">→</div>
+              <div class="ml-auto text-blue-500 group-hover:translate-x-1 transition-transform">→</div>
             </a>
           </div>
         </div>
