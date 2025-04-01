@@ -27,9 +27,29 @@
     
     let currentBgIndex = 0;
     
+    // For debugging
+    let backgroundImageUrl = '';
+    
     // Load data when the component mounts
     onMount(async () => {
         if (browser) {
+            console.log('Layout mounted, checking background images...');
+            
+            // Check if images exist and log their URLs
+            backgroundImages.forEach((img, index) => {
+                const fullUrl = window.location.origin + img;
+                console.log(`Background image ${index}: ${fullUrl}`);
+                
+                // Test if the image loads
+                const testImg = new Image();
+                testImg.onload = () => console.log(`Image ${index} loaded successfully`);
+                testImg.onerror = () => console.error(`Failed to load image ${index}: ${fullUrl}`);
+                testImg.src = fullUrl;
+            });
+            
+            // Set initial background
+            updateBackgroundImage();
+            
             // Load jobs if not already loaded
             if ($jobs.length === 0) {
                 await loadJobs();
@@ -56,18 +76,34 @@
     });
     
     // Update background image based on scroll position
-    $: {
-        if (scrollY && innerHeight) {
+    function updateBackgroundImage() {
+        if (scrollY && innerHeight && document.body) {
             const scrollPercentage = scrollY / (document.body.scrollHeight - innerHeight);
-            currentBgIndex = Math.min(
+            const newIndex = Math.min(
                 backgroundImages.length - 1,
                 Math.floor(scrollPercentage * backgroundImages.length)
             );
+            
+            if (newIndex !== currentBgIndex) {
+                console.log(`Changing background to image ${newIndex}: ${backgroundImages[newIndex]}`);
+                currentBgIndex = newIndex;
+            }
+            
+            backgroundImageUrl = `url('${backgroundImages[currentBgIndex]}')`;
+        } else {
+            backgroundImageUrl = `url('${backgroundImages[0]}')`;
+        }
+    }
+    
+    // Watch for scroll position changes
+    $: {
+        if (browser && loaded) {
+            updateBackgroundImage();
         }
     }
 </script>
 
-<svelte:window bind:scrollY bind:innerHeight />
+<svelte:window bind:scrollY bind:innerHeight on:scroll={() => updateBackgroundImage()} />
 
 <!-- Notification toasts -->
 <ToastContainer />
@@ -76,10 +112,11 @@
     {#if loaded}
         <div 
             class="background-container fixed inset-0 z-[-1] transition-opacity duration-1000"
-            style="background-image: url('{backgroundImages[currentBgIndex]}'); 
+            style="background-image: {backgroundImageUrl}; 
                    background-size: cover; 
                    background-position: center; 
-                   background-attachment: fixed;"
+                   background-attachment: fixed;
+                   background-repeat: no-repeat;"
         ></div>
         
         <div class="overlay fixed inset-0 z-[-1] bg-white/75 backdrop-blur-sm"></div>
