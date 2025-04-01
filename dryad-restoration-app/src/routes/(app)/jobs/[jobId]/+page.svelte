@@ -232,23 +232,16 @@
     addCompletedStatusPrompt(status);
   }
   
-                // Remove the prompt
-                const prompt = document.getElementById('advance-status-prompt');
-                if (prompt) {
-                  prompt.remove();
-                }
-                
-                // Reload the page to refresh the UI
-                setTimeout(() => window.location.reload(), 500);
-              }
-            })
-            .catch(err => {
-              console.error('Error updating job status:', err);
-              showErrorToast('Failed to update job status. Please try again.');
-            });
-        });
-      }
+  // Function to handle status advancement prompt removal after update
+  function handleStatusPromptRemoval() {
+    // Remove the prompt
+    const prompt = document.getElementById('advance-status-prompt');
+    if (prompt) {
+      prompt.remove();
     }
+    
+    // Reload the page to refresh the UI
+    setTimeout(() => window.location.reload(), 500);
   }
 
   // Add state for schedule date updates
