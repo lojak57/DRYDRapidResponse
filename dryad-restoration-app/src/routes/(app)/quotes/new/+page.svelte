@@ -1865,6 +1865,94 @@
                   <div class="border-t border-blue-200 pt-4">
                     <!-- ... -->
                   </div>
+                {:else if lineItemWizard.category === 'Supplies'}
+                  <!-- Supplies section content -->
+                  <div class="border-t border-blue-200 pt-4">
+                    <div class="mb-4">
+                      <label class="block text-sm font-medium text-gray-700 mb-1">Supply Type</label>
+                      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                        {#each [
+                          { title: 'Cleaning Supplies', price: 75, description: 'Basic cleaning package' },
+                          { title: 'PPE', price: 45, description: 'Personal protective equipment' },
+                          { title: 'Plastic Sheeting', price: 35, description: 'Containment plastic' },
+                          { title: 'Antimicrobial', price: 85, description: 'Antimicrobial treatment' },
+                          { title: 'Chemicals', price: 95, description: 'Cleaning & treatment chemicals' },
+                          { title: 'Packing Materials', price: 55, description: 'Materials for packing contents' },
+                          { title: 'Tape & Sealants', price: 30, description: 'Various tapes and sealants' },
+                          { title: 'Testing Supplies', price: 65, description: 'Moisture/mold testing supplies' }
+                        ] as supplyItem}
+                          <button 
+                            type="button"
+                            class="p-2 border rounded text-left text-sm transition-all {lineItemWizard.description === supplyItem.title ? 'bg-blue-100 border-blue-400 shadow-sm' : 'border-gray-300 hover:bg-gray-50'}"
+                            on:click={() => {
+                              lineItemWizard.description = supplyItem.title;
+                              lineItemWizard.unitPrice = supplyItem.price;
+                              lineItemWizard.internalCost = Math.round(supplyItem.price * 0.6 * 100) / 100;
+                            }}
+                          >
+                            <div class="font-medium">{supplyItem.title}</div>
+                            <div class="flex justify-between text-xs">
+                              <span class="text-gray-600">{supplyItem.description}</span>
+                              <span class="font-medium text-blue-700">${supplyItem.price}</span>
+                            </div>
+                          </button>
+                        {/each}
+                      </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+                        <input 
+                          type="number"
+                          bind:value={lineItemWizard.quantity}
+                          min="1"
+                          class="w-full p-2 border border-gray-300 rounded-lg"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Unit Price ($)</label>
+                        <div class="relative">
+                          <span class="absolute inset-y-0 left-0 flex items-center pl-2 pointer-events-none text-gray-500 text-sm">$</span>
+                          <input 
+                            type="number"
+                            bind:value={lineItemWizard.unitPrice}
+                            min="0"
+                            step="0.01"
+                            class="w-full p-2 pl-6 border border-gray-300 rounded-lg"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {#if $currentUser?.role === 'ADMIN' || $currentUser?.role === 'OFFICE'}
+                      <div class="mt-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Internal Cost ($)</label>
+                        <div class="relative">
+                          <span class="absolute inset-y-0 left-0 flex items-center pl-2 pointer-events-none text-gray-500 text-sm">$</span>
+                          <input 
+                            type="number"
+                            bind:value={lineItemWizard.internalCost}
+                            min="0"
+                            step="0.01"
+                            class="w-full p-2 pl-6 border border-gray-300 rounded-lg"
+                          />
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">Default cost is 60% of the supply price</p>
+                      </div>
+                    {/if}
+                    
+                    <div class="p-3 bg-gray-50 rounded-lg border border-gray-200 mt-4 mb-4">
+                      <div class="flex justify-between items-center">
+                        <span class="font-medium text-gray-700">Summary</span>
+                        <span class="font-bold text-dryd-blue">{formatCurrency(lineItemWizard.unitPrice * lineItemWizard.quantity)}</span>
+                      </div>
+                      <div class="text-sm text-gray-600 mt-1">
+                        {lineItemWizard.description || 'Supplies'} - {lineItemWizard.quantity} × ${lineItemWizard.unitPrice}
+                      </div>
+                    </div>
+                  </div>
                 {:else}
                   <!-- Description for non-labor/materials items -->
                   <div>
