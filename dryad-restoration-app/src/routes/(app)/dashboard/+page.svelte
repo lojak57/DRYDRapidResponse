@@ -41,7 +41,7 @@
     <div class="mb-8 text-center md:text-left">
       <div class="flex flex-col md:flex-row items-center justify-between mb-6">
         <div class="mb-4 md:mb-0">
-          <Logo size="xl" linkToDashboard={false} showText={false} />
+          <Logo size="xxl" linkToDashboard={false} showText={false} logoSrc="/dryd-logo-secondary.PNG" />
         </div>
         <div class="bg-white p-4 rounded-lg shadow-md border border-gray-200 max-w-md w-full">
           <p class="text-gray-500 text-sm">{formattedDate}</p>
