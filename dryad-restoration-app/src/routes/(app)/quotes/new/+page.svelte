@@ -1863,7 +1863,101 @@
                 {:else if lineItemWizard.category === 'Subcontractor'}
                   <!-- Subcontractor section content -->
                   <div class="border-t border-blue-200 pt-4">
-                    <!-- ... -->
+                    <div class="mb-4">
+                      <label class="block text-sm font-medium text-gray-700 mb-1">Subcontractor Type</label>
+                      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {#each [
+                          { title: 'Plumber', unit: 'service', unitPrice: 350, description: 'Licensed plumbing services' },
+                          { title: 'Electrician', unit: 'service', unitPrice: 375, description: 'Licensed electrical work' },
+                          { title: 'HVAC', unit: 'service', unitPrice: 450, description: 'HVAC system services' },
+                          { title: 'Roofing', unit: 'job', unitPrice: 850, description: 'Roofing repair/replacement' },
+                          { title: 'Drywall', unit: 'job', unitPrice: 275, description: 'Drywall installation/repair' },
+                          { title: 'Flooring', unit: 'job', unitPrice: 425, description: 'Flooring installation' },
+                          { title: 'Painting', unit: 'job', unitPrice: 300, description: 'Professional painting services' },
+                          { title: 'Specialty', unit: 'service', unitPrice: 500, description: 'Specialized contractor services' }
+                        ] as subcontractor}
+                          <button 
+                            type="button"
+                            class="p-3 border rounded text-left text-sm transition-all {lineItemWizard.description.includes(subcontractor.title) ? 'bg-blue-100 border-blue-400 shadow-sm' : 'border-gray-300 hover:bg-gray-50'}"
+                            on:click={() => {
+                              lineItemWizard.description = `${subcontractor.title} Services - ${subcontractor.description}`;
+                              lineItemWizard.unitPrice = subcontractor.unitPrice;
+                              lineItemWizard.internalCost = Math.round(subcontractor.unitPrice * 0.8 * 100) / 100;
+                            }}
+                          >
+                            <div class="font-medium">{subcontractor.title}</div>
+                            <div class="flex justify-between text-xs mt-1">
+                              <span class="text-gray-600">{subcontractor.description}</span>
+                              <span class="font-medium text-blue-700">${subcontractor.unitPrice}/{subcontractor.unit}</span>
+                            </div>
+                          </button>
+                        {/each}
+                      </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Service Quantity</label>
+                        <input 
+                          type="number"
+                          bind:value={lineItemWizard.quantity}
+                          min="1"
+                          class="w-full p-2 border border-gray-300 rounded-lg"
+                        />
+                        <p class="text-xs text-gray-500 mt-1">Number of service calls or jobs</p>
+                      </div>
+                      
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Unit Price ($)</label>
+                        <div class="relative">
+                          <span class="absolute inset-y-0 left-0 flex items-center pl-2 pointer-events-none text-gray-500 text-sm">$</span>
+                          <input 
+                            type="number"
+                            bind:value={lineItemWizard.unitPrice}
+                            min="0"
+                            step="0.01"
+                            class="w-full p-2 pl-6 border border-gray-300 rounded-lg"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {#if $currentUser?.role === 'ADMIN' || $currentUser?.role === 'OFFICE'}
+                      <div class="mt-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Internal Cost ($)</label>
+                        <div class="relative">
+                          <span class="absolute inset-y-0 left-0 flex items-center pl-2 pointer-events-none text-gray-500 text-sm">$</span>
+                          <input 
+                            type="number"
+                            bind:value={lineItemWizard.internalCost}
+                            min="0"
+                            step="0.01"
+                            class="w-full p-2 pl-6 border border-gray-300 rounded-lg"
+                          />
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">Default cost is 80% of the subcontractor price (markup 20%)</p>
+                      </div>
+                    {/if}
+                    
+                    <div class="mt-4">
+                      <label class="block text-sm font-medium text-gray-700 mb-1">Additional Notes</label>
+                      <textarea 
+                        bind:value={lineItemWizard.description}
+                        rows="2"
+                        placeholder="Additional details about the subcontractor work"
+                        class="w-full p-2 border border-gray-300 rounded-lg"
+                      ></textarea>
+                    </div>
+                    
+                    <div class="p-3 bg-gray-50 rounded-lg border border-gray-200 mt-4 mb-4">
+                      <div class="flex justify-between items-center">
+                        <span class="font-medium text-gray-700">Summary</span>
+                        <span class="font-bold text-dryd-blue">{formatCurrency(lineItemWizard.unitPrice * lineItemWizard.quantity)}</span>
+                      </div>
+                      <div class="text-sm text-gray-600 mt-1">
+                        {lineItemWizard.description || 'Subcontractor Services'} - {lineItemWizard.quantity} × ${lineItemWizard.unitPrice}
+                      </div>
+                    </div>
                   </div>
                 {:else if lineItemWizard.category === 'Supplies'}
                   <!-- Supplies section content -->
