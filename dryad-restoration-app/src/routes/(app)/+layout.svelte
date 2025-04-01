@@ -19,11 +19,16 @@
     // Single professional background image
     const backgroundImage = '/images/professional-restoration.jpg';
     let backgroundLoaded = false;
+    let absoluteBackgroundUrl = '';
     
     // Load data when the component mounts
     onMount(async () => {
         if (browser) {
             console.log('Layout mounted, checking background image...');
+            
+            // Set the absolute URL for the background image based on current window location
+            absoluteBackgroundUrl = new URL(backgroundImage, window.location.origin).href;
+            console.log('Using background image URL:', absoluteBackgroundUrl);
             
             // Test if the image loads
             const testImg = new Image();
@@ -34,9 +39,9 @@
             testImg.onerror = (e) => {
                 console.error('Failed to load background image', e);
                 // Log the full URL to help debug
-                console.error('Attempted to load:', window.location.origin + backgroundImage);
+                console.error('Attempted to load:', absoluteBackgroundUrl);
             };
-            testImg.src = backgroundImage;
+            testImg.src = absoluteBackgroundUrl;
             
             // Load jobs if not already loaded
             if ($jobs.length === 0) {
@@ -73,7 +78,7 @@
     {#if loaded}
         <div 
             class="background-container"
-            style="background-image: url('{backgroundImage}');"
+            style="background-image: url('{backgroundLoaded ? absoluteBackgroundUrl : ''}');"
         ></div>
         
         <!-- Overlay with reduced opacity for better visibility -->
