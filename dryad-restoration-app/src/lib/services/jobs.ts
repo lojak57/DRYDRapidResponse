@@ -4,7 +4,7 @@ import { JobStatus, type JobType, type CompletionTasks } from '$lib/types/Job';
 import { getCustomers } from '$lib/services/customers';
 import { customers } from '$lib/stores/customerStore';
 import { get } from 'svelte/store';
-import { jobs } from '$lib/stores/jobStore';
+import { _jobs } from '$lib/stores/jobStore';
 
 // Simulate API delay (between 100-500ms)
 const simulateDelay = () => new Promise(resolve => setTimeout(resolve, Math.random() * 400 + 100));
@@ -118,7 +118,7 @@ export async function updateJobStatus(jobId: string, status: JobStatus): Promise
   await new Promise(resolve => setTimeout(resolve, 600));
   
   // Find the job in the mock data
-  const jobsData = get(jobs);
+  const jobsData = get(_jobs);
   const jobIndex = jobsData.findIndex(job => job.id === jobId);
   
   if (jobIndex === -1) {
@@ -149,7 +149,7 @@ export async function updateJobStatus(jobId: string, status: JobStatus): Promise
   }
   
   // Update the store
-  jobs.update(currentJobs => {
+  _jobs.update(currentJobs => {
     const newJobs = [...currentJobs];
     newJobs[jobIndex] = updatedJob;
     return newJobs;
@@ -206,7 +206,7 @@ export async function createJob(jobData: Omit<Job, 'id' | 'createdAt' | 'status'
   
   // Also update the store directly to ensure it's visible immediately
   const parsedJob = parseJobDates(newJob);
-  jobs.update(currentJobs => [parsedJob, ...currentJobs]);
+  _jobs.update(currentJobs => [parsedJob, ...currentJobs]);
   
   // Return the new job with dates parsed
   return parsedJob;
@@ -228,7 +228,7 @@ export async function updateJob(jobId: string, updateData: Partial<Job>): Promis
     await simulateDelay();
     
     // Find the job in our data
-    const jobsData = get(jobs);
+    const jobsData = get(_jobs);
     const jobIndex = jobsData.findIndex(j => j.id === jobId);
     
     if (jobIndex === -1) {
@@ -268,7 +268,7 @@ export async function updateJob(jobId: string, updateData: Partial<Job>): Promis
     }
     
     // Update the store
-    jobs.update(currentJobs => {
+    _jobs.update(currentJobs => {
       const newJobs = [...currentJobs];
       newJobs[jobIndex] = updatedJob;
       return newJobs;
@@ -306,7 +306,7 @@ export async function updateJobCompletionTask(
   await simulateDelay();
   
   // Find the job in our data
-  const jobsData = get(jobs);
+  const jobsData = get(_jobs);
   const jobIndex = jobsData.findIndex(job => job.id === jobId);
   
   if (jobIndex === -1) {
@@ -354,7 +354,7 @@ export async function updateJobCompletionTask(
     }
     
     // Update the store
-    jobs.update(currentJobs => {
+    _jobs.update(currentJobs => {
       const newJobs = [...currentJobs];
       newJobs[jobIndex] = updatedJob;
       return newJobs;
@@ -391,7 +391,7 @@ export async function updateJobCompletionTask(
     }
     
     // Update the store
-    jobs.update(currentJobs => {
+    _jobs.update(currentJobs => {
       const newJobs = [...currentJobs];
       newJobs[jobIndex] = updatedJob;
       return newJobs;

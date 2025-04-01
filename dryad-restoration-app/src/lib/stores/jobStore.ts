@@ -14,6 +14,9 @@ const _customerFilter = writable<string | null>(null);
 const _technicianFilter = writable<string | null>(null);
 const _searchQuery = writable<string>('');
 
+// Export the internal writable stores for direct updates from services
+export { _jobs, _isLoading, _error };
+
 // Create derived stores
 const _filteredJobs = derived(
   [_jobs, _statusFilter, _customerFilter, _technicianFilter, _searchQuery],
