@@ -18,10 +18,10 @@
     let scrollY = 0;
     let innerHeight = 0;
     
-    // Images for parallax effect
+    // Images for parallax effect - updated with more restoration-focused images
     const backgroundImages = [
-        '/images/construction-site.jpg',
-        '/images/restoration-work.jpg',
+        '/images/restoration-jobsite.jpg',
+        '/images/water-damage-restoration.jpg',
         '/images/flood-damage.jpg'
     ];
     
