@@ -1,6 +1,9 @@
 import { loadJobs } from '$lib/stores/jobStore';
 import { browser } from '$app/environment';
 
+// Keep track of the refresh interval ID globally to prevent multiple intervals
+let globalIntervalId: ReturnType<typeof setInterval> | null = null;
+
 /** @type {import('./$types').PageLoad} */
 export async function load() {
   console.log('Dashboard loading at', new Date().toISOString());
@@ -8,7 +11,7 @@ export async function load() {
   // Reload jobs data whenever the dashboard is loaded
   await loadJobs();
   
-  // Force a reload of data every 30 seconds when in browser
+  // Force a reload of data every 5 minutes when in browser
   // This ensures the data stays fresh even if the user leaves the tab open
   if (browser) {
     console.log('Forcing reload of dashboard data');
@@ -17,16 +20,25 @@ export async function load() {
     sessionStorage.removeItem('dashboard_data');
     localStorage.removeItem('dashboard_data');
     
+    // Clear any existing interval to prevent multiple refreshes
+    if (globalIntervalId) {
+      clearInterval(globalIntervalId);
+      globalIntervalId = null;
+    }
+    
     // Schedule regular data refreshes when page is open
-    const intervalId = setInterval(async () => {
+    globalIntervalId = setInterval(async () => {
       console.log('Auto-refreshing job data at', new Date().toISOString());
       await loadJobs();
-    }, 30000); // 30 seconds
+    }, 300000); // 5 minutes (300000 ms)
     
     // Clean up interval on page navigation
     return {
       destroy() {
-        clearInterval(intervalId);
+        if (globalIntervalId) {
+          clearInterval(globalIntervalId);
+          globalIntervalId = null;
+        }
       }
     };
   }
