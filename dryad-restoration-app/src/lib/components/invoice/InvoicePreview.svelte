@@ -131,7 +131,7 @@
   }
 </script>
 
-<div class="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-lg">
+<div class="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-lg max-h-[80vh] overflow-y-auto">
   {#if isLoading}
     <div class="flex justify-center items-center h-64">
       <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-dryd-blue"></div>
