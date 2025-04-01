@@ -42,7 +42,7 @@
   }
 </script>
 
-<div class="sticky top-0 z-40 flex-shrink-0 flex h-16 border-b-2 border-dryd-grayblue-dark bg-dryd-gradient shadow-sm">
+<div class="sticky top-0 z-40 flex-shrink-0 flex h-16 border-b-2 border-dryd-grayblue-dark bg-dryd-gradient shadow-lg">
   <div class="flex-1 px-4 flex justify-between">
     <div class="flex items-center">
       <div class="flex-shrink-0 flex items-center">
@@ -51,35 +51,35 @@
       
       <div class="hidden md:ml-6 md:flex md:items-center md:space-x-2">
         <a href="/dashboard" 
-          class="px-4 py-2 rounded-md text-sm font-medium transition-colors duration-150 border-2 {isActive('/dashboard') ? 'bg-white border-white text-dryd-grayblue-dark' : 'bg-transparent border-transparent text-white hover:bg-white/10 hover:border-white/20'}">
+          class="px-4 py-2 rounded-md text-sm font-medium transition-colors duration-150 border-2 {isActive('/dashboard') ? 'bg-white border-white text-dryd-grayblue-dark font-bold' : 'bg-transparent border-transparent text-white hover:bg-white/20 hover:border-white/30'}">
           Dashboard
         </a>
         
         <a href="/jobs" 
-          class="px-4 py-2 rounded-md text-sm font-medium transition-colors duration-150 border-2 {isActive('/jobs') ? 'bg-white border-white text-dryd-grayblue-dark' : 'bg-transparent border-transparent text-white hover:bg-white/10 hover:border-white/20'}">
+          class="px-4 py-2 rounded-md text-sm font-medium transition-colors duration-150 border-2 {isActive('/jobs') ? 'bg-white border-white text-dryd-grayblue-dark font-bold' : 'bg-transparent border-transparent text-white hover:bg-white/20 hover:border-white/30'}">
           Jobs
         </a>
         
         <a href="/quotes" 
-          class="px-4 py-2 rounded-md text-sm font-medium transition-colors duration-150 border-2 {isActive('/quotes') ? 'bg-white border-white text-dryd-grayblue-dark' : 'bg-transparent border-transparent text-white hover:bg-white/10 hover:border-white/20'}">
+          class="px-4 py-2 rounded-md text-sm font-medium transition-colors duration-150 border-2 {isActive('/quotes') ? 'bg-white border-white text-dryd-grayblue-dark font-bold' : 'bg-transparent border-transparent text-white hover:bg-white/20 hover:border-white/30'}">
           Quotes
         </a>
         
         <a href="/customers" 
-          class="px-4 py-2 rounded-md text-sm font-medium transition-colors duration-150 border-2 {isActive('/customers') ? 'bg-white border-white text-dryd-grayblue-dark' : 'bg-transparent border-transparent text-white hover:bg-white/10 hover:border-white/20'}">
+          class="px-4 py-2 rounded-md text-sm font-medium transition-colors duration-150 border-2 {isActive('/customers') ? 'bg-white border-white text-dryd-grayblue-dark font-bold' : 'bg-transparent border-transparent text-white hover:bg-white/20 hover:border-white/30'}">
           Customers
         </a>
         
         {#if $currentUser && ($currentUser.role === Role.ADMIN || $currentUser.role === Role.OFFICE)}
           <a href="/reports" 
-            class="px-4 py-2 rounded-md text-sm font-medium transition-colors duration-150 border-2 {isActive('/reports') ? 'bg-white border-white text-dryd-grayblue-dark' : 'bg-transparent border-transparent text-white hover:bg-white/10 hover:border-white/20'}">
+            class="px-4 py-2 rounded-md text-sm font-medium transition-colors duration-150 border-2 {isActive('/reports') ? 'bg-white border-white text-dryd-grayblue-dark font-bold' : 'bg-transparent border-transparent text-white hover:bg-white/20 hover:border-white/30'}">
             Reports
           </a>
         {/if}
         
         {#if $currentUser && $currentUser.role === Role.ADMIN}
           <a href="/settings" 
-            class="px-4 py-2 rounded-md text-sm font-medium transition-colors duration-150 border-2 {isActive('/settings') ? 'bg-white border-white text-dryd-grayblue-dark' : 'bg-transparent border-transparent text-white hover:bg-white/10 hover:border-white/20'}">
+            class="px-4 py-2 rounded-md text-sm font-medium transition-colors duration-150 border-2 {isActive('/settings') ? 'bg-white border-white text-dryd-grayblue-dark font-bold' : 'bg-transparent border-transparent text-white hover:bg-white/20 hover:border-white/30'}">
             Settings
           </a>
         {/if}
@@ -93,7 +93,7 @@
       <!-- Mobile menu button -->
       <button 
         type="button" 
-        class="md:hidden ml-2 p-2 rounded-md text-white hover:bg-white/10"
+        class="md:hidden ml-2 p-2 rounded-md text-white hover:bg-white/20"
         on:click={() => sidebarOpen = !sidebarOpen}
         aria-label="Open main menu"
       >
@@ -107,38 +107,38 @@
 
 <!-- Mobile menu, show/hide based on menu state -->
 {#if sidebarOpen}
-  <div class="md:hidden bg-white shadow-lg absolute top-16 left-0 right-0 z-30">
+  <div class="md:hidden card-glass shadow-lg absolute top-16 left-0 right-0 z-30">
     <div class="pt-4 pb-4 space-y-1 px-2">
       <a href="/dashboard" 
-        class="block px-3 py-2 rounded-md text-base font-medium transition-colors duration-150 {isActive('/dashboard') ? 'bg-dryd-gradient text-white' : 'text-gray-700 hover:bg-gray-100'}">
+        class="block px-3 py-2 rounded-md text-base font-medium transition-colors duration-150 {isActive('/dashboard') ? 'bg-dryd-gradient text-white' : 'text-gray-700 hover:bg-gray-100/70'}">
         Dashboard
       </a>
       
       <a href="/jobs" 
-        class="block px-3 py-2 rounded-md text-base font-medium transition-colors duration-150 {isActive('/jobs') ? 'bg-dryd-gradient text-white' : 'text-gray-700 hover:bg-gray-100'}">
+        class="block px-3 py-2 rounded-md text-base font-medium transition-colors duration-150 {isActive('/jobs') ? 'bg-dryd-gradient text-white' : 'text-gray-700 hover:bg-gray-100/70'}">
         Jobs
       </a>
       
       <a href="/quotes" 
-        class="block px-3 py-2 rounded-md text-base font-medium transition-colors duration-150 {isActive('/quotes') ? 'bg-dryd-gradient text-white' : 'text-gray-700 hover:bg-gray-100'}">
+        class="block px-3 py-2 rounded-md text-base font-medium transition-colors duration-150 {isActive('/quotes') ? 'bg-dryd-gradient text-white' : 'text-gray-700 hover:bg-gray-100/70'}">
         Quotes
       </a>
       
       <a href="/customers" 
-        class="block px-3 py-2 rounded-md text-base font-medium transition-colors duration-150 {isActive('/customers') ? 'bg-dryd-gradient text-white' : 'text-gray-700 hover:bg-gray-100'}">
+        class="block px-3 py-2 rounded-md text-base font-medium transition-colors duration-150 {isActive('/customers') ? 'bg-dryd-gradient text-white' : 'text-gray-700 hover:bg-gray-100/70'}">
         Customers
       </a>
       
       {#if $currentUser && ($currentUser.role === Role.ADMIN || $currentUser.role === Role.OFFICE)}
         <a href="/reports" 
-          class="block px-3 py-2 rounded-md text-base font-medium transition-colors duration-150 {isActive('/reports') ? 'bg-dryd-gradient text-white' : 'text-gray-700 hover:bg-gray-100'}">
+          class="block px-3 py-2 rounded-md text-base font-medium transition-colors duration-150 {isActive('/reports') ? 'bg-dryd-gradient text-white' : 'text-gray-700 hover:bg-gray-100/70'}">
           Reports
         </a>
       {/if}
       
       {#if $currentUser && $currentUser.role === Role.ADMIN}
         <a href="/settings" 
-          class="block px-3 py-2 rounded-md text-base font-medium transition-colors duration-150 {isActive('/settings') ? 'bg-dryd-gradient text-white' : 'text-gray-700 hover:bg-gray-100'}">
+          class="block px-3 py-2 rounded-md text-base font-medium transition-colors duration-150 {isActive('/settings') ? 'bg-dryd-gradient text-white' : 'text-gray-700 hover:bg-gray-100/70'}">
           Settings
         </a>
       {/if}

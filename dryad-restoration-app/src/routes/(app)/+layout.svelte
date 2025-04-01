@@ -36,4 +36,4 @@
 <ToastContainer />
 
 <Nav />
-<main class="p-4"><slot /></main> 
+<main class="p-6 pt-8 min-h-screen"><slot /></main> 

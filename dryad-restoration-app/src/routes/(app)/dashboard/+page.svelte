@@ -35,7 +35,7 @@
   });
 </script>
 
-<div class="dashboard-container">
+<div class="max-w-6xl mx-auto">
   {#if $currentUser}
     <!-- Dashboard Header with Prominent Logo -->
     <div class="mb-8 text-center md:text-left">
@@ -43,7 +43,7 @@
         <div class="mb-4 md:mb-0">
           <Logo size="xxl" linkToDashboard={false} showText={false} logoSrc="/dryd-logo-secondary.PNG" />
         </div>
-        <div class="bg-white p-4 rounded-lg shadow-md border border-gray-200 max-w-md w-full">
+        <div class="card-glass p-4 rounded-lg card-shadow max-w-md w-full">
           <p class="text-gray-500 text-sm">{formattedDate}</p>
           <h2 class="text-xl font-bold text-gray-800">Welcome, {$currentUser.firstName}!</h2>
           <p class="text-gray-600 mt-1">
@@ -65,7 +65,7 @@
         
         <!-- Key Performance Metrics -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl shadow-md border border-blue-100 p-5 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+          <div class="card-glass bg-gradient-to-br from-blue-50/90 to-indigo-50/90 rounded-xl card-shadow p-5 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-sm font-medium text-blue-700">New Jobs</p>
@@ -87,7 +87,7 @@
             </div>
           </div>
           
-          <div class="bg-gradient-to-br from-green-50 to-teal-50 rounded-xl shadow-md border border-green-100 p-5 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+          <div class="card-glass bg-gradient-to-br from-green-50/90 to-teal-50/90 rounded-xl card-shadow p-5 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-sm font-medium text-green-700">Active Jobs</p>
@@ -109,7 +109,7 @@
             </div>
           </div>
           
-          <div class="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-xl shadow-md border border-purple-100 p-5 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+          <div class="card-glass bg-gradient-to-br from-purple-50/90 to-indigo-50/90 rounded-xl card-shadow p-5 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-sm font-medium text-purple-700">Completed</p>
@@ -131,7 +131,7 @@
             </div>
           </div>
           
-          <div class="bg-gradient-to-br from-amber-50 to-yellow-50 rounded-xl shadow-md border border-amber-100 p-5 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+          <div class="card-glass bg-gradient-to-br from-amber-50/90 to-yellow-50/90 rounded-xl card-shadow p-5 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-sm font-medium text-amber-700">Invoiced</p>
@@ -160,7 +160,7 @@
 
     <!-- Quotes Section - Only visible to Admin/Office -->
     {#if $currentUser && ($currentUser.role === Role.ADMIN || $currentUser.role === Role.OFFICE)}
-      <div class="mb-6 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
+      <div class="mb-6 card-glass rounded-lg card-shadow overflow-hidden">
         <div class="p-5 bg-gradient-to-r from-blue-600 to-indigo-700 text-white">
           <div class="flex justify-between items-center">
             <h2 class="font-bold text-xl flex items-center">
@@ -180,7 +180,7 @@
             <p class="text-gray-700 leading-relaxed">Create and manage quotes for potential customers. Track their status from draft to accepted or converted to jobs.</p>
           </div>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <a href="/quotes/new" class="flex items-center p-4 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg transition-all duration-200 group hover:shadow-md">
+            <a href="/quotes/new" class="flex items-center p-4 bg-blue-50/80 hover:bg-blue-100/90 text-blue-700 rounded-lg transition-all duration-200 group hover:shadow-md">
               <div class="bg-blue-100 p-3 rounded-full mr-4 group-hover:bg-blue-200 transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -193,7 +193,7 @@
               <div class="ml-auto text-blue-500 group-hover:translate-x-1 transition-transform">→</div>
             </a>
             
-            <a href="/quotes" class="flex items-center p-4 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg transition-all duration-200 group hover:shadow-md">
+            <a href="/quotes" class="flex items-center p-4 bg-indigo-50/80 hover:bg-indigo-100/90 text-indigo-700 rounded-lg transition-all duration-200 group hover:shadow-md">
               <div class="bg-indigo-100 p-3 rounded-full mr-4 group-hover:bg-indigo-200 transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
@@ -220,7 +220,7 @@
     <!-- Pending Completion Jobs - Only visible to Admin/Office -->
     {#if isAuthorized && pendingCompletionJobs.length > 0}
       <div class="mb-6">
-        <div class="bg-white rounded-lg shadow-lg border border-blue-300 overflow-hidden">
+        <div class="card-glass rounded-lg card-shadow overflow-hidden">
           <div class="p-4 bg-blue-100 text-blue-800 border-b border-blue-300">
             <div class="flex justify-between items-center">
               <h2 class="font-bold text-xl flex items-center">
@@ -232,11 +232,11 @@
             </div>
           </div>
 
-          <div class="p-6 bg-white">
+          <div class="p-6">
             <p class="text-gray-700 mb-4">The following jobs have been marked as ready for completion by technicians and need your review:</p>
             <div class="space-y-3">
               {#each pendingCompletionJobs as job}
-                <a href="/jobs/{job.id}" class="block p-4 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg transition-colors duration-150">
+                <a href="/jobs/{job.id}" class="block p-4 bg-blue-50/80 hover:bg-blue-100/90 border border-blue-200 rounded-lg transition-colors duration-150">
                   <div class="flex justify-between items-center">
                     <div>
                       <h3 class="font-semibold text-blue-800">{job.title}</h3>
@@ -257,7 +257,7 @@
     <!-- Paid & Closed Jobs Section -->
     {#if isAuthorized && paidJobs.length > 0}
       <div class="mb-6">
-        <div class="bg-white rounded-lg shadow-lg border border-green-300 overflow-hidden">
+        <div class="card-glass rounded-lg card-shadow overflow-hidden">
           <div class="p-4 bg-green-100 text-green-800 border-b border-green-300">
             <div class="flex justify-between items-center">
               <h2 class="font-bold text-xl flex items-center">
@@ -269,11 +269,11 @@
             </div>
           </div>
 
-          <div class="p-6 bg-white">
+          <div class="p-6">
             <p class="text-gray-700 mb-4">These jobs have been completed, invoiced, and payment has been received:</p>
             <div class="space-y-3">
               {#each paidJobs as job}
-                <a href="/jobs/{job.id}" class="block p-4 bg-green-50 hover:bg-green-100 border border-green-200 rounded-lg transition-colors duration-150">
+                <a href="/jobs/{job.id}" class="block p-4 bg-green-50/80 hover:bg-green-100/90 border border-green-200 rounded-lg transition-colors duration-150">
                   <div class="flex justify-between items-center">
                     <div>
                       <h3 class="font-semibold text-green-800">{job.title}</h3>
@@ -298,7 +298,7 @@
     {/if}
 
     <!-- Jobs Section -->
-    <div class="bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden mb-6">
+    <div class="card-glass rounded-lg card-shadow overflow-hidden mb-6">
       <div class="p-5 bg-gradient-to-r from-gray-700 to-gray-900 text-white">
         <div class="flex justify-between items-center">
           <h2 class="font-bold text-xl flex items-center">
@@ -319,11 +319,11 @@
             <p class="text-gray-500">Loading jobs...</p>
           </div>
         {:else if $error}
-          <div class="bg-red-50 p-6 rounded-lg border border-red-200 mb-4">
+          <div class="bg-red-50/90 p-6 rounded-lg border border-red-200 mb-4">
             <p class="text-red-700">{$error}</p>
           </div>
         {:else if $dashboardJobs.length === 0}
-          <div class="bg-gray-50 p-8 text-center rounded-lg border border-gray-200">
+          <div class="bg-gray-50/90 p-8 text-center rounded-lg border border-gray-200">
             {#if isTechnician}
               <p class="text-gray-600">You don't have any jobs assigned to you yet.</p>
             {:else}
@@ -341,29 +341,4 @@
       <p class="text-gray-500">Loading dashboard...</p>
     </div>
   {/if}
-</div>
-
-<style>
-  .dashboard-container {
-    max-width: 6xl;
-    margin: 0 auto;
-    position: relative;
-    padding: 1.5rem;
-    min-height: calc(100vh - 4rem);
-    background-image: 
-      linear-gradient(to bottom, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.92)),
-      linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 25%, #eff6ff 50%, #f8fafc 75%, #f9fafb 100%);
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
-    background-repeat: no-repeat;
-  }
-  
-  @media (min-width: 768px) {
-    .dashboard-container {
-      background-image: 
-        linear-gradient(to bottom, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.95)),
-        linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 25%, #eff6ff 50%, #f8fafc 75%, #f9fafb 100%);
-    }
-  }
-</style> 
+</div> 
