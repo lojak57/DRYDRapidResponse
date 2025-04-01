@@ -10,6 +10,7 @@ export enum JobStatus {
   ON_HOLD = 'ON_HOLD',
   PENDING_COMPLETION = 'PENDING_COMPLETION',
   COMPLETED = 'COMPLETED',
+  INVOICE_APPROVAL = 'INVOICE_APPROVAL',
   INVOICED = 'INVOICED',
   PAID = 'PAID',
   CANCELLED = 'CANCELLED'
@@ -57,8 +58,8 @@ export interface CompletionTasks {
   finalReadingsLogged: boolean;
   /** Flag indicating that after photos have been taken */
   afterPhotosTaken: boolean;
-  /** Flag indicating that all equipment has been removed from the site */
-  allEquipmentRemoved: boolean;
+  /** Flag indicating that the job has been submitted for office review */
+  mark_ready_for_review: boolean;
 }
 
 /**
@@ -107,6 +108,10 @@ export interface Job {
   tags?: string[];
   /** ID of the quote this job was created from */
   originatingQuoteId?: string | null;
+  /** ID of the office user or admin who owns the account */
+  accountOwnerId?: string;
   /** Optional tasks that must be completed before job can be marked complete */
   completionTasks?: CompletionTasks;
+  /** Flag indicating that "before" photos have been taken for the job */
+  hasBeforePhotos?: boolean;
 } 

@@ -22,3 +22,14 @@ Thumbs.db
 # Vite
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+*.bak
+*.bak3
+backup_page.svelte
+fixed.js
+fixed.svelte
+part1.svelte
+part2.svelte
+temp.svelte
+temp.svelte.bak
+/backup
+

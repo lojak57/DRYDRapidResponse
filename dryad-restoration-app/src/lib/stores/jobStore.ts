@@ -150,11 +150,14 @@ export const userJobCounts = derived(
  * Load all jobs into the store
  */
 export async function loadJobs(): Promise<void> {
+  console.log('Loading fresh jobs data at', new Date().toISOString());
   isLoading.set(true);
   error.set(null);
   
   try {
     const allJobs = await jobService.getJobs();
+    console.log('Jobs loaded:', allJobs.length, 'jobs');
+    console.log('First job title:', allJobs[0].title);
     jobs.set(allJobs);
   } catch (err) {
     console.error('Error loading jobs:', err);

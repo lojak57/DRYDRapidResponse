@@ -13,7 +13,8 @@ export enum LogEntryType {
   HUMIDITY_READING = 'HUMIDITY_READING',
   SIGNATURE = 'SIGNATURE',
   CHECKLIST = 'CHECKLIST',
-  TASK_COMPLETION = 'TASK_COMPLETION'
+  TASK_COMPLETION = 'TASK_COMPLETION',
+  EXPENSE = 'EXPENSE'
 }
 
 /**
@@ -67,6 +68,28 @@ export interface SignatureData {
 }
 
 /**
+ * Data for expense log entries
+ */
+export interface ExpenseData {
+  /** URL or path to receipt image */
+  receiptUrl: string;
+  /** Amount of the expense */
+  amount: number;
+  /** Category of the expense */
+  category: string;
+  /** Description of the expense */
+  description: string;
+  /** Date when the expense occurred */
+  date: Date;
+  /** Vendor or merchant name */
+  vendor: string;
+  /** Whether the expense has been approved */
+  approved: boolean;
+  /** Whether the expense has been reimbursed */
+  reimbursed: boolean;
+}
+
+/**
  * Represents a log entry for a job
  */
 export interface LogEntry {
@@ -81,7 +104,7 @@ export interface LogEntry {
   /** Type of log entry */
   type: LogEntryType;
   /** Content of the log entry, varies by type */
-  content: string | MoistureReadingData | EquipmentPlacementData | EquipmentLogData | PhotoData | SignatureData | Record<string, any>;
+  content: string | MoistureReadingData | EquipmentPlacementData | EquipmentLogData | PhotoData | SignatureData | ExpenseData | Record<string, any>;
   /** Geolocation where the log entry was created */
   location?: {
     latitude: number;

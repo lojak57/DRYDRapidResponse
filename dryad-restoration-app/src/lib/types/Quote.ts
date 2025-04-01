@@ -82,7 +82,7 @@ export interface Quote {
   /** Address where the work will be performed */
   siteAddress: Address;
   /** Detailed description of the work to be performed */
-  scopeOfWork: ScopeOfWorkData;
+  scopeOfWork: ScopeOfWorkData | string;
   /** Individual line items making up the quote */
   lineItems: QuoteLineItem[];
   /** Sum of all line item totals */

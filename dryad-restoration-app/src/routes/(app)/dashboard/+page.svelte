@@ -35,49 +35,29 @@
     </div>
 
     <!-- Quotes Section - Only visible to Admin/Office -->
-    {#if isAuthorized}
-      <div class="mb-6">
-        <div class="bg-white rounded-lg shadow-lg border border-gray-300 overflow-hidden">
-          <div class="p-4 bg-dryd-gradient text-white">
-            <div class="flex justify-between items-center">
-              <h2 class="font-bold text-xl flex items-center">
-                <svg class="w-6 h-6 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    {#if $currentUser && ($currentUser.role === Role.ADMIN || $currentUser.role === Role.OFFICE)}
+      <div class="mb-6 bg-white rounded-lg shadow-lg border border-gray-300 overflow-hidden">
+        <div class="p-4 bg-dryd-gradient text-white border-b-4 border-blue-600">
+          <div class="flex justify-between items-center">
+            <h2 class="font-bold text-xl flex items-center">
+              <div class="bg-blue-600 text-white p-2 rounded-md mr-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
-                Quotes
-              </h2>
-              
-              <div class="flex space-x-2">
-                <a 
-                  href="/quotes/new" 
-                  class="inline-flex items-center bg-dryd-blue text-white hover:bg-dryd-blue-dark px-4 py-2 rounded-md shadow-sm font-bold border border-transparent transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-dryd-blue"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-                  </svg>
-                  New Quote
-                </a>
-                <a 
-                  href="/quotes" 
-                  class="inline-flex items-center bg-dryd-blue text-white hover:bg-dryd-blue-dark px-4 py-2 rounded-md shadow-sm font-bold border border-transparent transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-dryd-blue"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-                  </svg>
-                  View All Quotes
-                </a>
               </div>
-            </div>
+              <span>Quotes</span>
+            </h2>
+            <a href="/quotes" class="text-sm bg-white text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg font-medium">View All</a>
           </div>
+        </div>
 
-          <div class="p-6 bg-gray-50">
-            <div class="mb-4">
-              <p class="text-gray-700">Create and manage quotes for potential customers. Track their status from draft to accepted or converted to jobs.</p>
-            </div>
-            <div class="flex space-x-4">
-              <a href="/quotes/new" class="text-dryd-blue hover:text-dryd-blue-dark font-medium">Create a new quote →</a>
-              <a href="/quotes" class="text-dryd-blue hover:text-dryd-blue-dark font-medium">Manage existing quotes →</a>
-            </div>
+        <div class="p-6 bg-gray-50">
+          <div class="mb-4">
+            <p class="text-gray-700">Create and manage quotes for potential customers. Track their status from draft to accepted or converted to jobs.</p>
+          </div>
+          <div class="flex space-x-4">
+            <a href="/quotes/new" class="text-dryd-blue hover:text-dryd-blue-dark font-medium">Create a new quote →</a>
+            <a href="/quotes" class="text-dryd-blue hover:text-dryd-blue-dark font-medium">Manage existing quotes →</a>
           </div>
         </div>
       </div>
@@ -94,13 +74,15 @@
     {#if isAuthorized && pendingCompletionJobs.length > 0}
       <div class="mb-6">
         <div class="bg-white rounded-lg shadow-lg border border-blue-300 overflow-hidden">
-          <div class="p-4 bg-blue-100 text-blue-800 border-b border-blue-300">
+          <div class="p-4 bg-blue-100 text-blue-800 border-b-4 border-blue-400">
             <div class="flex justify-between items-center">
               <h2 class="font-bold text-xl flex items-center">
-                <svg class="w-6 h-6 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
-                Jobs Awaiting Final Completion
+                <div class="bg-blue-200 p-2 rounded-md mr-3">
+                  <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                </div>
+                <span class="text-2xl">Jobs Awaiting Final Completion</span>
               </h2>
             </div>
           </div>
@@ -128,42 +110,18 @@
     {/if}
 
     <!-- Jobs Section -->
-    <div class="bg-white rounded-lg shadow-lg border border-gray-300 overflow-hidden">
-      <div class="p-4 bg-dryd-gradient text-white">
+    <div class="bg-white rounded-lg shadow-lg border border-gray-300 overflow-hidden mb-6">
+      <div class="p-4 bg-dryd-gradient text-white border-b-4 border-blue-600">
         <div class="flex justify-between items-center">
           <h2 class="font-bold text-xl flex items-center">
-            <svg class="w-6 h-6 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-            </svg>
-            {#if isTechnician}
-              My Assigned Jobs
-            {:else}
-              Active Jobs
-            {/if}
-          </h2>
-          
-          {#if isAuthorized}
-            <div class="flex space-x-2">
-              <a 
-                href="/jobs/new" 
-                class="inline-flex items-center bg-dryd-blue text-white hover:bg-dryd-blue-dark px-4 py-2 rounded-md shadow-sm font-bold border border-transparent transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-dryd-blue"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-                </svg>
-                New Job
-              </a>
-              <a 
-                href="/jobs" 
-                class="inline-flex items-center bg-dryd-blue text-white hover:bg-dryd-blue-dark px-4 py-2 rounded-md shadow-sm font-bold border border-transparent transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-dryd-blue"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-                </svg>
-                View All Jobs
-              </a>
+            <div class="bg-blue-600 text-white p-2 rounded-md mr-3">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
             </div>
-          {/if}
+            <span>{#if $currentUser && $currentUser.role === Role.TECH}My Assigned Jobs{:else}Active Jobs{/if}</span>
+          </h2>
+          <a href="/jobs" class="text-sm bg-white text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg font-medium">View All</a>
         </div>
       </div>
 

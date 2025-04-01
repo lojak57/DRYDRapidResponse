@@ -1,0 +1,354 @@
+<script lang="ts">
+  import { createEventDispatcher } from 'svelte';
+  import type { Job } from '$lib/types/Job';
+  import type { Customer, Address } from '$lib/types/Customer';
+  import type { User } from '$lib/types/User';
+  import { getCustomerById } from '$lib/services/customers';
+  import { getUserById } from '$lib/services/users';
+  import { onMount } from 'svelte';
+  
+  // Re-define CustomLineItem type since we can't import it directly from JobFinalizeForm
+  interface CustomLineItem {
+    id: string;
+    description: string;
+    quantity: number;
+    unitPrice: number;
+    total: number;
+    category: string;
+  }
+  
+  export let job: Job;
+  export let lineItems: CustomLineItem[] = [];
+  export let laborCost: number = 0;
+  export let materialsCost: number = 0;
+  export let equipmentCost: number = 0;
+  export let mode: 'create' | 'review' = 'review';
+  
+  // Create event dispatcher
+  const dispatch = createEventDispatcher<{
+    approve: void;
+    cancel: void;
+  }>();
+  
+  // State
+  let customer: Customer | null = null;
+  let technicians: User[] = [];
+  let isLoading = true;
+  let error: string | null = null;
+  
+  // Calculate totals
+  $: subtotal = laborCost + materialsCost + equipmentCost + 
+    lineItems.reduce((sum, item) => sum + item.total, 0);
+  
+  $: taxRate = 0.07; // 7% tax rate
+  $: taxAmount = subtotal * taxRate;
+  $: total = subtotal + taxAmount;
+  
+  // Format date for invoice
+  const formatDate = (date: Date | string | undefined): string => {
+    if (!date) return 'N/A';
+    return new Date(date).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+  
+  // Get today's date for invoice date
+  const invoiceDate = formatDate(new Date());
+  
+  // Generate invoice number
+  const invoiceNumber = `INV-${job.jobNumber.replace('J-', '')}-${new Date().getFullYear()}`;
+  
+  // Due date (30 days from now)
+  const dueDate = formatDate(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000));
+  
+  // Function to load technician data one by one
+  async function loadTechnicians(userIds: string[]): Promise<User[]> {
+    const techData: User[] = [];
+    for (const id of userIds) {
+      try {
+        const tech = await getUserById(id);
+        if (tech) techData.push(tech);
+      } catch (err) {
+        console.error(`Error loading technician ${id}:`, err);
+      }
+    }
+    return techData;
+  }
+  
+  // Load customer and technician data
+  onMount(async () => {
+    isLoading = true;
+    error = null;
+    
+    try {
+      // Load customer data
+      if (job.customerId) {
+        customer = await getCustomerById(job.customerId);
+      }
+      
+      // Load technician data
+      if (job.assignedUserIds && job.assignedUserIds.length > 0) {
+        technicians = await loadTechnicians(job.assignedUserIds);
+      }
+      
+      isLoading = false;
+    } catch (err) {
+      console.error('Error loading invoice data:', err);
+      error = 'Failed to load customer or technician information';
+      isLoading = false;
+    }
+  });
+  
+  // Handle approve and cancel
+  function handleApprove() {
+    dispatch('approve');
+  }
+  
+  function handleCancel() {
+    dispatch('cancel');
+  }
+  
+  // Format address for display
+  function formatAddress(address?: Address): string {
+    if (!address) return 'No address available';
+    
+    let addressStr = address.street;
+    if (address.city) addressStr += `, ${address.city}`;
+    if (address.state) addressStr += `, ${address.state}`;
+    if (address.zip) addressStr += ` ${address.zip}`;
+    
+    return addressStr;
+  }
+</script>
+
+<div class="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-lg">
+  {#if isLoading}
+    <div class="flex justify-center items-center h-64">
+      <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-dryd-blue"></div>
+    </div>
+  {:else if error}
+    <div class="bg-red-50 p-4 rounded-md border border-red-200 mb-4">
+      <p class="text-red-700">{error}</p>
+    </div>
+  {:else}
+    <!-- Invoice Header with Logo -->
+    <div class="flex justify-between items-start">
+      <div class="flex-1">
+        <div class="h-14 w-48 bg-dryd-blue text-white flex items-center justify-center rounded-lg shadow-md mb-2">
+          <span class="text-2xl font-bold tracking-wider">DRYAD RESTORATION</span>
+        </div>
+        <p class="text-gray-600 text-sm">Professional Water & Fire Restoration Services</p>
+        <p class="text-gray-600 text-sm">123 Main Street, Suite 101</p>
+        <p class="text-gray-600 text-sm">Anytown, CA 90210</p>
+        <p class="text-gray-600 text-sm">Phone: (555) 123-4567</p>
+        <p class="text-gray-600 text-sm">Email: billing@dryadrestoration.com</p>
+      </div>
+      
+      <div class="text-right">
+        <h1 class="text-3xl font-bold text-dryd-blue mb-4">INVOICE</h1>
+        <div class="bg-gray-100 p-3 rounded-md">
+          <div class="flex justify-between mb-1">
+            <span class="font-medium text-gray-700">Invoice #:</span>
+            <span>{invoiceNumber}</span>
+          </div>
+          <div class="flex justify-between mb-1">
+            <span class="font-medium text-gray-700">Invoice Date:</span>
+            <span>{invoiceDate}</span>
+          </div>
+          <div class="flex justify-between mb-1">
+            <span class="font-medium text-gray-700">Due Date:</span>
+            <span>{dueDate}</span>
+          </div>
+          <div class="flex justify-between pt-2 border-t border-gray-300 mt-2">
+            <span class="font-bold text-gray-800">Amount Due:</span>
+            <span class="font-bold text-dryd-blue">${total.toFixed(2)}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Customer and Job Information -->
+    <div class="grid grid-cols-2 gap-8 mt-10 mb-8">
+      <div>
+        <h2 class="text-lg font-bold text-gray-700 mb-3 border-b border-gray-300 pb-1">Bill To</h2>
+        {#if customer}
+          <p class="font-medium">{customer.name}</p>
+          {#if customer.contactPerson}
+            <p class="text-sm mb-1">{customer.contactPerson}</p>
+          {/if}
+          {#if customer.billingAddress}
+            <p>{customer.billingAddress.street}</p>
+            <p>{customer.billingAddress.city}, {customer.billingAddress.state} {customer.billingAddress.zip}</p>
+          {:else if customer.primaryAddress}
+            <p>{customer.primaryAddress.street}</p>
+            <p>{customer.primaryAddress.city}, {customer.primaryAddress.state} {customer.primaryAddress.zip}</p>
+          {/if}
+          <p class="mt-2">{customer.email}</p>
+          <p>{customer.phone}</p>
+        {:else}
+          <p class="text-gray-500">Customer information not available</p>
+        {/if}
+      </div>
+      
+      <div>
+        <h2 class="text-lg font-bold text-gray-700 mb-3 border-b border-gray-300 pb-1">Job Details</h2>
+        <div class="grid grid-cols-2 gap-x-4 gap-y-1">
+          <div class="font-medium text-gray-700">Job #:</div>
+          <div>{job.jobNumber}</div>
+          
+          <div class="font-medium text-gray-700">Job Type:</div>
+          <div class="capitalize">{job.jobType.toLowerCase()} Damage</div>
+          
+          <div class="font-medium text-gray-700">Job Location:</div>
+          <div>
+            {job.siteAddress.street}, 
+            {job.siteAddress.city}, {job.siteAddress.state} {job.siteAddress.zip}
+          </div>
+          
+          <div class="font-medium text-gray-700">Start Date:</div>
+          <div>{formatDate(job.scheduledStartDate)}</div>
+          
+          <div class="font-medium text-gray-700">Completion Date:</div>
+          <div>{formatDate(job.completedDate || job.estimatedCompletionDate)}</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Technician Information -->
+    {#if technicians.length > 0}
+      <div class="mb-8">
+        <h2 class="text-base font-bold text-gray-700 mb-2">Technicians</h2>
+        <div class="bg-gray-50 p-3 rounded-md">
+          <div class="flex flex-wrap gap-2">
+            {#each technicians as tech}
+              <div class="bg-white px-3 py-1 rounded-md border border-gray-200 text-sm">
+                {tech.firstName} {tech.lastName}
+              </div>
+            {/each}
+          </div>
+        </div>
+      </div>
+    {/if}
+    
+    <!-- Line Items Table -->
+    <h2 class="text-lg font-bold text-gray-700 mb-3">Services & Products</h2>
+    <div class="mb-8 overflow-x-auto rounded-lg border border-gray-200">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-100">
+          <tr>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Description</th>
+            <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider">Quantity</th>
+            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">Unit Price</th>
+            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">Total</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <!-- Standard service items -->
+          {#if laborCost > 0}
+            <tr>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Labor Services</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-center">1</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-right">${laborCost.toFixed(2)}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-right">${laborCost.toFixed(2)}</td>
+            </tr>
+          {/if}
+          
+          {#if materialsCost > 0}
+            <tr>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Materials & Supplies</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-center">1</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-right">${materialsCost.toFixed(2)}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-right">${materialsCost.toFixed(2)}</td>
+            </tr>
+          {/if}
+          
+          {#if equipmentCost > 0}
+            <tr>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Equipment Usage</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-center">1</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-right">${equipmentCost.toFixed(2)}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-right">${equipmentCost.toFixed(2)}</td>
+            </tr>
+          {/if}
+          
+          <!-- Custom line items -->
+          {#each lineItems as item}
+            <tr>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.description}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-center">{item.quantity}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-right">${item.unitPrice.toFixed(2)}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-right">${item.total.toFixed(2)}</td>
+            </tr>
+          {/each}
+        </tbody>
+        <tfoot class="bg-gray-50">
+          <tr>
+            <td colspan="3" class="px-6 py-3 text-right text-sm font-medium text-gray-700">Subtotal</td>
+            <td class="px-6 py-3 text-right text-sm font-medium text-gray-900">${subtotal.toFixed(2)}</td>
+          </tr>
+          <tr>
+            <td colspan="3" class="px-6 py-3 text-right text-sm font-medium text-gray-700">Tax ({(taxRate * 100).toFixed(0)}%)</td>
+            <td class="px-6 py-3 text-right text-sm font-medium text-gray-900">${taxAmount.toFixed(2)}</td>
+          </tr>
+          <tr class="bg-gray-100">
+            <td colspan="3" class="px-6 py-3 text-right text-base font-bold text-gray-800">Total Due</td>
+            <td class="px-6 py-3 text-right text-base font-bold text-dryd-blue">${total.toFixed(2)}</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+    
+    <!-- Payment Information & Terms -->
+    <div class="grid grid-cols-2 gap-8 mt-10">
+      <div>
+        <h2 class="text-base font-bold text-gray-700 mb-2">Payment Methods</h2>
+        <div class="bg-gray-50 p-4 rounded-md">
+          <p class="mb-2"><span class="font-medium">Check:</span> Make payable to "Dryad Restoration LLC"</p>
+          <p class="mb-2"><span class="font-medium">Bank Transfer:</span> Contact us for account details</p>
+          <p><span class="font-medium">Credit Card:</span> Call our office to pay by card</p>
+        </div>
+      </div>
+      
+      <div>
+        <h2 class="text-base font-bold text-gray-700 mb-2">Terms & Conditions</h2>
+        <div class="bg-gray-50 p-4 rounded-md text-sm text-gray-700">
+          <ul class="list-disc ml-4 space-y-1">
+            <li>Payment is due within 30 days of invoice date</li>
+            <li>Late payments subject to 1.5% monthly interest</li>
+            <li>All work is guaranteed for 90 days from completion</li>
+            <li>Questions about this invoice? Contact billing@dryadrestoration.com</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Thank You Note -->
+    <div class="mt-8 text-center p-4 bg-dryd-blue bg-opacity-10 rounded-lg border border-dryd-blue border-opacity-20">
+      <p class="text-dryd-blue font-medium">Thank you for choosing Dryad Restoration for your restoration needs!</p>
+      <p class="text-gray-600 text-sm mt-1">We appreciate your business and are committed to your satisfaction.</p>
+    </div>
+    
+    <!-- Approval Buttons -->
+    <div class="mt-8 flex justify-end space-x-4">
+      <button 
+        on:click={handleCancel}
+        class="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200"
+      >
+        Back
+      </button>
+      
+      <button 
+        on:click={handleApprove}
+        class="px-4 py-2 bg-dryd-blue text-white rounded-md hover:bg-blue-700"
+      >
+        {#if mode === 'create'}
+          Create & Submit Invoice
+        {:else}
+          Approve & Generate Invoice
+        {/if}
+      </button>
+    </div>
+  {/if}
+</div> 

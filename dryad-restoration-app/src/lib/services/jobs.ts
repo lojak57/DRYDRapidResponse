@@ -45,7 +45,10 @@ function parseJobDates(job: any): Job {
  */
 export async function getJobs(): Promise<Job[]> {
   await simulateDelay();
-  return (mockJobs as any[]).map(job => parseJobDates(job));
+  
+  // Dynamically import the jobs.json to avoid caching
+  const jobsModule = await import('$lib/mock/jobs.json');
+  return (jobsModule.default as any[]).map(job => parseJobDates(job));
 }
 
 /**
@@ -55,7 +58,10 @@ export async function getJobs(): Promise<Job[]> {
  */
 export async function getJobById(id: string): Promise<Job | undefined> {
   await simulateDelay();
-  const job = (mockJobs as any[]).find(job => job.id === id);
+  
+  // Dynamically import the jobs.json to avoid caching
+  const jobsModule = await import('$lib/mock/jobs.json');
+  const job = (jobsModule.default as any[]).find(job => job.id === id);
   return job ? parseJobDates(job) : undefined;
 }
 
@@ -66,7 +72,10 @@ export async function getJobById(id: string): Promise<Job | undefined> {
  */
 export async function getJobsByCustomer(customerId: string): Promise<Job[]> {
   await simulateDelay();
-  const jobs = (mockJobs as any[]).filter(job => job.customerId === customerId);
+  
+  // Dynamically import the jobs.json to avoid caching
+  const jobsModule = await import('$lib/mock/jobs.json');
+  const jobs = (jobsModule.default as any[]).filter(job => job.customerId === customerId);
   return jobs.map(job => parseJobDates(job));
 }
 
@@ -77,7 +86,10 @@ export async function getJobsByCustomer(customerId: string): Promise<Job[]> {
  */
 export async function getJobsByTechnician(userId: string): Promise<Job[]> {
   await simulateDelay();
-  const jobs = (mockJobs as any[]).filter(job => job.assignedUserIds.includes(userId));
+  
+  // Dynamically import the jobs.json to avoid caching
+  const jobsModule = await import('$lib/mock/jobs.json');
+  const jobs = (jobsModule.default as any[]).filter(job => job.assignedUserIds.includes(userId));
   return jobs.map(job => parseJobDates(job));
 }
 
@@ -88,7 +100,10 @@ export async function getJobsByTechnician(userId: string): Promise<Job[]> {
  */
 export async function getJobsByStatus(status: JobStatus): Promise<Job[]> {
   await simulateDelay();
-  const jobs = (mockJobs as any[]).filter(job => job.status === status);
+  
+  // Dynamically import the jobs.json to avoid caching
+  const jobsModule = await import('$lib/mock/jobs.json');
+  const jobs = (jobsModule.default as any[]).filter(job => job.status === status);
   return jobs.map(job => parseJobDates(job));
 }
 
@@ -119,11 +134,15 @@ export async function updateJobStatus(jobId: string, status: JobStatus): Promise
     ...(status === JobStatus.COMPLETED ? { completedDate: new Date() } : {})
   };
   
+  // Dynamically get the latest mock jobs data
+  const jobsModule = await import('$lib/mock/jobs.json');
+  const mockJobsData = jobsModule.default as any[];
+  
   // Update in the mock data
-  const mockIndex = (mockJobs as any[]).findIndex(job => job.id === jobId);
+  const mockIndex = mockJobsData.findIndex(job => job.id === jobId);
   if (mockIndex !== -1) {
-    (mockJobs as any[])[mockIndex] = {
-      ...(mockJobs as any[])[mockIndex],
+    mockJobsData[mockIndex] = {
+      ...mockJobsData[mockIndex],
       status,
       ...(status === JobStatus.COMPLETED ? { completedDate: new Date().toISOString() } : {})
     };
@@ -156,11 +175,15 @@ export async function createJob(jobData: Omit<Job, 'id' | 'createdAt' | 'status'
     throw new Error(`Customer with ID ${jobData.customerId} not found`);
   }
   
+  // Dynamically get the latest mock jobs data
+  const jobsModule = await import('$lib/mock/jobs.json');
+  const mockJobsData = jobsModule.default as any[];
+  
   // Generate a unique job ID
   const jobId = `job-${Date.now()}`;
   
   // Generate a job number
-  const jobNumber = `J-${new Date().getFullYear()}-${String(mockJobs.length + 1).padStart(3, '0')}`;
+  const jobNumber = `J-${new Date().getFullYear()}-${String(mockJobsData.length + 1).padStart(3, '0')}`;
   
   // Create the new job object
   const newJob = {
@@ -179,7 +202,7 @@ export async function createJob(jobData: Omit<Job, 'id' | 'createdAt' | 'status'
   };
   
   // Add the new job to the mock data
-  (mockJobs as any[]).unshift(newJob);
+  mockJobsData.unshift(newJob);
   
   // Also update the store directly to ensure it's visible immediately
   const parsedJob = parseJobDates(newJob);
@@ -192,21 +215,80 @@ export async function createJob(jobData: Omit<Job, 'id' | 'createdAt' | 'status'
 /**
  * Update a job
  */
-export async function updateJob(id: string, updates: Partial<Job>): Promise<Job | null> {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 400));
+export async function updateJob(jobId: string, updateData: Partial<Job>): Promise<Job | null> {
+  console.log('updateJob - Updating job with data:', updateData);
   
-  const index = (mockJobs as any[]).findIndex(job => job.id === id);
-  if (index === -1) return null;
+  if (!jobId) {
+    console.error('Job ID is undefined or empty. Cannot update job.');
+    return null;
+  }
   
-  // Update the job
-  (mockJobs as any[])[index] = {
-    ...(mockJobs as any[])[index],
-    ...updates
-  };
-  
-  return parseJobDates((mockJobs as any[])[index]);
+  try {
+    // Simulate API delay
+    await simulateDelay();
+    
+    // Find the job in our data
+    const jobsData = get(jobs);
+    const jobIndex = jobsData.findIndex(j => j.id === jobId);
+    
+    if (jobIndex === -1) {
+      console.error(`Job with ID ${jobId} not found.`);
+      return null;
+    }
+    
+    // Convert date strings to Date objects
+    if (updateData.scheduledStartDate && typeof updateData.scheduledStartDate === 'string') {
+      console.log('Converting scheduledStartDate from string to Date:', updateData.scheduledStartDate);
+      updateData.scheduledStartDate = new Date(updateData.scheduledStartDate);
+    }
+    
+    if (updateData.estimatedCompletionDate && typeof updateData.estimatedCompletionDate === 'string') {
+      updateData.estimatedCompletionDate = new Date(updateData.estimatedCompletionDate);
+    }
+    
+    if (updateData.completedDate && typeof updateData.completedDate === 'string') {
+      updateData.completedDate = new Date(updateData.completedDate);
+    }
+    
+    // Create updated job object
+    const updatedJob: Job = {
+      ...jobsData[jobIndex],
+      ...updateData
+    };
+    
+    console.log('updateJob - Updated job:', updatedJob, 'scheduledStartDate:', updatedJob.scheduledStartDate);
+    
+    // Update in the mock data
+    const mockIndex = mockJobs.findIndex(j => j.id === jobId);
+    if (mockIndex !== -1) {
+      mockJobs[mockIndex] = {
+        ...mockJobs[mockIndex],
+        ...updateData
+      } as any;
+    }
+    
+    // Update the store
+    jobs.update(currentJobs => {
+      const newJobs = [...currentJobs];
+      newJobs[jobIndex] = updatedJob;
+      return newJobs;
+    });
+    
+    // Return a copy of the updated job
+    return JSON.parse(JSON.stringify(updatedJob));
+  } catch (err) {
+    console.error('Error updating job:', err);
+    return null;
+  }
 }
+
+/**
+ * Update a job's completion tasks with a complete tasks object
+ */
+export async function updateJobCompletionTask(
+  jobId: string,
+  tasks: CompletionTasks
+): Promise<Job | null>;
 
 /**
  * Update a job's completion task
@@ -217,8 +299,8 @@ export async function updateJob(id: string, updates: Partial<Job>): Promise<Job 
  */
 export async function updateJobCompletionTask(
   jobId: string, 
-  taskKey: keyof CompletionTasks, 
-  value: boolean
+  taskKeyOrTasks: keyof CompletionTasks | CompletionTasks, 
+  value?: boolean
 ): Promise<Job | null> {
   // Simulate API delay
   await simulateDelay();
@@ -239,40 +321,85 @@ export async function updateJobCompletionTask(
     job.completionTasks = {
       finalReadingsLogged: false,
       afterPhotosTaken: false,
-      allEquipmentRemoved: false
+      mark_ready_for_review: false
     };
   }
   
-  // Create updated job with the updated task
-  const updatedJob = {
-    ...job,
-    completionTasks: {
-      ...job.completionTasks,
-      [taskKey]: value
-    }
-  };
-  
-  // Update in the mock data
-  const mockIndex = (mockJobs as any[]).findIndex(job => job.id === jobId);
-  if (mockIndex !== -1) {
-    if (!(mockJobs as any[])[mockIndex].completionTasks) {
+  // Handle the case where a full CompletionTasks object is provided
+  if (typeof taskKeyOrTasks === 'object') {
+    // Create updated job with the updated tasks object
+    const updatedJob = {
+      ...job,
+      completionTasks: {
+        ...job.completionTasks,
+        ...taskKeyOrTasks
+      }
+    };
+    
+    // Update in the mock data
+    const mockIndex = mockJobs.findIndex(job => job.id === jobId);
+    if (mockIndex !== -1) {
+      if (!(mockJobs as any[])[mockIndex].completionTasks) {
+        (mockJobs as any[])[mockIndex].completionTasks = {
+          finalReadingsLogged: false,
+          afterPhotosTaken: false,
+          mark_ready_for_review: false
+        };
+      }
+      
       (mockJobs as any[])[mockIndex].completionTasks = {
-        finalReadingsLogged: false,
-        afterPhotosTaken: false,
-        allEquipmentRemoved: false
+        ...(mockJobs as any[])[mockIndex].completionTasks,
+        ...taskKeyOrTasks
       };
     }
     
-    (mockJobs as any[])[mockIndex].completionTasks[taskKey] = value;
+    // Update the store
+    jobs.update(currentJobs => {
+      const newJobs = [...currentJobs];
+      newJobs[jobIndex] = updatedJob;
+      return newJobs;
+    });
+    
+    // Return a copy of the updated job
+    return JSON.parse(JSON.stringify(updatedJob));
+  } 
+  // Handle the case where a single task key and value are provided
+  else if (typeof value === 'boolean') {
+    const taskKey = taskKeyOrTasks as keyof CompletionTasks;
+    
+    // Create updated job with the updated task
+    const updatedJob = {
+      ...job,
+      completionTasks: {
+        ...job.completionTasks,
+        [taskKey]: value
+      }
+    };
+    
+    // Update in the mock data
+    const mockIndex = mockJobs.findIndex(job => job.id === jobId);
+    if (mockIndex !== -1) {
+      if (!(mockJobs as any[])[mockIndex].completionTasks) {
+        (mockJobs as any[])[mockIndex].completionTasks = {
+          finalReadingsLogged: false,
+          afterPhotosTaken: false,
+          mark_ready_for_review: false
+        };
+      }
+      
+      (mockJobs as any[])[mockIndex].completionTasks[taskKey] = value;
+    }
+    
+    // Update the store
+    jobs.update(currentJobs => {
+      const newJobs = [...currentJobs];
+      newJobs[jobIndex] = updatedJob;
+      return newJobs;
+    });
+    
+    // Return a copy of the updated job
+    return JSON.parse(JSON.stringify(updatedJob));
   }
   
-  // Update the store
-  jobs.update(currentJobs => {
-    const newJobs = [...currentJobs];
-    newJobs[jobIndex] = updatedJob;
-    return newJobs;
-  });
-  
-  // Return a copy of the updated job
-  return JSON.parse(JSON.stringify(updatedJob));
+  return null;
 } 

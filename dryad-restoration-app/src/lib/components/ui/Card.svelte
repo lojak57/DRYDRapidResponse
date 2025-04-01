@@ -4,6 +4,6 @@
   export let className = '';
 </script>
 
-<div class="{noPadding ? '' : 'p-4'} bg-white shadow-sm rounded-lg border border-gray-200 {className}">
+<div class="{noPadding ? '' : 'p-4'} bg-gray-100 shadow-sm rounded-lg border border-gray-200 {className}">
   <slot />
 </div>
