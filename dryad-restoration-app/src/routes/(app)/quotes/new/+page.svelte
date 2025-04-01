@@ -1089,18 +1089,7 @@
   }
   
   // Update the lineItems declaration
-  let lineItems: LineItem[] = [
-    { 
-      id: crypto.randomUUID(), 
-      description: '', 
-      quantity: 1, 
-      unitPrice: 0, 
-      internalCost: 0,
-      total: 0, 
-      isEstimate: false, 
-      category: '' 
-    }
-  ];
+  let lineItems: LineItem[] = [];
   
   // Update setEquipmentType function to properly cast selectedEquipmentCategory
 </script>
