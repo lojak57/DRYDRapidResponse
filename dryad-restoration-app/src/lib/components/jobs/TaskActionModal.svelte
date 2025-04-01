@@ -455,27 +455,36 @@
       equipmentCost: job.equipmentCost 
     });
     
-    // Refresh the job data to ensure we have the latest
-    refreshJobData()
-      .then(() => {
-        // Create the invoice with the refreshed job data
-        const data = {
-          timestamp: new Date(),
-          taskType: 'create_invoice'
-        };
+    // Create invoice data
+    const invoiceData = {
+      invoiceNumber: `INV-${job.jobNumber.replace('J-', '')}-${new Date().getFullYear()}`,
+      invoiceDate: new Date(),
+      invoiceDueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+      timestamp: new Date(),
+      taskType: 'create_invoice'
+    };
+    
+    // Update job with invoice information and change status
+    updateJob(job.id, {
+      invoiceNumber: invoiceData.invoiceNumber,
+      invoiceDate: invoiceData.invoiceDate,
+      invoiceDueDate: invoiceData.invoiceDueDate,
+      status: JobStatus.INVOICE_APPROVAL
+    })
+      .then(updatedJob => {
+        if (updatedJob) {
+          console.log('Job updated with invoice data and status changed to INVOICE_APPROVAL:', updatedJob);
+          // Update local job object
+          job = updatedJob;
+        }
         
-        completeTask(data);
+        // Complete the task
+        completeTask(invoiceData);
       })
-      .catch(err => {
-        console.error('Error refreshing job data before invoice creation:', err);
-        
-        // Proceed with invoice creation using existing job data
-        const data = {
-          timestamp: new Date(),
-          taskType: 'create_invoice'
-        };
-        
-        completeTask(data);
+      .catch(error => {
+        console.error('Error updating job with invoice data:', error);
+        // Complete the task anyway to ensure workflow continues
+        completeTask(invoiceData);
       });
   }
   
@@ -507,7 +516,23 @@
       timestamp: new Date()
     };
     
-    completeTask(data);
+    // Update the job status to INVOICED after approval
+    updateJobStatus(job.id, JobStatus.INVOICED)
+      .then(updatedJob => {
+        if (updatedJob) {
+          console.log('Job status updated to INVOICED:', updatedJob);
+          // Update local job object
+          job = updatedJob;
+        }
+        
+        // Complete the task
+        completeTask(data);
+      })
+      .catch(error => {
+        console.error('Error updating job status to INVOICED:', error);
+        // Complete the task anyway to ensure workflow continues
+        completeTask(data);
+      });
   }
   
   onMount(async () => {

@@ -270,7 +270,7 @@
           <div>{job.jobNumber}</div>
           
           <div class="font-medium text-gray-700">Job Type:</div>
-          <div class="capitalize">{job.type.toLowerCase()} Damage</div>
+          <div class="capitalize">{job?.type ? job.type.toLowerCase() : 'Unknown'} Damage</div>
           
           <div class="font-medium text-gray-700">Job Location:</div>
           <div>
@@ -469,7 +469,7 @@
       
       <button 
         on:click={handleApprove}
-        class="px-4 py-2 bg-dryd-blue text-white rounded-md hover:bg-blue-700"
+        class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
       >
         {#if mode === 'create'}
           Create & Submit Invoice
