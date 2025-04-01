@@ -16,7 +16,7 @@
     
     let loaded = false;
     
-    // Single professional background image
+    // Single professional background image - using static folder path
     const backgroundImage = '/images/professional-restoration.jpg';
     let backgroundLoaded = false;
     let absoluteBackgroundUrl = '';
@@ -40,6 +40,7 @@
                 console.error('Failed to load background image', e);
                 // Log the full URL to help debug
                 console.error('Attempted to load:', absoluteBackgroundUrl);
+                console.error('Current port:', window.location.port);
             };
             testImg.src = absoluteBackgroundUrl;
             
@@ -76,11 +77,12 @@
 
 <div class="app">
     {#if loaded}
-        <!-- Directly set the background image style property -->
-        <div 
-            class="background-container"
-            style="background-image: url('{backgroundImage}');"
-        ></div>
+        <!-- Directly use an img element to ensure the background image shows up -->
+        <img 
+            src={backgroundImage} 
+            alt="" 
+            class="background-image" 
+        />
         
         <!-- Overlay with reduced opacity for better visibility -->
         <div class="overlay"></div>
@@ -104,16 +106,14 @@
         position: relative;
     }
     
-    .background-container {
+    .background-image {
         position: fixed;
         top: 0;
         left: 0;
-        right: 0;
-        bottom: 0;
-        background-size: cover;
-        background-position: center;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
         z-index: -2;
-        transition: opacity 0.5s ease;
     }
     
     .overlay {
