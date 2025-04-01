@@ -46,7 +46,7 @@
   <div class="flex-1 px-4 flex justify-between">
     <div class="flex items-center">
       <div class="flex-shrink-0 flex items-center">
-        <Logo size="md" linkToDashboard={true} />
+        <Logo size="md" linkToDashboard={true} showText={false} />
       </div>
       
       <div class="hidden md:ml-6 md:flex md:items-center md:space-x-2">
