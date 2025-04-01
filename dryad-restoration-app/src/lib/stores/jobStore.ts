@@ -217,6 +217,11 @@ function resetFilters(): void {
   _searchQuery.set('');
 }
 
+// Expose the jobs store directly for more flexibility
+export const jobs = {
+  subscribe: _jobs.subscribe
+};
+
 // Export the jobStore with a subscribe method and all its properties
 export const jobStore = {
   // Expose the stores with their subscribe methods
@@ -252,30 +257,12 @@ export const jobStore = {
   resetFilters
 };
 
-// For compatibility with existing code, also export individual stores
-export const jobs = { subscribe: _jobs.subscribe };
+// Export individual stores and functions for direct import
 export const isLoading = { subscribe: _isLoading.subscribe };
 export const error = { subscribe: _error.subscribe };
-export const statusFilter = {
-  subscribe: _statusFilter.subscribe,
-  set: _statusFilter.set
-};
-export const customerFilter = {
-  subscribe: _customerFilter.subscribe,
-  set: _customerFilter.set
-};
-export const technicianFilter = {
-  subscribe: _technicianFilter.subscribe,
-  set: _technicianFilter.set
-};
-export const searchQuery = {
-  subscribe: _searchQuery.subscribe,
-  set: _searchQuery.set
-};
 export const filteredJobs = { subscribe: _filteredJobs.subscribe };
 export const dashboardJobs = { subscribe: _dashboardJobs.subscribe };
 export const jobStatusCounts = { subscribe: _jobStatusCounts.subscribe };
 export const userJobCounts = { subscribe: _userJobCounts.subscribe };
 
-// Also export the methods separately
 export { loadJobs, loadJobById, resetFilters }; 

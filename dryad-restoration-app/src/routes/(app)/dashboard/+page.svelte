@@ -1,29 +1,45 @@
 <!-- Dashboard page -->
 <script lang="ts">
   import JobList from '$lib/components/jobs/JobList.svelte';
-  import { dashboardJobs, isLoading, error, jobStatusCounts, userJobCounts } from '$lib/stores/jobStore';
+  import { dashboardJobs, isLoading, error, jobStatusCounts, userJobCounts, jobs } from '$lib/stores/jobStore';
   import { currentUser } from '$lib/stores/authStore';
   import { Role } from '$lib/types/User';
   import { JobStatus } from '$lib/types/Job';
   import Logo from '$lib/components/common/Logo.svelte';
   import TechJobFocusWidget from '$lib/components/dashboard/TechJobFocusWidget.svelte';
   import AdminControlsWidget from '$lib/components/dashboard/AdminControlsWidget.svelte';
+  import { onMount } from 'svelte';
+  
+  // Animation variables
+  let animated = false;
+  
+  onMount(() => {
+    // Trigger animations after component mounts
+    setTimeout(() => {
+      animated = true;
+    }, 100);
+  });
   
   // Check if user is authorized to create jobs
   $: isAuthorized = $currentUser?.role === Role.ADMIN || $currentUser?.role === Role.OFFICE;
   $: isTechnician = $currentUser?.role === Role.TECH;
   $: isAdmin = $currentUser?.role === Role.ADMIN;
   
-  // Filter jobs that are pending completion
-  $: pendingCompletionJobs = $dashboardJobs.filter(job => job.status === JobStatus.PENDING_COMPLETION);
-  
-  // Filter jobs that are paid and closed
-  $: paidJobs = $dashboardJobs.filter(job => job.status === JobStatus.PAID);
+  // Filter jobs for each category
+  $: newJobs = $jobs.filter(job => job.status === JobStatus.NEW);
+  $: scheduledJobs = $jobs.filter(job => job.status === JobStatus.SCHEDULED);
+  $: inProgressJobs = $jobs.filter(job => job.status === JobStatus.IN_PROGRESS);
+  $: onHoldJobs = $jobs.filter(job => job.status === JobStatus.ON_HOLD);
+  $: pendingCompletionJobs = $jobs.filter(job => job.status === JobStatus.PENDING_COMPLETION);
+  $: completedJobs = $jobs.filter(job => job.status === JobStatus.COMPLETED);
+  $: invoiceApprovalJobs = $jobs.filter(job => job.status === JobStatus.INVOICE_APPROVAL);
+  $: invoicedJobs = $jobs.filter(job => job.status === JobStatus.INVOICED);
+  $: paidJobs = $jobs.filter(job => job.status === JobStatus.PAID);
+  $: cancelledJobs = $jobs.filter(job => job.status === JobStatus.CANCELLED);
   
   // Calculate performance metrics
-  $: totalActiveJobs = ($jobStatusCounts?.IN_PROGRESS || 0) + ($jobStatusCounts?.PENDING_COMPLETION || 0);
-  $: totalCompletedJobs = ($jobStatusCounts?.COMPLETED || 0) + ($jobStatusCounts?.INVOICE_APPROVAL || 0) +
-                         ($jobStatusCounts?.INVOICED || 0) + ($jobStatusCounts?.PAID || 0);
+  $: totalActiveJobs = inProgressJobs.length + pendingCompletionJobs.length + scheduledJobs.length;
+  $: totalCompletedJobs = completedJobs.length + invoiceApprovalJobs.length + invoicedJobs.length + paidJobs.length;
   
   // Get current date for welcome message
   const today = new Date();
@@ -33,7 +49,152 @@
     month: 'long', 
     day: 'numeric' 
   });
+
+  // Job category configurations for the cards
+  const jobCategories = [
+    {
+      title: "New Jobs",
+      count: newJobs.length,
+      icon: "M12 4v16m8-8H4",
+      bgColors: "from-blue-50/90 to-indigo-50/90",
+      textColor: "blue",
+      iconBg: "blue-100",
+      status: JobStatus.NEW,
+      priority: 1
+    },
+    {
+      title: "Scheduled",
+      count: scheduledJobs.length,
+      icon: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z",
+      bgColors: "from-cyan-50/90 to-sky-50/90",
+      textColor: "cyan",
+      iconBg: "cyan-100",
+      status: JobStatus.SCHEDULED,
+      priority: 2
+    },
+    {
+      title: "In Progress",
+      count: inProgressJobs.length,
+      icon: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z",
+      bgColors: "from-green-50/90 to-teal-50/90",
+      textColor: "green",
+      iconBg: "green-100",
+      status: JobStatus.IN_PROGRESS,
+      priority: 3
+    },
+    {
+      title: "On Hold",
+      count: onHoldJobs.length,
+      icon: "M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z",
+      bgColors: "from-orange-50/90 to-amber-50/90",
+      textColor: "orange",
+      iconBg: "orange-100",
+      status: JobStatus.ON_HOLD,
+      priority: 4
+    },
+    {
+      title: "Pending Completion",
+      count: pendingCompletionJobs.length,
+      icon: "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z",
+      bgColors: "from-lime-50/90 to-green-50/90",
+      textColor: "lime",
+      iconBg: "lime-100",
+      status: JobStatus.PENDING_COMPLETION,
+      priority: 5
+    },
+    {
+      title: "Completed",
+      count: completedJobs.length,
+      icon: "M5 13l4 4L19 7",
+      bgColors: "from-purple-50/90 to-indigo-50/90",
+      textColor: "purple",
+      iconBg: "purple-100",
+      status: JobStatus.COMPLETED,
+      priority: 6
+    },
+    {
+      title: "Invoice Approval",
+      count: invoiceApprovalJobs.length,
+      icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4",
+      bgColors: "from-pink-50/90 to-rose-50/90",
+      textColor: "pink",
+      iconBg: "pink-100",
+      status: JobStatus.INVOICE_APPROVAL,
+      priority: 7
+    },
+    {
+      title: "Invoiced",
+      count: invoicedJobs.length,
+      icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01",
+      bgColors: "from-amber-50/90 to-yellow-50/90",
+      textColor: "amber",
+      iconBg: "amber-100",
+      status: JobStatus.INVOICED,
+      priority: 8
+    },
+    {
+      title: "Paid",
+      count: paidJobs.length,
+      icon: "M9 8l3 5m0 0l3-5m-3 5v4m-3-5h6m-6 3h6m6-3a9 9 0 11-18 0 9 9 0 0118 0z",
+      bgColors: "from-emerald-50/90 to-green-50/90",
+      textColor: "emerald",
+      iconBg: "emerald-100",
+      status: JobStatus.PAID,
+      priority: 9
+    }
+  ];
+
+  // Filter job categories based on user role and what to show
+  $: visibleCategories = isTechnician 
+    ? jobCategories.filter(cat => ['In Progress', 'Scheduled', 'Pending Completion'].includes(cat.title))
+    : isAuthorized 
+      ? jobCategories.filter(cat => cat.count > 0 || ['New Jobs', 'In Progress', 'Pending Completion', 'Invoiced'].includes(cat.title))
+      : [];
+      
+  // Sort categories by priority
+  $: sortedCategories = [...visibleCategories].sort((a, b) => a.priority - b.priority);
+  
+  // Get badge classes based on count
+  function getBadgeClasses(count: number): string {
+    if (count === 0) return 'bg-gray-200 text-gray-600';
+    if (count > 5) return 'bg-red-500 text-white animate-pulse';
+    if (count > 3) return 'bg-orange-400 text-white';
+    return 'bg-blue-500 text-white';
+  }
 </script>
+
+<style>
+  .card-enter {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+    transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+  }
+  
+  .card-enter.animated {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  
+  .count-badge {
+    transition: all 0.3s ease;
+  }
+  
+  .count-pulse {
+    animation: pulse 2s infinite;
+  }
+  
+  @keyframes pulse {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.1);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+</style>
 
 <div class="max-w-6xl mx-auto">
   {#if $currentUser}
@@ -48,7 +209,7 @@
           <h2 class="text-xl font-bold text-gray-800">Welcome, {$currentUser.firstName}!</h2>
           <p class="text-gray-600 mt-1">
             {#if isTechnician}
-              You have {$userJobCounts?.assigned || 0} assigned jobs.
+              You have {inProgressJobs.length + scheduledJobs.length} active jobs.
             {:else}
               There are {totalActiveJobs} active jobs requiring attention.
             {/if}
@@ -64,94 +225,42 @@
         <h1 class="text-3xl font-extrabold text-gray-800 mb-6">Company Dashboard</h1>
         
         <!-- Key Performance Metrics -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <div class="card-glass bg-gradient-to-br from-blue-50/90 to-indigo-50/90 rounded-xl card-shadow p-5 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-sm font-medium text-blue-700">New Jobs</p>
-                <p class="text-3xl font-bold text-blue-800">{$jobStatusCounts?.NEW || 0}</p>
-              </div>
-              <div class="bg-blue-100 p-3 rounded-full">
-                <svg class="w-6 h-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                </svg>
-              </div>
-            </div>
-            <div class="mt-2">
-              <a href="/jobs?status=NEW" class="text-xs text-blue-700 hover:underline inline-flex items-center">
-                View all new jobs
-                <svg class="w-3 h-3 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                </svg>
-              </a>
-            </div>
-          </div>
-          
-          <div class="card-glass bg-gradient-to-br from-green-50/90 to-teal-50/90 rounded-xl card-shadow p-5 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-sm font-medium text-green-700">Active Jobs</p>
-                <p class="text-3xl font-bold text-green-800">{totalActiveJobs}</p>
-              </div>
-              <div class="bg-green-100 p-3 rounded-full">
-                <svg class="w-6 h-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-              </div>
-            </div>
-            <div class="mt-2">
-              <a href="/jobs?status=IN_PROGRESS" class="text-xs text-green-700 hover:underline inline-flex items-center">
-                View all active jobs
-                <svg class="w-3 h-3 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                </svg>
-              </a>
-            </div>
-          </div>
-          
-          <div class="card-glass bg-gradient-to-br from-purple-50/90 to-indigo-50/90 rounded-xl card-shadow p-5 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-sm font-medium text-purple-700">Completed</p>
-                <p class="text-3xl font-bold text-purple-800">{totalCompletedJobs}</p>
-              </div>
-              <div class="bg-purple-100 p-3 rounded-full">
-                <svg class="w-6 h-6 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                </svg>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          {#each sortedCategories as category, i}
+            <div class="card-enter {animated ? 'animated' : ''}" style="transition-delay: {i * 75}ms">
+              <div class="card-glass bg-gradient-to-br {category.bgColors} rounded-xl card-shadow p-5 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 relative">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <div class="flex items-center">
+                      <p class="text-sm font-medium text-{category.textColor}-700">{category.title}</p>
+                      {#if category.count > 0}
+                        <span class="ml-2 px-2 py-0.5 text-xs font-medium rounded-full count-badge {getBadgeClasses(category.count)} {category.count > 5 ? 'count-pulse' : ''}">
+                          {category.count}
+                        </span>
+                      {/if}
+                    </div>
+                    <p class="text-3xl font-bold text-{category.textColor}-800">{category.count}</p>
+                  </div>
+                  <div class="bg-{category.iconBg} p-3 rounded-full {category.count > 0 ? 'animate-bounce' : ''}">
+                    <svg class="w-6 h-6 text-{category.textColor}-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={category.icon}/>
+                    </svg>
+                  </div>
+                </div>
+                <div class="mt-2">
+                  <a href="/jobs?status={category.status}" class="text-xs text-{category.textColor}-700 hover:underline inline-flex items-center group">
+                    View all {category.title.toLowerCase()}
+                    <svg class="w-3 h-3 ml-1 transform group-hover:translate-x-1 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                  </a>
+                </div>
+                {#if category.count > 3}
+                  <div class="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full -mt-1 -mr-1"></div>
+                {/if}
               </div>
             </div>
-            <div class="mt-2">
-              <a href="/jobs?status=COMPLETED" class="text-xs text-purple-700 hover:underline inline-flex items-center">
-                View completed jobs
-                <svg class="w-3 h-3 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                </svg>
-              </a>
-            </div>
-          </div>
-          
-          <div class="card-glass bg-gradient-to-br from-amber-50/90 to-yellow-50/90 rounded-xl card-shadow p-5 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-sm font-medium text-amber-700">Invoiced</p>
-                <p class="text-3xl font-bold text-amber-800">{($jobStatusCounts?.INVOICED || 0) + ($jobStatusCounts?.INVOICE_APPROVAL || 0)}</p>
-              </div>
-              <div class="bg-amber-100 p-3 rounded-full">
-                <svg class="w-6 h-6 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
-                </svg>
-              </div>
-            </div>
-            <div class="mt-2">
-              <a href="/jobs?status=INVOICED" class="text-xs text-amber-700 hover:underline inline-flex items-center">
-                View invoiced jobs
-                <svg class="w-3 h-3 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                </svg>
-              </a>
-            </div>
-          </div>
+          {/each}
         </div>
       {:else}
         <h1 class="text-3xl font-extrabold text-gray-800 mb-6">Dashboard</h1>
