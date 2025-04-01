@@ -32,7 +32,7 @@
   let errorMessage = '';
   
   const dispatch = createEventDispatcher<{
-    newLogEntry: LogEntry;
+    submit: LogEntry;
   }>();
   
   onMount(async () => {
@@ -116,7 +116,7 @@
       }
       
       // Dispatch the new entry to the parent component
-      dispatch('newLogEntry', newEntry);
+      dispatch('submit', newEntry);
       
       // Reset form
       selectedEquipmentId = '';

@@ -1,1 +1,47 @@
-[] 
+[
+  {
+    "id": "labor-001",
+    "jobId": "job-001",
+    "userId": "tech-01",
+    "date": "2024-03-03T00:00:00Z",
+    "hours": 6.5,
+    "description": "Initial water extraction and equipment setup",
+    "createdAt": "2024-03-03T16:45:00Z"
+  },
+  {
+    "id": "labor-002",
+    "jobId": "job-001",
+    "userId": "tech-02",
+    "date": "2024-03-03T00:00:00Z",
+    "hours": 6.5,
+    "description": "Initial water extraction and equipment setup",
+    "createdAt": "2024-03-03T16:50:00Z"
+  },
+  {
+    "id": "labor-003",
+    "jobId": "job-001",
+    "userId": "tech-01",
+    "date": "2024-03-04T00:00:00Z",
+    "hours": 4.0,
+    "description": "Equipment monitoring and document recovery",
+    "createdAt": "2024-03-04T13:30:00Z"
+  },
+  {
+    "id": "labor-004",
+    "jobId": "job-001",
+    "userId": "tech-02",
+    "date": "2024-03-05T00:00:00Z",
+    "hours": 3.5,
+    "description": "Equipment monitoring and moisture readings",
+    "createdAt": "2024-03-05T12:45:00Z"
+  },
+  {
+    "id": "labor-005",
+    "jobId": "job-002",
+    "userId": "tech-03",
+    "date": "2024-03-20T00:00:00Z",
+    "hours": 5.0,
+    "description": "Containment setup and prep work",
+    "createdAt": "2024-03-20T14:15:00Z"
+  }
+] 

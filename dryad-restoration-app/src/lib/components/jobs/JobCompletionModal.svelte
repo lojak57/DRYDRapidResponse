@@ -72,7 +72,7 @@
 <!-- Modal overlay -->
 <div class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 p-4">
   <!-- Modal container -->
-  <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl overflow-hidden">
+  <div class="bg-gray-100 rounded-lg shadow-xl w-full max-w-2xl overflow-hidden">
     <!-- Modal header -->
     <div class="bg-dryd-gradient text-white px-6 py-4">
       <h2 class="text-xl font-bold">Finalize Job: {job.jobNumber}</h2>
@@ -100,7 +100,7 @@
           <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
             <div class="grid grid-cols-1 gap-4">
               {#each techDetails as tech}
-                <div class="flex items-center justify-between p-3 bg-white rounded border border-gray-200">
+                <div class="flex items-center justify-between p-3 bg-gray-100 rounded border border-gray-200">
                   <div>
                     <p class="font-medium text-gray-800">{tech.name}</p>
                     <p class="text-sm text-gray-500">Tech ID: {tech.id}</p>

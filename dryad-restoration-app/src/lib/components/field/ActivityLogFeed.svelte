@@ -2,9 +2,30 @@
   import type { LogEntry } from '$lib/types/LogEntry';
   import LogEntryCard from './LogEntryCard.svelte';
   import { fade } from 'svelte/transition';
+  import AssignTechnicianForm from './AssignTechnicianForm.svelte';
+  import { loadJobById } from '$lib/stores/jobStore';
   
   export let logEntries: LogEntry[] = [];
   export let isLoading: boolean = false;
+  export let jobId: string;
+  export let userId: string;
+  
+  let showAssignTechnician = false;
+  
+  async function handleTechnicianAssignment(event: CustomEvent) {
+    const { assignedUserIds } = event.detail;
+    console.log('Technicians assigned:', assignedUserIds);
+    
+    // Reload the job data to refresh the UI
+    try {
+      await loadJobById(jobId);
+      // Add a success message or notification here if desired
+    } catch (error) {
+      console.error('Error reloading job data:', error);
+    }
+    
+    showAssignTechnician = false;
+  }
 </script>
 
 <style>
@@ -20,6 +41,26 @@
 </style>
 
 <div class="activity-log-feed">
+  <!-- Action buttons -->
+  <div class="mb-4 flex flex-wrap gap-2">
+    <button
+      on:click={() => showAssignTechnician = true}
+      class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+    >
+      Assign Technician
+    </button>
+  </div>
+  
+  {#if showAssignTechnician}
+    <div class="mb-4" in:fade={{ duration: 200 }}>
+      <AssignTechnicianForm
+        {jobId}
+        {userId}
+        on:submit={handleTechnicianAssignment}
+      />
+    </div>
+  {/if}
+  
   {#if isLoading}
     <div class="py-10 flex justify-center">
       <div class="animate-pulse flex space-x-4 w-full max-w-lg">

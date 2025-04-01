@@ -4,13 +4,15 @@
 </script>
 
 <div class="bg-white rounded-lg shadow-lg border border-gray-300 overflow-hidden mb-6">
-  <div class="p-4 bg-dryd-gradient text-white">
+  <div class="p-4 bg-dryd-gradient text-white border-b-4 border-blue-600">
     <div class="flex justify-between items-center">
       <h2 class="font-bold text-xl flex items-center">
-        <svg class="w-6 h-6 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-        </svg>
-        Company Performance
+        <div class="bg-blue-600 text-white p-2 rounded-md mr-3">
+          <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          </svg>
+        </div>
+        <span>Company Performance</span>
       </h2>
     </div>
   </div>
@@ -81,7 +83,7 @@
 
     <!-- Business metrics overview -->
     <div class="mt-6 bg-white rounded-lg shadow-md border border-gray-200 p-5">
-      <h3 class="text-lg font-semibold text-gray-800 mb-4">Business Metrics</h3>
+      <h3 class="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-200">Business Metrics</h3>
       
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div class="border-r border-gray-200 pr-4">

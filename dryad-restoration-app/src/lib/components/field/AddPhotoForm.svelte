@@ -15,7 +15,7 @@
   let previewUrl: string | null = null;
   
   const dispatch = createEventDispatcher<{
-    newLogEntry: LogEntry;
+    submit: LogEntry;
   }>();
   
   function handleFileChange(event: Event) {
@@ -70,7 +70,7 @@
       });
       
       // Dispatch the new entry to the parent component
-      dispatch('newLogEntry', newEntry);
+      dispatch('submit', newEntry);
       
       // Reset form
       selectedFiles = null;

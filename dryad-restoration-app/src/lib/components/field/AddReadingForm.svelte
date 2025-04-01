@@ -154,7 +154,7 @@
   }
   
   const dispatch = createEventDispatcher<{
-    newLogEntry: LogEntry;
+    submit: LogEntry;
   }>();
   
   async function handleSubmit() {
@@ -204,7 +204,7 @@
       });
       
       // Dispatch the new entry to the parent component
-      dispatch('newLogEntry', newEntry);
+      dispatch('submit', newEntry);
       
       // Reset form
       location = '';

@@ -38,7 +38,7 @@
   });
 </script>
 
-<div class="border border-gray-200 rounded-lg overflow-hidden shadow-md hover:shadow-lg hover:border-gray-300 transition-all duration-200 ease-in-out bg-white">
+<div class="border border-gray-200 rounded-lg overflow-hidden shadow-md hover:shadow-lg hover:border-gray-300 transition-all duration-200 ease-in-out bg-gray-100">
   <div class="border-l-4 {
     job.status === 'NEW' ? 'border-blue-500' : 
     job.status === 'SCHEDULED' ? 'border-purple-500' : 

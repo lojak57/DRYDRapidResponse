@@ -8,6 +8,7 @@
     // Import the job store functions and stores
     import { jobs, loadJobs } from '$lib/stores/jobStore';
     import { currentUser, switchUser } from '$lib/stores/authStore';
+    import { users, loadUsers } from '$lib/stores/userStore';
     
     // Load data when the component mounts
     onMount(async () => {
@@ -17,10 +18,15 @@
                 await loadJobs();
             }
             
+            // Load users if not already loaded
+            if ($users.length === 0) {
+                await loadUsers();
+            }
+            
             // Set a default user if no one is logged in yet
             if (!$currentUser) {
                 // Use an office staff user ID from your mock data
-                await switchUser('u005'); // Morgan Williams (OFFICE role)
+                await switchUser('office-01'); // Updated ID
             }
         }
     });

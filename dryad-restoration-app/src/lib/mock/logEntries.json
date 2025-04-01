@@ -1,414 +1,207 @@
 [
   {
     "id": "log-001",
-    "jobId": "j001",
-    "userId": "u002",
-    "timestamp": "2024-03-25T09:30:00Z",
+    "jobId": "job-001",
+    "userId": "tech-01",
+    "timestamp": "2024-03-03T08:15:00Z",
     "type": "NOTE",
-    "content": "Arrived on site. Water damage confined to basement area. Started setting up equipment.",
-    "synced": true
+    "content": {
+      "text": "Arrived on site. Water damage from sprinkler malfunction affecting approximately 1500 sq ft of office space. Carpeting, baseboards, and furniture affected. Document recovery will be needed."
+    }
   },
   {
     "id": "log-002",
-    "jobId": "j001",
-    "userId": "u002",
-    "timestamp": "2024-03-25T10:15:00Z",
-    "type": "MOISTURE_READING",
+    "jobId": "job-001",
+    "userId": "tech-01",
+    "timestamp": "2024-03-03T09:30:00Z",
+    "type": "PHOTO",
     "content": {
-      "location": "Basement southwest wall",
-      "material": "Drywall",
-      "value": 42,
-      "referenceId": "photo-001"
-    },
-    "synced": true
+      "url": "https://placehold.co/600x400?text=Water+Damage+Before",
+      "caption": "Initial water damage before extraction",
+      "filename": "office_water_damage_001.jpg"
+    }
   },
   {
     "id": "log-003",
-    "jobId": "j001",
-    "userId": "u002",
-    "timestamp": "2024-03-25T10:30:00Z",
-    "type": "PHOTO",
+    "jobId": "job-001",
+    "userId": "tech-02",
+    "timestamp": "2024-03-03T12:45:00Z",
+    "type": "READING",
     "content": {
-      "url": "/assets/photos/job001-damage1.jpg",
-      "caption": "Water damage on basement carpet and baseboards",
-      "tags": ["water damage", "basement", "carpet"]
-    },
-    "synced": true
+      "location": "Office - Center",
+      "value": 98,
+      "unit": "percent",
+      "notes": "High saturation in carpet and pad, extraction in progress"
+    }
   },
   {
     "id": "log-004",
-    "jobId": "j001",
-    "userId": "u002",
-    "timestamp": "2024-03-25T11:45:00Z",
-    "type": "EQUIPMENT_PLACEMENT",
+    "jobId": "job-001",
+    "userId": "tech-01",
+    "timestamp": "2024-03-03T16:30:00Z",
+    "type": "EQUIPMENT",
     "content": {
-      "equipmentId": "dehu-104",
-      "location": "Basement center",
-      "settings": {
-        "fanSpeed": "high",
-        "targetHumidity": 45
-      }
-    },
-    "synced": true
+      "action": "INSTALL",
+      "equipmentId": "equip-001",
+      "equipmentType": "DEHUMIDIFIER",
+      "location": "Main Office Area",
+      "notes": "Commercial LGR dehumidifier set to continuous operation"
+    }
   },
   {
     "id": "log-005",
-    "jobId": "j001",
-    "userId": "u005",
-    "timestamp": "2024-03-25T14:20:00Z",
-    "type": "NOTE",
-    "content": "Customer called to confirm the equipment was running properly. I confirmed the technician's setup and that everything was operating as expected.",
-    "synced": true
+    "jobId": "job-001",
+    "userId": "tech-02",
+    "timestamp": "2024-03-03T16:40:00Z",
+    "type": "EQUIPMENT",
+    "content": {
+      "action": "INSTALL",
+      "equipmentId": "equip-002",
+      "equipmentType": "AIR_MOVER",
+      "location": "Document Storage Area",
+      "notes": "5 air movers positioned for optimal airflow"
+    }
   },
   {
     "id": "log-006",
-    "jobId": "j001",
-    "userId": "u002",
-    "timestamp": "2024-03-26T09:00:00Z",
-    "type": "NOTE",
-    "content": "Follow-up visit. Equipment running well, basement showing good signs of drying progress.",
-    "synced": true
+    "jobId": "job-001",
+    "userId": "tech-01",
+    "timestamp": "2024-03-04T09:15:00Z",
+    "type": "READING",
+    "content": {
+      "location": "Office - Center",
+      "value": 85,
+      "unit": "percent",
+      "notes": "Saturation decreasing but still high"
+    }
   },
   {
     "id": "log-007",
-    "jobId": "j001",
-    "userId": "u002",
-    "timestamp": "2024-03-26T09:15:00Z",
-    "type": "MOISTURE_READING",
+    "jobId": "job-001",
+    "userId": "tech-02",
+    "timestamp": "2024-03-05T10:30:00Z",
+    "type": "READING",
     "content": {
-      "location": "Basement southwest wall",
-      "material": "Drywall",
-      "value": 28,
-      "referenceId": "photo-002"
-    },
-    "synced": true
+      "location": "Office - Center",
+      "value": 68,
+      "unit": "percent",
+      "notes": "Continued improvement, drying progressing well"
+    }
   },
   {
     "id": "log-008",
-    "jobId": "j002",
-    "userId": "u003",
-    "timestamp": "2024-03-24T13:30:00Z",
-    "type": "NOTE",
-    "content": "Fire damage assessment completed. Smoke residue throughout living room and kitchen.",
-    "synced": true
+    "jobId": "job-001",
+    "userId": "tech-01",
+    "timestamp": "2024-03-05T10:45:00Z",
+    "type": "PHOTO",
+    "content": {
+      "url": "https://placehold.co/600x400?text=Document+Drying",
+      "caption": "Document recovery process in progress",
+      "filename": "document_recovery_001.jpg"
+    }
   },
   {
     "id": "log-009",
-    "jobId": "j002",
-    "userId": "u003",
-    "timestamp": "2024-03-24T14:00:00Z",
-    "type": "PHOTO",
+    "jobId": "job-002",
+    "userId": "tech-03",
+    "timestamp": "2024-03-20T09:30:00Z",
+    "type": "NOTE",
     "content": {
-      "url": "/assets/photos/job002-smoke1.jpg",
-      "caption": "Smoke residue on kitchen ceiling",
-      "tags": ["fire damage", "smoke", "kitchen"]
-    },
-    "synced": true
+      "text": "Initial inspection of apartment unit 305. Visible mold growth on bathroom wall extending into adjacent bedroom. Setting up containment before remediation work begins."
+    }
   },
   {
     "id": "log-010",
-    "jobId": "j003",
-    "userId": "u004",
-    "timestamp": "2024-03-23T10:00:00Z",
-    "type": "NOTE",
-    "content": "Mold identified in bathroom ceiling. Recommended removal and treatment.",
-    "synced": true
+    "jobId": "job-002",
+    "userId": "tech-03",
+    "timestamp": "2024-03-20T10:15:00Z",
+    "type": "PHOTO",
+    "content": {
+      "url": "https://placehold.co/600x400?text=Mold+Growth",
+      "caption": "Bathroom wall mold growth before remediation",
+      "filename": "bathroom_mold_001.jpg"
+    }
   },
   {
     "id": "log-011",
-    "jobId": "j003",
-    "userId": "u004",
-    "timestamp": "2024-03-23T10:15:00Z",
+    "jobId": "job-002",
+    "userId": "tech-03",
+    "timestamp": "2024-03-20T13:45:00Z",
+    "type": "EQUIPMENT",
+    "content": {
+      "action": "INSTALL",
+      "equipmentId": "equip-003",
+      "equipmentType": "AIR_SCRUBBER",
+      "location": "Bathroom",
+      "notes": "HEPA air scrubber installed for negative air pressure"
+    }
+  },
+  {
+    "id": "log-100",
+    "jobId": "job-010",
+    "userId": "tech-01",
+    "timestamp": "2024-03-29T15:30:00Z",
     "type": "MOISTURE_READING",
     "content": {
-      "location": "Bathroom ceiling near exhaust fan",
-      "material": "Drywall",
-      "value": 22.5,
-      "referenceId": "photo-003"
-    },
-    "synced": true
-  },
-  {
-    "id": "log-012",
-    "jobId": "j001",
-    "userId": "u002",
-    "timestamp": "2024-03-26T11:30:00Z",
-    "type": "PHOTO",
-    "content": {
-      "url": "https://via.placeholder.com/640x480?text=Water+Damage+After+Treatment",
-      "caption": "Basement after 24 hours of drying equipment operation",
-      "tags": ["water damage", "basement", "treatment progress"],
-      "filename": "basement_day2.jpg",
-      "size": 256400
-    },
-    "synced": true
-  },
-  {
-    "id": "log-013",
-    "jobId": "j001",
-    "userId": "u002",
-    "timestamp": "2024-03-26T11:45:00Z",
-    "type": "PHOTO",
-    "content": {
-      "url": "https://via.placeholder.com/640x480?text=Equipment+Setup",
-      "caption": "Dehumidifier placement in basement",
-      "tags": ["equipment", "dehumidifier"],
-      "filename": "dehumidifier_setup.jpg",
-      "size": 184500
-    },
-    "synced": true
-  },
-  {
-    "id": "log-014",
-    "jobId": "j001",
-    "userId": "u002",
-    "timestamp": "2024-03-26T12:00:00Z",
-    "type": "PHOTO",
-    "content": {
-      "url": "https://via.placeholder.com/640x480?text=Affected+Wall",
-      "caption": "Close-up of affected wall with moisture meter reading",
-      "tags": ["water damage", "moisture reading"],
-      "filename": "wall_moisture.jpg",
-      "size": 216400
-    },
-    "synced": true
-  },
-  {
-    "id": "log-015",
-    "jobId": "j003",
-    "userId": "u004",
-    "timestamp": "2024-03-23T10:30:00Z",
-    "type": "PHOTO",
-    "content": {
-      "url": "https://via.placeholder.com/640x480?text=Mold+Growth",
-      "caption": "Visible mold growth on bathroom ceiling",
-      "tags": ["mold", "bathroom"],
-      "filename": "mold_bathroom.jpg",
-      "size": 198200
-    },
-    "synced": true
-  },
-  {
-    "id": "log-e001",
-    "jobId": "job-123",
-    "userId": "tech-789",
-    "timestamp": "2023-06-16T09:30:00.000Z",
-    "type": "EQUIPMENT_PLACEMENT",
-    "content": {
-      "equipmentId": "equip-001",
-      "equipmentType": "AIR_MOVER",
-      "model": "AirMax 3000",
-      "serialNumber": "AM3K-12345",
       "location": "Living Room - North Wall",
-      "settings": {
-        "speedSetting": "high"
-      },
-      "notes": "Placed to dry carpet and baseboards"
+      "material": "Drywall",
+      "value": 12.5,
+      "referenceId": "reading-001"
     },
     "synced": true
   },
   {
-    "id": "log-e002",
-    "jobId": "job-123",
-    "userId": "tech-789",
-    "timestamp": "2023-06-16T09:45:00.000Z",
-    "type": "EQUIPMENT_PLACEMENT",
-    "content": {
-      "equipmentId": "equip-002",
-      "equipmentType": "AIR_MOVER",
-      "model": "AirMax 3000",
-      "serialNumber": "AM3K-12346",
-      "location": "Living Room - South Wall",
-      "settings": {
-        "speedSetting": "high"
-      },
-      "notes": "Placed to dry carpet and baseboards"
-    },
-    "synced": true
-  },
-  {
-    "id": "log-e003",
-    "jobId": "job-123",
-    "userId": "tech-789",
-    "timestamp": "2023-06-16T10:00:00.000Z",
-    "type": "EQUIPMENT_PLACEMENT",
-    "content": {
-      "equipmentId": "equip-003",
-      "equipmentType": "DEHUMIDIFIER",
-      "model": "DryTech Pro",
-      "serialNumber": "DTP-98765",
-      "location": "Living Room - Center",
-      "settings": {
-        "humiditySetting": "40%"
-      },
-      "notes": "Set to maintain 40% relative humidity"
-    },
-    "synced": true
-  },
-  {
-    "id": "log-e004",
-    "jobId": "job-123",
-    "userId": "tech-789",
-    "timestamp": "2023-06-16T10:15:00.000Z",
-    "type": "EQUIPMENT_PLACEMENT",
-    "content": {
-      "equipmentId": "equip-004",
-      "equipmentType": "AIR_MOVER",
-      "model": "AirMax 3000",
-      "serialNumber": "AM3K-12347",
-      "location": "Kitchen - East Wall",
-      "settings": {
-        "speedSetting": "medium"
-      },
-      "notes": "Placed to dry affected cabinetry"
-    },
-    "synced": true
-  },
-  {
-    "id": "log-e005",
-    "jobId": "job-123",
-    "userId": "tech-101",
-    "timestamp": "2023-06-16T10:30:00.000Z",
+    "id": "log-101",
+    "jobId": "job-010",
+    "userId": "tech-01",
+    "timestamp": "2024-03-29T15:35:00Z",
     "type": "MOISTURE_READING",
     "content": {
-      "location": "Living Room - Baseboard",
+      "location": "Kitchen - Under Sink",
       "material": "Wood",
-      "value": 24.5
+      "value": 15.2,
+      "referenceId": "reading-002"
     },
     "synced": true
   },
   {
-    "id": "log-e006",
-    "jobId": "job-123",
-    "userId": "tech-101",
-    "timestamp": "2023-06-16T10:45:00.000Z",
+    "id": "log-102",
+    "jobId": "job-010",
+    "userId": "tech-01",
+    "timestamp": "2024-03-29T15:40:00Z",
     "type": "MOISTURE_READING",
     "content": {
-      "location": "Kitchen - Cabinet",
-      "material": "Wood",
-      "value": 32.7
+      "location": "Bathroom - Floor",
+      "material": "Tile",
+      "value": 8.5,
+      "referenceId": "reading-003"
     },
     "synced": true
   },
   {
-    "id": "log-e007",
-    "jobId": "job-123",
-    "userId": "tech-101",
-    "timestamp": "2023-06-20T14:30:00.000Z",
-    "type": "MOISTURE_READING",
+    "id": "log-103",
+    "jobId": "job-010",
+    "userId": "tech-01",
+    "timestamp": "2024-03-29T16:15:00Z",
+    "type": "PHOTO",
     "content": {
-      "location": "Living Room - Baseboard",
-      "material": "Wood",
-      "value": 14.8
+      "url": "https://placehold.co/600x400?text=Fire+Damage+After+Repair",
+      "caption": "After photo - Fire damage restoration complete",
+      "tags": ["after", "complete"]
     },
     "synced": true
   },
   {
-    "id": "log-e008",
-    "jobId": "job-123",
-    "userId": "tech-101",
-    "timestamp": "2023-06-20T14:45:00.000Z",
-    "type": "MOISTURE_READING",
+    "id": "log-104",
+    "jobId": "job-010",
+    "userId": "tech-01",
+    "timestamp": "2024-03-29T16:20:00Z", 
+    "type": "PHOTO",
     "content": {
-      "location": "Kitchen - Cabinet",
-      "material": "Wood",
-      "value": 18.3
+      "url": "https://placehold.co/600x400?text=Kitchen+Restoration+Complete",
+      "caption": "After photo - Kitchen repairs finished",
+      "tags": ["after", "kitchen"]
     },
-    "synced": true
-  },
-  {
-    "id": "log-e009",
-    "jobId": "job-123",
-    "userId": "tech-789",
-    "timestamp": "2023-06-23T10:00:00.000Z",
-    "type": "MOISTURE_READING",
-    "content": {
-      "location": "Living Room - Baseboard",
-      "material": "Wood",
-      "value": 8.2
-    },
-    "synced": true
-  },
-  {
-    "id": "log-e010",
-    "jobId": "job-123",
-    "userId": "tech-789",
-    "timestamp": "2023-06-23T10:15:00.000Z",
-    "type": "MOISTURE_READING",
-    "content": {
-      "location": "Kitchen - Cabinet",
-      "material": "Wood",
-      "value": 9.1
-    },
-    "synced": true
-  },
-  {
-    "id": "log-e011",
-    "jobId": "job-123",
-    "userId": "tech-789",
-    "timestamp": "2023-06-23T13:30:00.000Z",
-    "type": "EQUIPMENT_REMOVAL",
-    "content": {
-      "equipmentId": "equip-001",
-      "equipmentType": "AIR_MOVER",
-      "model": "AirMax 3000",
-      "serialNumber": "AM3K-12345",
-      "notes": "Removed after drying complete"
-    },
-    "synced": true
-  },
-  {
-    "id": "log-e012",
-    "jobId": "job-123",
-    "userId": "tech-789",
-    "timestamp": "2023-06-23T13:35:00.000Z",
-    "type": "EQUIPMENT_REMOVAL",
-    "content": {
-      "equipmentId": "equip-002",
-      "equipmentType": "AIR_MOVER",
-      "model": "AirMax 3000",
-      "serialNumber": "AM3K-12346",
-      "notes": "Removed after drying complete"
-    },
-    "synced": true
-  },
-  {
-    "id": "log-e013",
-    "jobId": "job-123",
-    "userId": "tech-789",
-    "timestamp": "2023-06-23T13:40:00.000Z",
-    "type": "EQUIPMENT_REMOVAL",
-    "content": {
-      "equipmentId": "equip-003",
-      "equipmentType": "DEHUMIDIFIER",
-      "model": "DryTech Pro",
-      "serialNumber": "DTP-98765",
-      "notes": "Removed after drying complete"
-    },
-    "synced": true
-  },
-  {
-    "id": "log-e014",
-    "jobId": "job-123",
-    "userId": "tech-789",
-    "timestamp": "2023-06-23T13:45:00.000Z",
-    "type": "EQUIPMENT_REMOVAL",
-    "content": {
-      "equipmentId": "equip-004",
-      "equipmentType": "AIR_MOVER",
-      "model": "AirMax 3000",
-      "serialNumber": "AM3K-12347",
-      "notes": "Removed after drying complete"
-    },
-    "synced": true
-  },
-  {
-    "id": "log-e015",
-    "jobId": "job-123",
-    "userId": "tech-789",
-    "timestamp": "2023-06-23T15:30:00.000Z",
-    "type": "NOTE",
-    "content": "Job completed successfully. All moisture readings within acceptable range. Equipment removed and area cleaned.",
     "synced": true
   }
 ] 

@@ -29,6 +29,9 @@ export async function switchUser(userId: string): Promise<void> {
       
       // Set the user directly
       currentUser.set(user as User);
+      
+      // Redirect to dashboard after successful user switch
+      await goto('/dashboard');
     } else {
       console.error(`User with ID ${userId} not found`);
       error.set(`User with ID ${userId} not found`);

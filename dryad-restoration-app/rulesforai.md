@@ -251,6 +251,36 @@ async function handleSubmit() {
 *   **Offline Support:** Not yet implemented
 *   **Testing:** Test coverage is not yet comprehensive
 
+## 9. Recent Updates & Learnings
+
+### 9.1 Enhanced Role Switching
+
+The app now includes an improved user switcher functionality:
+* **User Selection Dropdown:** Replaced simple role buttons with a full user selection dropdown
+* **User Grouping:** Users are organized by role type (Admin, Office, Tech)
+* **Complete User Testing:** Allows testing the full job workflow by switching between specific users
+
+### 9.2 Quote Creation Enhancements
+
+* **Emergency Labor Rate:** Added an "Emergency Response" labor rate of $175/hr for after-hours service calls
+* **Labor Rate Organization:** Rates are displayed in descending price order for better visibility of premium options
+
+### 9.3 Styling Considerations
+
+* **Button Text Contrast:** Some buttons may have contrast issues with white text on light backgrounds
+* **Button Component:** The `Button.svelte` component in `src/lib/components/ui/Button.svelte` should be used whenever possible for consistent styling
+* **CSS Classes:** When using custom buttons or links styled as buttons, ensure proper text contrast with appropriate classes:
+  * Dark backgrounds should include `text-white`
+  * Light backgrounds should include `text-gray-700` or `text-gray-800`
+* **Tailwind Configuration:** Custom colors are defined in `tailwind.config.js` and include:
+  * `dryd-blue` (light: #61C3E2, DEFAULT: #2980B9, dark: #264F8E)
+  * `dryd-burgundy` (light: #9A3667, DEFAULT: #8A2755, dark: #751D44)
+
+### 9.4 Areas for Enhancement
+
+* **Technician Assignment:** Need to add functionality for office/admin staff to assign technicians to jobs from the job details page
+* **Role-Based UI:** Continue ensuring UI elements are appropriately visible/hidden based on user role
+
 ## Golden Rule
 
 Think about maintainability and readability for the future human developers (including your future self!). Keep code clean, well-structured, and appropriately typed. Follow the established patterns in the codebase to maintain consistency.

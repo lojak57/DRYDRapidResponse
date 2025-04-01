@@ -444,6 +444,7 @@
   
   // Labor rate presets
   const laborRates = [
+    { title: 'Emergency Response', rate: 175, description: 'After-hours emergency calls' },
     { title: 'Technician', rate: 75, description: 'General restoration technician' },
     { title: 'Senior Tech', rate: 95, description: 'Senior restoration technician' },
     { title: 'Supervisor', rate: 110, description: 'Site supervisor' },
@@ -2170,7 +2171,7 @@
       {#if currentStep > 1}
         <button 
           type="button" 
-          class="px-6 py-2.5 bg-white text-dryd-blue border border-dryd-blue rounded-lg hover:bg-gray-50 hover:shadow-sm transition-all duration-200"
+          class="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-dryd-blue-dark hover:shadow-md transition-all duration-200"
           on:click={prevStep}
         >
           <span class="flex items-center">
@@ -2187,7 +2188,7 @@
       {#if currentStep < totalSteps}
         <button 
           type="button" 
-          class="px-6 py-2.5 bg-dryd-blue text-white rounded-lg hover:bg-dryd-blue-dark hover:shadow-md transition-all duration-200"
+          class="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-dryd-blue-dark hover:shadow-md transition-all duration-200"
           on:click={nextStep}
         >
           <span class="flex items-center">
@@ -2200,7 +2201,7 @@
       {:else}
         <button 
           type="submit" 
-          class="px-6 py-2.5 bg-dryd-blue text-white rounded-lg hover:bg-dryd-blue-dark hover:shadow-md transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed"
+          class="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-dryd-blue-dark hover:shadow-md transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed"
           disabled={isSubmitting}
         >
           {#if isSubmitting}
@@ -2221,7 +2222,7 @@
     <!-- New Customer Modal -->
     {#if showNewCustomerForm}
       <div class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-screen overflow-y-auto">
+        <div class="bg-gray-100 rounded-lg shadow-xl max-w-2xl w-full max-h-screen overflow-y-auto">
           <div class="p-6">
             <div class="flex justify-between items-center mb-4">
               <h2 class="text-xl font-semibold text-gray-800">Create New Customer</h2>
