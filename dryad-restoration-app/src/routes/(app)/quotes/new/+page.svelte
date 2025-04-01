@@ -1959,6 +1959,105 @@
                       </div>
                     </div>
                   </div>
+                {:else if lineItemWizard.category === 'Permit'}
+                  <!-- Permit section content -->
+                  <div class="border-t border-blue-200 pt-4">
+                    <div class="mb-4">
+                      <label class="block text-sm font-medium text-gray-700 mb-1">Permit Type</label>
+                      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {#each [
+                          { title: 'Building Permit', unitPrice: 450, description: 'General building permit for construction/renovation' },
+                          { title: 'Electrical Permit', unitPrice: 225, description: 'For electrical work and inspections' },
+                          { title: 'Plumbing Permit', unitPrice: 195, description: 'For plumbing work and inspections' },
+                          { title: 'Mechanical Permit', unitPrice: 210, description: 'For HVAC and mechanical systems' },
+                          { title: 'Demolition Permit', unitPrice: 275, description: 'For structural demolition work' },
+                          { title: 'Zoning Permit', unitPrice: 180, description: 'Local zoning and planning approval' },
+                          { title: 'Fire Safety Permit', unitPrice: 235, description: 'Fire department inspection and approval' },
+                          { title: 'Environmental Permit', unitPrice: 350, description: 'Environmental impact assessment fees' }
+                        ] as permit}
+                          <button 
+                            type="button"
+                            class="p-3 border rounded text-left text-sm transition-all {lineItemWizard.description.includes(permit.title) ? 'bg-blue-100 border-blue-400 shadow-sm' : 'border-gray-300 hover:bg-gray-50'}"
+                            on:click={() => {
+                              lineItemWizard.description = `${permit.title} - ${permit.description}`;
+                              lineItemWizard.unitPrice = permit.unitPrice;
+                              lineItemWizard.internalCost = permit.unitPrice; // Pass-through cost with no markup
+                            }}
+                          >
+                            <div class="font-medium">{permit.title}</div>
+                            <div class="flex justify-between text-xs mt-1">
+                              <span class="text-gray-600">{permit.description}</span>
+                              <span class="font-medium text-blue-700">${permit.unitPrice}</span>
+                            </div>
+                          </button>
+                        {/each}
+                      </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+                        <input 
+                          type="number"
+                          bind:value={lineItemWizard.quantity}
+                          min="1"
+                          class="w-full p-2 border border-gray-300 rounded-lg"
+                        />
+                        <p class="text-xs text-gray-500 mt-1">Usually one permit per type is needed</p>
+                      </div>
+                      
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Permit Fee ($)</label>
+                        <div class="relative">
+                          <span class="absolute inset-y-0 left-0 flex items-center pl-2 pointer-events-none text-gray-500 text-sm">$</span>
+                          <input 
+                            type="number"
+                            bind:value={lineItemWizard.unitPrice}
+                            min="0"
+                            step="0.01"
+                            class="w-full p-2 pl-6 border border-gray-300 rounded-lg"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {#if $currentUser?.role === 'ADMIN' || $currentUser?.role === 'OFFICE'}
+                      <div class="mt-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Internal Cost ($)</label>
+                        <div class="relative">
+                          <span class="absolute inset-y-0 left-0 flex items-center pl-2 pointer-events-none text-gray-500 text-sm">$</span>
+                          <input 
+                            type="number"
+                            bind:value={lineItemWizard.internalCost}
+                            min="0"
+                            step="0.01"
+                            class="w-full p-2 pl-6 border border-gray-300 rounded-lg"
+                          />
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">Permit fees are typically passed through with no markup</p>
+                      </div>
+                    {/if}
+                    
+                    <div class="mt-4">
+                      <label class="block text-sm font-medium text-gray-700 mb-1">Permit Information</label>
+                      <textarea 
+                        bind:value={lineItemWizard.description}
+                        rows="2"
+                        placeholder="Additional details about the permit (agency, application #, etc.)"
+                        class="w-full p-2 border border-gray-300 rounded-lg"
+                      ></textarea>
+                    </div>
+                    
+                    <div class="p-3 bg-gray-50 rounded-lg border border-gray-200 mt-4 mb-4">
+                      <div class="flex justify-between items-center">
+                        <span class="font-medium text-gray-700">Summary</span>
+                        <span class="font-bold text-dryd-blue">{formatCurrency(lineItemWizard.unitPrice * lineItemWizard.quantity)}</span>
+                      </div>
+                      <div class="text-sm text-gray-600 mt-1">
+                        {lineItemWizard.description || 'Permit Fee'} - {lineItemWizard.quantity} × ${lineItemWizard.unitPrice}
+                      </div>
+                    </div>
+                  </div>
                 {:else if lineItemWizard.category === 'Supplies'}
                   <!-- Supplies section content -->
                   <div class="border-t border-blue-200 pt-4">
