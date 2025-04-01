@@ -119,7 +119,8 @@
                    background-repeat: no-repeat;"
         ></div>
         
-        <div class="overlay fixed inset-0 z-[-1] bg-white/75 backdrop-blur-sm"></div>
+        <!-- Modified overlay with no blur and less opacity -->
+        <div class="overlay fixed inset-0 z-[-1] bg-white/40"></div>
         
         <div in:fade={{ duration: 500 }} class="flex flex-col h-full">
             {#if $currentUser}
