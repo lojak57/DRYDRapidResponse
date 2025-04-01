@@ -30,6 +30,14 @@
     cancel: void;
   }>();
   
+  // Debug information
+  console.log('InvoicePreview - Job data:', job);
+  console.log('InvoicePreview - Line items:', lineItems);
+  console.log('InvoicePreview - Costs:', { laborCost, materialsCost, equipmentCost });
+  
+  // Check if the job has any line items
+  $: hasLineItems = lineItems && lineItems.length > 0;
+  
   // State
   let customer: Customer | null = null;
   let technicians: User[] = [];

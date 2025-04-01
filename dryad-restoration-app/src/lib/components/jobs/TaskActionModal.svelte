@@ -21,10 +21,12 @@
   import LaborEntryForm from './LaborEntryForm.svelte';
   import JobFinalizeForm from './JobFinalizeForm.svelte';
   import InvoicePreview from '../invoice/InvoicePreview.svelte';
+  import type { Task } from '$lib/types/Task';
+  import type { LogEntry } from '$lib/types/LogEntry';
   import AssignTechnicianForm from '../field/AssignTechnicianForm.svelte';
   import { currentUser } from '$lib/stores/authStore';
   import { getTaskInfo } from '$lib/config/workflowConfig';
-  import { addCompletionTaskToJob, updateJob, addLog } from '$lib/services/jobs';
+  import { addCompletionTaskToJob, updateJob, addLog, getJobById } from '$lib/services/jobs';
   import type { CustomLineItem } from '$lib/types/Job';
   
   // Define field types
@@ -432,18 +434,56 @@
   console.log('Raw mock technician data:', mockTechnicians);
   
   // Handle invoice creation 
-  function handleInvoiceCreation(event: CustomEvent) {
-    console.log('Invoice creation approved with data:', event.detail);
+  function handleInvoiceCreation() {
+    // Create a log entry for invoice creation
+    console.log('Creating invoice for job:', job);
+
+    // Log any line items found in the job
+    console.log('Job line items:', job.lineItems);
+    console.log('Job costs:', { 
+      laborCost: job.laborCost, 
+      materialsCost: job.materialsCost, 
+      equipmentCost: job.equipmentCost 
+    });
     
-    // Create a completion data object
-    const data = {
-      taskType: 'create_invoice',
-      invoiceCreated: true,
-      notes: 'Invoice created and submitted for approval',
-      timestamp: new Date()
-    };
-    
-    completeTask(data);
+    // Refresh the job data to ensure we have the latest
+    refreshJobData()
+      .then(() => {
+        // Create the invoice with the refreshed job data
+        const data = {
+          timestamp: new Date(),
+          taskType: 'create_invoice'
+        };
+        
+        completeTask(data);
+      })
+      .catch(err => {
+        console.error('Error refreshing job data before invoice creation:', err);
+        
+        // Proceed with invoice creation using existing job data
+        const data = {
+          timestamp: new Date(),
+          taskType: 'create_invoice'
+        };
+        
+        completeTask(data);
+      });
+  }
+  
+  // Function to refresh job data
+  async function refreshJobData() {
+    try {
+      console.log('Refreshing job data for ID:', job.id);
+      const refreshedJob = await getJobById(job.id);
+      if (refreshedJob) {
+        job = refreshedJob;
+        console.log('Job refreshed, line items:', job.lineItems);
+        return job;
+      }
+    } catch (err) {
+      console.error('Error refreshing job data:', err);
+      throw err;
+    }
   }
   
   // Handle invoice review/approval
@@ -1021,6 +1061,20 @@
               on:cancel={closeModal}
             />
           {:else if task.id === 'create_invoice'}
+            {#if !job.lineItems || !job.lineItems.length}
+              <div class="bg-yellow-50 p-4 rounded-md border border-yellow-200 mb-4">
+                <p class="text-yellow-700">No line items found. You might need to refresh the job data to get the latest information.</p>
+              </div>
+              
+              <button 
+                type="button"
+                class="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md mb-4"
+                on:click={refreshJobData}
+              >
+                Refresh Job Data
+              </button>
+            {/if}
+            
             <InvoicePreview
               job={job}
               mode="create"
