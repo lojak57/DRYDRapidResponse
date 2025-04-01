@@ -24,7 +24,23 @@
     // Log loaded jobs
     console.log('Dashboard mounted, jobs length:', $jobs?.length);
     if ($jobs?.length) {
-      console.log('Job statuses:', $jobs.map(j => j.status));
+      // Log specific job status values to debug
+      const statusCounts = {};
+      $jobs.forEach(job => {
+        statusCounts[job.status] = (statusCounts[job.status] || 0) + 1;
+      });
+      console.log('Job status counts:', statusCounts);
+      
+      // Log the expected JobStatus enum values
+      console.log('JobStatus enum values:', Object.values(JobStatus));
+      
+      // Check the first few jobs with their full status info
+      console.log('Sample jobs with status details:', $jobs.slice(0, 3).map(j => ({
+        id: j.id,
+        title: j.title,
+        status: j.status,
+        statusMatches: Object.values(JobStatus).includes(j.status)
+      })));
     }
   });
   
@@ -36,7 +52,22 @@
   // Safely filter jobs by checking for nulls/undefined
   function safeFilter(jobArray: Job[] | null | undefined, statusCheck: JobStatus): Job[] {
     if (!jobArray || !Array.isArray(jobArray)) return [];
-    return jobArray.filter(job => job && job.status === statusCheck);
+    
+    // Debug job status values 
+    if (statusCheck === JobStatus.NEW && !jobArray.some(job => job.status === statusCheck)) {
+      console.log('No jobs matching status:', statusCheck);
+      console.log('Available job statuses:', [...new Set(jobArray.map(j => j.status))]);
+    }
+    
+    // The issue might be that the job type field in the JSON is "jobType" instead of "type"
+    // And similarly, "siteAddress" instead of "location"
+    const result = jobArray.filter(job => {
+      if (!job) return false;
+      return job.status === statusCheck;
+    });
+    
+    console.log(`Found ${result.length} jobs with status ${statusCheck}`);
+    return result;
   }
   
   // Filter jobs for each category with added safety checks
