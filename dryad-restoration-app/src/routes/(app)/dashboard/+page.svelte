@@ -128,7 +128,8 @@
       headerClass: "card-header-burgundy-4",
       buttonClass: "btn-burgundy-4",
       status: JobStatus.PENDING_COMPLETION,
-      priority: 5
+      priority: 5,
+      shortTitle: "Pending"
     },
     {
       title: "Completed",
@@ -150,7 +151,8 @@
       headerClass: "card-header-burgundy-5",
       buttonClass: "btn-burgundy-5",
       status: JobStatus.INVOICE_APPROVAL,
-      priority: 7
+      priority: 7,
+      shortTitle: "Invoices"
     },
     {
       title: "Invoiced",
@@ -247,6 +249,7 @@
     flex-grow: 1;
     display: flex;
     flex-direction: column;
+    min-height: 150px;
   }
   
   .action-link {
@@ -257,6 +260,7 @@
     padding: 0.5rem 0.75rem;
     border-radius: 0.375rem;
     margin-top: auto;
+    min-width: 110px;
   }
   
   .action-link:hover {
@@ -328,10 +332,10 @@
                   
                   <a 
                     href="/jobs?status={category.status}" 
-                    class="action-link btn-burgundy text-sm mt-auto self-start"
+                    class="action-link btn-teal text-sm mt-auto self-start"
                   >
-                    View all {category.title.toLowerCase()}
-                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    View all {category.shortTitle || category.title.toLowerCase()}
+                    <svg class="w-3 h-3 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                     </svg>
                   </a>
