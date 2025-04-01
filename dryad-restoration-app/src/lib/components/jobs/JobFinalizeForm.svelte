@@ -148,6 +148,9 @@
   function addAllQuoteItems() {
     if (quoteLineItems.length === 0) return;
     
+    // First check all the boxes by setting selectedQuoteItems to include all items
+    selectedQuoteItems = [...quoteLineItems];
+    
     // Convert all quote items to custom line items
     const newCustomItems = quoteLineItems.map(quoteItem => ({
       id: nanoid(6),
@@ -179,7 +182,7 @@
   }
 </script>
 
-<form on:submit|preventDefault={handleSubmit} class="space-y-6">
+<form on:submit|preventDefault={handleSubmit} class="space-y-6 max-h-[80vh] overflow-y-auto pr-2">
   <div>
     <h3 class="text-lg font-medium text-gray-900 mb-3">Job Cost Summary</h3>
     <p class="text-gray-500 mb-4">Please review and finalize the job costs. This information will be used for invoicing.</p>
@@ -200,7 +203,7 @@
           {#if quoteLineItems.length > 0}
             <div class="mt-3">
               <h5 class="text-sm font-medium text-blue-800 mb-2">Import Line Items from Quote</h5>
-              <div class="max-h-60 overflow-y-auto bg-white rounded border border-blue-200 p-2">
+              <div class="max-h-40 overflow-y-auto bg-white rounded border border-blue-200 p-2">
                 {#each quoteLineItems as item (item.id)}
                   <div class="flex items-center space-x-2 py-1 border-b border-blue-100 last:border-0">
                     <input 
