@@ -6,6 +6,7 @@
   import { getCustomerById } from '$lib/services/customers';
   import { getUserById } from '$lib/services/users';
   import { onMount } from 'svelte';
+  import Logo from '$lib/components/common/Logo.svelte';
   
   // Re-define CustomLineItem type since we can't import it directly from JobFinalizeForm
   interface CustomLineItem {
@@ -144,8 +145,8 @@
     <!-- Invoice Header with Logo -->
     <div class="flex justify-between items-start">
       <div class="flex-1">
-        <div class="h-14 w-48 bg-dryd-blue text-white flex items-center justify-center rounded-lg shadow-md mb-2">
-          <span class="text-2xl font-bold tracking-wider">DRYAD RESTORATION</span>
+        <div class="mb-2">
+          <Logo size="lg" linkToDashboard={false} />
         </div>
         <p class="text-gray-600 text-sm">Professional Water & Fire Restoration Services</p>
         <p class="text-gray-600 text-sm">123 Main Street, Suite 101</p>
