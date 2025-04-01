@@ -1,32 +1,68 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { jobStore } from '$lib/stores/jobStore';
+  import { jobStore, isLoading, error } from '$lib/stores/jobStore';
   import JobList from '$lib/components/jobs/JobList.svelte';
   import Button from '$lib/components/ui/Button.svelte';
   import PageHeader from '$lib/components/ui/PageHeader.svelte';
   import { goto } from '$app/navigation';
+  import JobHeaderNav from '$lib/components/jobs/JobHeaderNav.svelte';
+  import { JobStatus, type Job, type JobType } from '$lib/types/Job';
   
   let searchQuery = '';
-  let statusFilter = 'ALL';
+  let statusFilter: JobStatus | 'ALL' = 'ALL';
   let searchTimeout: ReturnType<typeof setTimeout>;
   
-  $: filteredJobs = filterJobs($jobStore.jobs, searchQuery);
+  // Apply filters to the jobs from the store
+  $: filteredJobs = applyFilters($jobStore, searchQuery, statusFilter);
   
-  function filterJobs(jobs: any[], query: string) {
-    if (!query.trim()) return jobs;
+  // Count jobs by status
+  $: jobCountsByStatus = getJobCountsByStatus($jobStore || []);
+  
+  function getJobCountsByStatus(jobs: Job[]): Record<string, number> {
+    const counts: Record<string, number> = { ALL: jobs.length };
     
-    const searchTerms = query.toLowerCase().split(' ');
-    return jobs.filter(job => {
-      const searchableText = [
-        job.jobNumber,
-        job.description || '',
-        job.status,
-        job.jobType || ''
-      ].join(' ').toLowerCase();
-      
-      // Check if all search terms are found in the searchable text
-      return searchTerms.every(term => searchableText.includes(term));
+    // Initialize counts for each status
+    Object.values(JobStatus).forEach(status => {
+      counts[status] = 0;
     });
+    
+    // Count jobs by status
+    jobs.forEach(job => {
+      if (job.status) {
+        counts[job.status] = (counts[job.status] || 0) + 1;
+      }
+    });
+    
+    return counts;
+  }
+  
+  function applyFilters(jobs: Job[], query: string, status: JobStatus | 'ALL'): Job[] {
+    if (!jobs) return [];
+    
+    // First filter by status if specified
+    let result = jobs;
+    if (status !== 'ALL') {
+      result = result.filter(job => job.status === status);
+    }
+    
+    // Then apply search if query exists
+    if (query.trim()) {
+      const searchTerms = query.toLowerCase().split(' ');
+      result = result.filter(job => {
+        const searchableText = [
+          job.jobNumber || '',
+          job.title || '',
+          job.description || '',
+          job.status || '',
+          job.type?.toString() || ''
+        ].join(' ').toLowerCase();
+        
+        // Check if all search terms are found in the searchable text
+        return searchTerms.every(term => searchableText.includes(term));
+      });
+    }
+    
+    return result;
   }
   
   function handleSearch(e: Event) {
@@ -37,14 +73,25 @@
     }, 300);
   }
   
+  function handleStatusFilterChange(event: CustomEvent<{status: JobStatus | 'ALL'}>) {
+    statusFilter = event.detail.status;
+  }
+  
   function createNewQuote() {
     goto('/quotes/new');
   }
   
   onMount(() => {
-    jobStore.fetchJobs();
+    // Call loadJobs from the jobStore to fetch the jobs
+    jobStore.loadJobs();
   });
 </script>
+
+<JobHeaderNav 
+  selectedStatus={statusFilter}
+  countsMap={jobCountsByStatus}
+  on:filterChange={handleStatusFilterChange}
+/>
 
 <PageHeader title="Jobs">
   <svelte:fragment slot="actions">
@@ -70,29 +117,12 @@
         on:input={handleSearch}
       />
     </div>
-    
-    <!-- Status Filter -->
-    <div class="w-full sm:w-auto">
-      <select 
-        bind:value={statusFilter}
-        class="block w-full p-2.5 text-sm text-gray-900 border border-gray-300 rounded-lg bg-white focus:ring-primary-500 focus:border-primary-500"
-      >
-        <option value="ALL">All Statuses</option>
-        <option value="NEW">New</option>
-        <option value="SCHEDULED">Scheduled</option>
-        <option value="IN_PROGRESS">In Progress</option>
-        <option value="PENDING_COMPLETION">Pending Completion</option>
-        <option value="ON_HOLD">On Hold</option>
-        <option value="COMPLETED">Completed</option>
-        <option value="CANCELLED">Cancelled</option>
-      </select>
-    </div>
   </div>
   
   <JobList 
     jobs={filteredJobs} 
-    loading={$jobStore.loading} 
-    error={$jobStore.error}
+    loading={$isLoading} 
+    error={$error}
     filterStatus={statusFilter}
     emptyStateMessage={searchQuery ? "No jobs match your search" : "No jobs found"}
   />
