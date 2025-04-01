@@ -26,8 +26,8 @@
         if (browser) {
             console.log('Layout mounted, checking background image...');
             
-            // Set the absolute URL for the background image based on current window location
-            absoluteBackgroundUrl = new URL(backgroundImage, window.location.origin).href;
+            // Fix the URL construction - make sure to use the full pathname
+            absoluteBackgroundUrl = window.location.origin + backgroundImage;
             console.log('Using background image URL:', absoluteBackgroundUrl);
             
             // Test if the image loads
@@ -76,9 +76,10 @@
 
 <div class="app">
     {#if loaded}
+        <!-- Directly set the background image style property -->
         <div 
             class="background-container"
-            style="background-image: url('{backgroundLoaded ? absoluteBackgroundUrl : ''}');"
+            style="background-image: url('{backgroundImage}');"
         ></div>
         
         <!-- Overlay with reduced opacity for better visibility -->
