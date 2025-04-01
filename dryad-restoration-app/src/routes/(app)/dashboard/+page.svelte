@@ -250,7 +250,7 @@
     </div>
   {:else if $currentUser}
     <!-- Dashboard Header with Prominent Logo -->
-    <div class="mb-8 text-center md:text-left">
+    <div style="margin-bottom: 2rem;" class="text-center md:text-left">
       <div class="flex flex-col md:flex-row items-center justify-between mb-6">
         <div class="mb-4 md:mb-0">
           <Logo size="xxl" linkToDashboard={false} showText={false} logoSrc="/dryd-logo-secondary.PNG" />
@@ -276,7 +276,7 @@
         <h1 class="text-3xl font-extrabold text-gray-800 mb-6">Company Dashboard</h1>
         
         <!-- Key Performance Metrics -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div style="margin-bottom: 2rem;" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {#each sortedCategories as category, i}
             <div class="card-enter {animated ? 'animated' : ''}" style="transition-delay: {i * 75}ms">
               <div class="dashboard-card bg-gradient-to-br {category.bgColors} border border-{category.borderColor} p-5 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 relative">
@@ -320,7 +320,7 @@
 
     <!-- Quotes Section - Only visible to Admin/Office -->
     {#if $currentUser && ($currentUser.role === Role.ADMIN || $currentUser.role === Role.OFFICE)}
-      <div class="dashboard-section mb-6">
+      <div style="margin-bottom: 1.5rem;" class="dashboard-section">
         <div class="dashboard-section-header">
           <h2 class="font-bold text-xl flex items-center">
             <div class="dashboard-header-icon">
@@ -370,14 +370,14 @@
 
     <!-- Admin Controls - Only visible to Admin -->
     {#if isAdmin}
-      <div class="mb-6">
+      <div style="margin-bottom: 1.5rem;">
         <AdminControlsWidget />
       </div>
     {/if}
 
     <!-- Pending Completion Jobs - Only visible to Admin/Office -->
     {#if isAuthorized && pendingCompletionJobs && pendingCompletionJobs.length > 0}
-      <div class="dashboard-section mb-6">
+      <div style="margin-bottom: 1.5rem;" class="dashboard-section">
         <div class="dashboard-section-header" style="background: linear-gradient(to right, #55a630, #80b918);">
           <h2 class="font-bold text-xl flex items-center">
             <svg class="w-6 h-6 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -412,7 +412,7 @@
 
     <!-- Paid & Closed Jobs Section -->
     {#if isAuthorized && paidJobs && paidJobs.length > 0}
-      <div class="dashboard-section mb-6">
+      <div style="margin-bottom: 1.5rem;" class="dashboard-section">
         <div class="dashboard-section-header" style="background: linear-gradient(to right, #2a9d8f, #40916c);">
           <h2 class="font-bold text-xl flex items-center">
             <svg class="w-6 h-6 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -452,7 +452,7 @@
     {/if}
 
     <!-- Jobs Section -->
-    <div class="dashboard-section mb-6">
+    <div style="margin-bottom: 1.5rem;" class="dashboard-section">
       <div class="dashboard-section-header">
         <h2 class="font-bold text-xl flex items-center">
           <div class="dashboard-header-icon">
