@@ -14,6 +14,31 @@
   // Animation variables
   let animated = false;
   
+  // Job status filter
+  let selectedStatusFilter: string | null = null;
+  
+  // Function to reset the filter
+  function resetFilter() {
+    selectedStatusFilter = null;
+  }
+  
+  // Function to set the filter
+  function setStatusFilter(status: string) {
+    selectedStatusFilter = status === selectedStatusFilter ? null : status;
+  }
+  
+  // Get filtered dashboard jobs
+  $: filteredDashboardJobs = selectedStatusFilter 
+    ? $dashboardJobs.filter(job => job.status === selectedStatusFilter)
+    : $dashboardJobs;
+  
+  // Track available statuses (statuses that have jobs)
+  $: availableStatuses = $jobs 
+    ? Object.values(JobStatus)
+        .filter(status => status !== JobStatus.CANCELLED)
+        .filter(status => $jobs.some(job => job.status === status))
+    : [];
+  
   onMount(() => {
     // Trigger animations after component mounts
     setTimeout(() => {
@@ -499,24 +524,32 @@
             </div>
             <span class="font-bold text-xl">Job Filter</span>
           </div>
-          <a href="/jobs" class="btn-light-blue text-sm px-4 py-2 rounded-lg font-medium shadow-sm transition-all duration-200 hover:shadow hover:scale-105">View All</a>
+          <div class="flex items-center space-x-2">
+            {#if selectedStatusFilter}
+              <button 
+                on:click={resetFilter}
+                class="bg-white/10 border-white text-white text-sm px-3 py-1 rounded-lg font-medium transition-all duration-200 hover:bg-white/20"
+              >
+                Show All
+              </button>
+            {/if}
+            <a href="/jobs" class="btn-light-blue text-sm px-4 py-2 rounded-lg font-medium shadow-sm transition-all duration-200 hover:shadow hover:scale-105">View All Jobs</a>
+          </div>
         </div>
         
         <!-- Job Status Filter -->
         <div class="mt-4 flex overflow-x-auto pb-2 scrollbar-hide">
           <div class="flex space-x-2">
-            {#each Object.values(JobStatus) as status}
-              {#if status !== JobStatus.CANCELLED}
-                <button 
-                  class="whitespace-nowrap px-4 py-2 rounded-lg text-sm font-medium border-2 transition-colors duration-150
-                  {$dashboardJobs && $dashboardJobs.some(job => job.status === status) 
-                    ? 'bg-white/10 border-white text-white hover:bg-white/20' 
-                    : 'bg-white/5 border-white/20 text-white/70 hover:bg-white/10 hover:border-white/40'}"
-                  on:click={() => goto(`/jobs?status=${status}`)}
-                >
-                  {status.replace(/_/g, ' ')}
-                </button>
-              {/if}
+            {#each availableStatuses as status}
+              <button 
+                class="whitespace-nowrap px-4 py-2 rounded-lg text-sm font-medium border-2 transition-colors duration-150
+                {selectedStatusFilter === status 
+                  ? 'bg-white/20 border-white text-white' 
+                  : 'bg-white/5 border-white/20 text-white/70 hover:bg-white/10 hover:border-white/40'}"
+                on:click={() => setStatusFilter(status)}
+              >
+                {status.replace(/_/g, ' ')}
+              </button>
             {/each}
           </div>
         </div>
@@ -531,16 +564,24 @@
           <div class="bg-red-50/90 p-6 rounded-lg border border-red-200 mb-4">
             <p class="text-red-700">{$error}</p>
           </div>
-        {:else if !$dashboardJobs || $dashboardJobs.length === 0}
+        {:else if !filteredDashboardJobs || filteredDashboardJobs.length === 0}
           <div class="bg-gray-50/90 p-8 text-center rounded-lg border border-gray-200">
-            {#if isTechnician}
+            {#if selectedStatusFilter}
+              <p class="text-gray-600">No jobs found with status "{selectedStatusFilter.replace(/_/g, ' ')}".</p>
+              <button 
+                on:click={resetFilter}
+                class="mt-4 text-blue-600 hover:text-blue-800 font-medium"
+              >
+                Show all jobs
+              </button>
+            {:else if isTechnician}
               <p class="text-gray-600">You don't have any jobs assigned to you yet.</p>
             {:else}
               <p class="text-gray-600">No active jobs found.</p>
             {/if}
           </div>
         {:else}
-          <JobList jobs={$dashboardJobs} />
+          <JobList jobs={filteredDashboardJobs} />
         {/if}
       </div>
     </div>
