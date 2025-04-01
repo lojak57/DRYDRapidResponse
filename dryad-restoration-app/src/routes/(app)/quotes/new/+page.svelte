@@ -1053,6 +1053,9 @@
   let selectedEquipmentCategory = '';
   let selectedEquipmentType = '';
   
+  // Initialize typedEquipmentCategories from EQUIPMENT_CATEGORIES
+  const typedEquipmentCategories = EQUIPMENT_CATEGORIES as Record<string, string[]>;
+  
   // Add these functions in the script section
   function formatEquipmentCategory(category: string): string {
     return category.replace(/_/g, ' ').split(' ').map(word => 
