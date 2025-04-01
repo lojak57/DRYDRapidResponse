@@ -2058,6 +2058,104 @@
                       </div>
                     </div>
                   </div>
+                {:else if lineItemWizard.category === 'Disposal'}
+                  <!-- Disposal section content -->
+                  <div class="border-t border-blue-200 pt-4">
+                    <div class="mb-4">
+                      <label class="block text-sm font-medium text-gray-700 mb-1">Disposal Type</label>
+                      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {#each [
+                          { title: 'Dumpster Rental', unit: 'unit', unitPrice: 425, description: '10-yard dumpster (1 week)' },
+                          { title: 'Dumpster Rental - Large', unit: 'unit', unitPrice: 575, description: '20-yard dumpster (1 week)' },
+                          { title: 'Hazardous Material', unit: 'load', unitPrice: 650, description: 'Properly disposed hazardous waste' },
+                          { title: 'Construction Debris', unit: 'load', unitPrice: 295, description: 'Non-hazardous construction waste' },
+                          { title: 'Water Removal', unit: 'load', unitPrice: 175, description: 'Contaminated water disposal' },
+                          { title: 'Electronics', unit: 'load', unitPrice: 225, description: 'Electronic waste disposal' },
+                          { title: 'Mold Materials', unit: 'load', unitPrice: 475, description: 'Mold-contaminated materials' },
+                          { title: 'Dump Fee', unit: 'trip', unitPrice: 150, description: 'Standard landfill dumping fee' }
+                        ] as disposal}
+                          <button 
+                            type="button"
+                            class="p-3 border rounded text-left text-sm transition-all {lineItemWizard.description.includes(disposal.title) ? 'bg-blue-100 border-blue-400 shadow-sm' : 'border-gray-300 hover:bg-gray-50'}"
+                            on:click={() => {
+                              lineItemWizard.description = `${disposal.title} - ${disposal.description}`;
+                              lineItemWizard.unitPrice = disposal.unitPrice;
+                              lineItemWizard.internalCost = Math.round(disposal.unitPrice * 0.7 * 100) / 100;
+                            }}
+                          >
+                            <div class="font-medium">{disposal.title}</div>
+                            <div class="flex justify-between text-xs mt-1">
+                              <span class="text-gray-600">{disposal.description}</span>
+                              <span class="font-medium text-blue-700">${disposal.unitPrice}/{disposal.unit}</span>
+                            </div>
+                          </button>
+                        {/each}
+                      </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+                        <input 
+                          type="number"
+                          bind:value={lineItemWizard.quantity}
+                          min="1"
+                          class="w-full p-2 border border-gray-300 rounded-lg"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Unit Price ($)</label>
+                        <div class="relative">
+                          <span class="absolute inset-y-0 left-0 flex items-center pl-2 pointer-events-none text-gray-500 text-sm">$</span>
+                          <input 
+                            type="number"
+                            bind:value={lineItemWizard.unitPrice}
+                            min="0"
+                            step="0.01"
+                            class="w-full p-2 pl-6 border border-gray-300 rounded-lg"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {#if $currentUser?.role === 'ADMIN' || $currentUser?.role === 'OFFICE'}
+                      <div class="mt-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Internal Cost ($)</label>
+                        <div class="relative">
+                          <span class="absolute inset-y-0 left-0 flex items-center pl-2 pointer-events-none text-gray-500 text-sm">$</span>
+                          <input 
+                            type="number"
+                            bind:value={lineItemWizard.internalCost}
+                            min="0"
+                            step="0.01"
+                            class="w-full p-2 pl-6 border border-gray-300 rounded-lg"
+                          />
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">Default cost is 70% of the disposal fee (30% markup)</p>
+                      </div>
+                    {/if}
+                    
+                    <div class="mt-4">
+                      <label class="block text-sm font-medium text-gray-700 mb-1">Additional Details</label>
+                      <textarea 
+                        bind:value={lineItemWizard.description}
+                        rows="2"
+                        placeholder="Additional details about the disposal (location, restrictions, etc.)"
+                        class="w-full p-2 border border-gray-300 rounded-lg"
+                      ></textarea>
+                    </div>
+                    
+                    <div class="p-3 bg-gray-50 rounded-lg border border-gray-200 mt-4 mb-4">
+                      <div class="flex justify-between items-center">
+                        <span class="font-medium text-gray-700">Summary</span>
+                        <span class="font-bold text-dryd-blue">{formatCurrency(lineItemWizard.unitPrice * lineItemWizard.quantity)}</span>
+                      </div>
+                      <div class="text-sm text-gray-600 mt-1">
+                        {lineItemWizard.description || 'Disposal Fee'} - {lineItemWizard.quantity} × ${lineItemWizard.unitPrice}
+                      </div>
+                    </div>
+                  </div>
                 {:else if lineItemWizard.category === 'Supplies'}
                   <!-- Supplies section content -->
                   <div class="border-t border-blue-200 pt-4">
