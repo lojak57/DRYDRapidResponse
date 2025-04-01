@@ -25,21 +25,27 @@
   $: isTechnician = $currentUser?.role === Role.TECH;
   $: isAdmin = $currentUser?.role === Role.ADMIN;
   
-  // Filter jobs for each category
-  $: newJobs = $jobs.filter(job => job.status === JobStatus.NEW);
-  $: scheduledJobs = $jobs.filter(job => job.status === JobStatus.SCHEDULED);
-  $: inProgressJobs = $jobs.filter(job => job.status === JobStatus.IN_PROGRESS);
-  $: onHoldJobs = $jobs.filter(job => job.status === JobStatus.ON_HOLD);
-  $: pendingCompletionJobs = $jobs.filter(job => job.status === JobStatus.PENDING_COMPLETION);
-  $: completedJobs = $jobs.filter(job => job.status === JobStatus.COMPLETED);
-  $: invoiceApprovalJobs = $jobs.filter(job => job.status === JobStatus.INVOICE_APPROVAL);
-  $: invoicedJobs = $jobs.filter(job => job.status === JobStatus.INVOICED);
-  $: paidJobs = $jobs.filter(job => job.status === JobStatus.PAID);
-  $: cancelledJobs = $jobs.filter(job => job.status === JobStatus.CANCELLED);
+  // Safely filter jobs by checking for nulls/undefined
+  function safeFilter(jobArray, statusCheck) {
+    if (!jobArray || !Array.isArray(jobArray)) return [];
+    return jobArray.filter(job => job && job.status === statusCheck);
+  }
   
-  // Calculate performance metrics
-  $: totalActiveJobs = inProgressJobs.length + pendingCompletionJobs.length + scheduledJobs.length;
-  $: totalCompletedJobs = completedJobs.length + invoiceApprovalJobs.length + invoicedJobs.length + paidJobs.length;
+  // Filter jobs for each category with added safety checks
+  $: newJobs = safeFilter($jobs, JobStatus.NEW);
+  $: scheduledJobs = safeFilter($jobs, JobStatus.SCHEDULED);
+  $: inProgressJobs = safeFilter($jobs, JobStatus.IN_PROGRESS);
+  $: onHoldJobs = safeFilter($jobs, JobStatus.ON_HOLD);
+  $: pendingCompletionJobs = safeFilter($jobs, JobStatus.PENDING_COMPLETION);
+  $: completedJobs = safeFilter($jobs, JobStatus.COMPLETED);
+  $: invoiceApprovalJobs = safeFilter($jobs, JobStatus.INVOICE_APPROVAL);
+  $: invoicedJobs = safeFilter($jobs, JobStatus.INVOICED);
+  $: paidJobs = safeFilter($jobs, JobStatus.PAID);
+  $: cancelledJobs = safeFilter($jobs, JobStatus.CANCELLED);
+  
+  // Calculate performance metrics safely
+  $: totalActiveJobs = (inProgressJobs?.length || 0) + (pendingCompletionJobs?.length || 0) + (scheduledJobs?.length || 0);
+  $: totalCompletedJobs = (completedJobs?.length || 0) + (invoiceApprovalJobs?.length || 0) + (invoicedJobs?.length || 0) + (paidJobs?.length || 0);
   
   // Get current date for welcome message
   const today = new Date();
@@ -54,7 +60,7 @@
   const jobCategories = [
     {
       title: "New Jobs",
-      count: newJobs.length,
+      count: newJobs?.length || 0,
       icon: "M12 4v16m8-8H4",
       bgColors: "from-blue-50/90 to-indigo-50/90",
       textColor: "blue",
@@ -64,7 +70,7 @@
     },
     {
       title: "Scheduled",
-      count: scheduledJobs.length,
+      count: scheduledJobs?.length || 0,
       icon: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z",
       bgColors: "from-cyan-50/90 to-sky-50/90",
       textColor: "cyan",
@@ -74,7 +80,7 @@
     },
     {
       title: "In Progress",
-      count: inProgressJobs.length,
+      count: inProgressJobs?.length || 0,
       icon: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z",
       bgColors: "from-green-50/90 to-teal-50/90",
       textColor: "green",
@@ -84,7 +90,7 @@
     },
     {
       title: "On Hold",
-      count: onHoldJobs.length,
+      count: onHoldJobs?.length || 0,
       icon: "M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z",
       bgColors: "from-orange-50/90 to-amber-50/90",
       textColor: "orange",
@@ -94,7 +100,7 @@
     },
     {
       title: "Pending Completion",
-      count: pendingCompletionJobs.length,
+      count: pendingCompletionJobs?.length || 0,
       icon: "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z",
       bgColors: "from-lime-50/90 to-green-50/90",
       textColor: "lime",
@@ -104,7 +110,7 @@
     },
     {
       title: "Completed",
-      count: completedJobs.length,
+      count: completedJobs?.length || 0,
       icon: "M5 13l4 4L19 7",
       bgColors: "from-purple-50/90 to-indigo-50/90",
       textColor: "purple",
@@ -114,7 +120,7 @@
     },
     {
       title: "Invoice Approval",
-      count: invoiceApprovalJobs.length,
+      count: invoiceApprovalJobs?.length || 0,
       icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4",
       bgColors: "from-pink-50/90 to-rose-50/90",
       textColor: "pink",
@@ -124,7 +130,7 @@
     },
     {
       title: "Invoiced",
-      count: invoicedJobs.length,
+      count: invoicedJobs?.length || 0,
       icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01",
       bgColors: "from-amber-50/90 to-yellow-50/90",
       textColor: "amber",
@@ -134,7 +140,7 @@
     },
     {
       title: "Paid",
-      count: paidJobs.length,
+      count: paidJobs?.length || 0,
       icon: "M9 8l3 5m0 0l3-5m-3 5v4m-3-5h6m-6 3h6m6-3a9 9 0 11-18 0 9 9 0 0118 0z",
       bgColors: "from-emerald-50/90 to-green-50/90",
       textColor: "emerald",
@@ -144,19 +150,19 @@
     }
   ];
 
-  // Filter job categories based on user role and what to show
-  $: visibleCategories = isTechnician 
+  // Filter job categories based on user role and what to show with safety checks
+  $: visibleCategories = !$jobs ? [] : isTechnician 
     ? jobCategories.filter(cat => ['In Progress', 'Scheduled', 'Pending Completion'].includes(cat.title))
     : isAuthorized 
       ? jobCategories.filter(cat => cat.count > 0 || ['New Jobs', 'In Progress', 'Pending Completion', 'Invoiced'].includes(cat.title))
       : [];
       
   // Sort categories by priority
-  $: sortedCategories = [...visibleCategories].sort((a, b) => a.priority - b.priority);
+  $: sortedCategories = visibleCategories?.length ? [...visibleCategories].sort((a, b) => a.priority - b.priority) : [];
   
   // Get badge classes based on count
   function getBadgeClasses(count: number): string {
-    if (count === 0) return 'bg-gray-200 text-gray-600';
+    if (!count || count === 0) return 'bg-gray-200 text-gray-600';
     if (count > 5) return 'bg-red-500 text-white animate-pulse';
     if (count > 3) return 'bg-orange-400 text-white';
     return 'bg-blue-500 text-white';
@@ -197,7 +203,22 @@
 </style>
 
 <div class="max-w-6xl mx-auto">
-  {#if $currentUser}
+  {#if $isLoading}
+    <div class="flex justify-center items-center h-64">
+      <p class="text-gray-500">Loading dashboard...</p>
+    </div>
+  {:else if $error}
+    <div class="bg-red-50/90 p-6 rounded-lg border border-red-200 mb-4 card-glass">
+      <h2 class="text-red-700 font-bold text-lg mb-2">Error Loading Dashboard</h2>
+      <p class="text-red-700">{$error}</p>
+      <button 
+        class="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg shadow-md hover:bg-red-700 transition-colors"
+        on:click={() => window.location.reload()}
+      >
+        Reload Page
+      </button>
+    </div>
+  {:else if $currentUser}
     <!-- Dashboard Header with Prominent Logo -->
     <div class="mb-8 text-center md:text-left">
       <div class="flex flex-col md:flex-row items-center justify-between mb-6">
@@ -209,7 +230,7 @@
           <h2 class="text-xl font-bold text-gray-800">Welcome, {$currentUser.firstName}!</h2>
           <p class="text-gray-600 mt-1">
             {#if isTechnician}
-              You have {inProgressJobs.length + scheduledJobs.length} active jobs.
+              You have {inProgressJobs?.length || 0 + scheduledJobs?.length || 0} active jobs.
             {:else}
               There are {totalActiveJobs} active jobs requiring attention.
             {/if}
@@ -327,7 +348,7 @@
     {/if}
 
     <!-- Pending Completion Jobs - Only visible to Admin/Office -->
-    {#if isAuthorized && pendingCompletionJobs.length > 0}
+    {#if isAuthorized && pendingCompletionJobs && pendingCompletionJobs.length > 0}
       <div class="mb-6">
         <div class="card-glass rounded-lg card-shadow overflow-hidden">
           <div class="p-4 bg-blue-100 text-blue-800 border-b border-blue-300">
@@ -345,17 +366,19 @@
             <p class="text-gray-700 mb-4">The following jobs have been marked as ready for completion by technicians and need your review:</p>
             <div class="space-y-3">
               {#each pendingCompletionJobs as job}
-                <a href="/jobs/{job.id}" class="block p-4 bg-blue-50/80 hover:bg-blue-100/90 border border-blue-200 rounded-lg transition-colors duration-150">
-                  <div class="flex justify-between items-center">
-                    <div>
-                      <h3 class="font-semibold text-blue-800">{job.title}</h3>
-                      <p class="text-sm text-blue-600">#{job.jobNumber}</p>
+                {#if job && job.id}
+                  <a href="/jobs/{job.id}" class="block p-4 bg-blue-50/80 hover:bg-blue-100/90 border border-blue-200 rounded-lg transition-colors duration-150">
+                    <div class="flex justify-between items-center">
+                      <div>
+                        <h3 class="font-semibold text-blue-800">{job.title}</h3>
+                        <p class="text-sm text-blue-600">#{job.jobNumber}</p>
+                      </div>
+                      <div class="bg-blue-200 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                        Ready for Review
+                      </div>
                     </div>
-                    <div class="bg-blue-200 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
-                      Ready for Review
-                    </div>
-                  </div>
-                </a>
+                  </a>
+                {/if}
               {/each}
             </div>
           </div>
@@ -364,7 +387,7 @@
     {/if}
 
     <!-- Paid & Closed Jobs Section -->
-    {#if isAuthorized && paidJobs.length > 0}
+    {#if isAuthorized && paidJobs && paidJobs.length > 0}
       <div class="mb-6">
         <div class="card-glass rounded-lg card-shadow overflow-hidden">
           <div class="p-4 bg-green-100 text-green-800 border-b border-green-300">
@@ -382,23 +405,25 @@
             <p class="text-gray-700 mb-4">These jobs have been completed, invoiced, and payment has been received:</p>
             <div class="space-y-3">
               {#each paidJobs as job}
-                <a href="/jobs/{job.id}" class="block p-4 bg-green-50/80 hover:bg-green-100/90 border border-green-200 rounded-lg transition-colors duration-150">
-                  <div class="flex justify-between items-center">
-                    <div>
-                      <h3 class="font-semibold text-green-800">{job.title}</h3>
-                      <p class="text-sm text-green-600">#{job.jobNumber}</p>
+                {#if job && job.id}
+                  <a href="/jobs/{job.id}" class="block p-4 bg-green-50/80 hover:bg-green-100/90 border border-green-200 rounded-lg transition-colors duration-150">
+                    <div class="flex justify-between items-center">
+                      <div>
+                        <h3 class="font-semibold text-green-800">{job.title}</h3>
+                        <p class="text-sm text-green-600">#{job.jobNumber}</p>
+                      </div>
+                      <div class="bg-green-200 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
+                        Paid
+                      </div>
                     </div>
-                    <div class="bg-green-200 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
-                      Paid
-                    </div>
-                  </div>
-                  {#if job.payment}
-                    <div class="mt-2 text-sm text-green-700">
-                      <span class="font-medium">Paid:</span> ${job.payment.amount.toFixed(2)} via {job.payment.method} 
-                      on {new Date(job.payment.date).toLocaleDateString()}
-                    </div>
-                  {/if}
-                </a>
+                    {#if job.payment}
+                      <div class="mt-2 text-sm text-green-700">
+                        <span class="font-medium">Paid:</span> ${job.payment.amount.toFixed(2)} via {job.payment.method} 
+                        on {new Date(job.payment.date).toLocaleDateString()}
+                      </div>
+                    {/if}
+                  </a>
+                {/if}
               {/each}
             </div>
           </div>
@@ -431,7 +456,7 @@
           <div class="bg-red-50/90 p-6 rounded-lg border border-red-200 mb-4">
             <p class="text-red-700">{$error}</p>
           </div>
-        {:else if $dashboardJobs.length === 0}
+        {:else if !$dashboardJobs || $dashboardJobs.length === 0}
           <div class="bg-gray-50/90 p-8 text-center rounded-lg border border-gray-200">
             {#if isTechnician}
               <p class="text-gray-600">You don't have any jobs assigned to you yet.</p>
