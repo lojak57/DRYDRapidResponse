@@ -11,12 +11,6 @@
   import type { Customer } from '$lib/types/Customer';
   import { createQuote } from '$lib/services/quotes';
   import { addNotification } from '$lib/stores/notificationStore';
-  import { 
-    EQUIPMENT_DAILY_RATES, 
-    EQUIPMENT_DESCRIPTIONS, 
-    EQUIPMENT_CATEGORIES 
-  } from '$lib/config/equipmentRates';
-  import { EquipmentType } from '$lib/types/Equipment';
   
   // Step tracking for multi-step form
   let currentStep = 1;
@@ -223,6 +217,9 @@
     state: '',
     zip: '',
   };
+  let lineItems = [
+    { id: crypto.randomUUID(), description: '', quantity: 1, unitPrice: 0, total: 0, isEstimate: false, category: '' }
+  ];
   
   // Track if site address was manually edited
   let siteAddressManuallyEdited = {
@@ -939,26 +936,24 @@
   // For tracking line item wizard state
   let showLineItemWizard = false;
   let lineItemWizard = {
+    category: '',
     description: '',
     quantity: 1,
     unitPrice: 0,
     internalCost: 0,
-    isEstimate: false,
-    category: ''
+    isEstimate: false
   };
   
   // Reset line item wizard
   function resetLineItemWizard() {
     lineItemWizard = {
+      category: '',
       description: '',
       quantity: 1,
       unitPrice: 0,
       internalCost: 0,
-      isEstimate: false,
-      category: ''
+      isEstimate: false
     };
-    selectedEquipmentCategory = '';
-    selectedEquipmentType = '';
   }
   
   // Set labor rate preset
@@ -1048,92 +1043,6 @@
     { label: 'Medium', desc: 'Multiple rooms' },
     { label: 'Large', desc: 'Entire property' }
   ];
-
-  // Add these variables in the script section
-  let selectedEquipmentCategory = '';
-  let selectedEquipmentType = '';
-  
-  // Add these functions in the script section
-  function formatEquipmentCategory(category: string): string {
-    return category.replace(/_/g, ' ').split(' ').map(word => 
-      word.charAt(0) + word.slice(1).toLowerCase()
-    ).join(' ');
-  }
-  
-  function formatEquipmentType(type: string): string {
-    return type.split('_').map(word => 
-      word.charAt(0) + word.slice(1).toLowerCase()
-    ).join(' ');
-  }
-  
-  function setEquipmentType(equipType: string) {
-    selectedEquipmentType = equipType;
-    lineItemWizard.description = `${formatEquipmentType(equipType)} - ${EQUIPMENT_DESCRIPTIONS[equipType]}`;
-    lineItemWizard.unitPrice = EQUIPMENT_DAILY_RATES[equipType];
-    lineItemWizard.internalCost = Math.round(EQUIPMENT_DAILY_RATES[equipType] * 0.6 * 100) / 100;
-  }
-  
-  // Define the LineItem interface to include internalCost property
-  interface LineItem {
-    id: `${string}-${string}-${string}-${string}-${string}`;
-    description: string;
-    quantity: number;
-    unitPrice: number;
-    internalCost?: number;
-    total: number;
-    isEstimate: boolean;
-    category: string;
-  }
-  
-  // Update the lineItems declaration
-  let lineItems: LineItem[] = [
-    { 
-      id: crypto.randomUUID(), 
-      description: '', 
-      quantity: 1, 
-      unitPrice: 0, 
-      internalCost: 0,
-      total: 0, 
-      isEstimate: false, 
-      category: '' 
-    }
-  ];
-  
-  // Update setEquipmentType function to properly cast selectedEquipmentCategory
-  function setEquipmentType(equipType: string) {
-    selectedEquipmentType = equipType;
-    lineItemWizard.description = `${formatEquipmentType(equipType)} - ${EQUIPMENT_DESCRIPTIONS[equipType]}`;
-    lineItemWizard.unitPrice = EQUIPMENT_DAILY_RATES[equipType];
-    lineItemWizard.internalCost = Math.round(EQUIPMENT_DAILY_RATES[equipType] * 0.6 * 100) / 100;
-  }
-  
-  // Updated lineItemWizard object with internalCost property
-  let lineItemWizard = {
-    description: '',
-    quantity: 1,
-    unitPrice: 0,
-    internalCost: 0,
-    isEstimate: false,
-    category: ''
-  };
-  
-  // Update resetLineItemWizard to include internalCost
-  function resetLineItemWizard() {
-    lineItemWizard = {
-      description: '',
-      quantity: 1,
-      unitPrice: 0,
-      internalCost: 0,
-      isEstimate: false,
-      category: ''
-    };
-    selectedEquipmentCategory = '';
-    selectedEquipmentType = '';
-  }
-  
-  // Update the EQUIPMENT_CATEGORIES mapping in the Equipment component's code block
-  // Type assertion for EQUIPMENT_CATEGORIES
-  const typedEquipmentCategories = EQUIPMENT_CATEGORIES as Record<string, string[]>;
 </script>
 
 <div class="container mx-auto px-4 py-8">
@@ -1802,100 +1711,6 @@
                       {/if}
                     </div>
                   </div>
-                {:else if lineItemWizard.category === 'Equipment'}
-                  <!-- Equipment section content -->
-                  <div class="border-t border-blue-200 pt-4">
-                    <div class="mb-4">
-                      <label class="block text-sm font-medium text-gray-700 mb-1">Equipment Type</label>
-                      <div class="grid grid-cols-1 gap-2">
-                        <select 
-                          bind:value={selectedEquipmentCategory}
-                          class="w-full p-2 border border-gray-300 rounded-lg"
-                        >
-                          <option value="">-- Select Equipment Category --</option>
-                          {#each Object.keys(typedEquipmentCategories) as category}
-                            <option value={category}>{formatEquipmentCategory(category)}</option>
-                          {/each}
-                        </select>
-                        
-                        {#if selectedEquipmentCategory}
-                          <div class="mt-2">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                              {#each typedEquipmentCategories[selectedEquipmentCategory] as equipType}
-                                <button 
-                                  type="button"
-                                  class="p-2 border rounded text-left text-sm transition-all {selectedEquipmentType === equipType ? 'bg-blue-100 border-blue-400 shadow-sm' : 'border-gray-300 hover:bg-gray-50'}"
-                                  on:click={() => setEquipmentType(equipType)}
-                                >
-                                  <div class="font-medium">{formatEquipmentType(equipType)}</div>
-                                  <div class="flex justify-between text-xs">
-                                    <span class="text-gray-600">{EQUIPMENT_DESCRIPTIONS[equipType]}</span>
-                                    <span class="font-medium text-blue-700">${EQUIPMENT_DAILY_RATES[equipType]}/day</span>
-                                  </div>
-                                </button>
-                              {/each}
-                            </div>
-                          </div>
-                        {/if}
-                      </div>
-                    </div>
-                    
-                    <div class="mb-4">
-                      <label class="block text-sm font-medium text-gray-700 mb-1">Rental Duration (Days)</label>
-                      <div class="flex items-center">
-                        <input 
-                          type="number"
-                          bind:value={lineItemWizard.quantity}
-                          min="1"
-                          class="w-24 p-2 border border-gray-300 rounded-lg text-center"
-                        />
-                        <span class="ml-2 text-sm text-gray-600">days</span>
-                      </div>
-                      <div class="flex flex-wrap gap-2 mt-2">
-                        {#each [1, 3, 5, 7, 14, 30] as days}
-                          <button 
-                            type="button"
-                            class="px-2 py-1 text-xs {lineItemWizard.quantity === days ? 'bg-blue-100 text-blue-700 font-medium rounded' : 'text-gray-600 hover:bg-gray-100 rounded'}"
-                            on:click={() => lineItemWizard.quantity = days}
-                          >
-                            {days} {days === 1 ? 'day' : 'days'}
-                          </button>
-                        {/each}
-                      </div>
-                    </div>
-                    
-                    {#if $currentUser?.role === 'ADMIN' || $currentUser?.role === 'OFFICE'}
-                      <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Internal Cost ($)</label>
-                        <div class="relative">
-                          <span class="absolute inset-y-0 left-0 flex items-center pl-2 pointer-events-none text-gray-500 text-sm">$</span>
-                          <input 
-                            type="number"
-                            bind:value={lineItemWizard.internalCost}
-                            min="0"
-                            step="0.01"
-                            class="w-full p-2 pl-6 border border-gray-300 rounded-lg"
-                          />
-                        </div>
-                        <p class="text-xs text-gray-500 mt-1">Default cost is 60% of the rental rate</p>
-                      </div>
-                    {/if}
-                    
-                    <div class="p-3 bg-gray-50 rounded-lg border border-gray-200 mb-4">
-                      <div class="flex justify-between items-center">
-                        <span class="font-medium text-gray-700">Summary</span>
-                        <span class="font-bold text-dryd-blue">{formatCurrency(lineItemWizard.unitPrice * lineItemWizard.quantity)}</span>
-                      </div>
-                      <div class="text-sm text-gray-600 mt-1">
-                        {lineItemWizard.description || 'Equipment rental'} - {lineItemWizard.quantity} {lineItemWizard.quantity === 1 ? 'day' : 'days'} x ${lineItemWizard.unitPrice}/day
-                      </div>
-                    </div>
-                  </div>
-                {:else if lineItemWizard.category === 'Subcontractor'}
-                  <!-- Subcontractor section content -->
-                  <div class="border-t border-blue-200 pt-4">
-                    <!-- ... -->
-                  </div>
                 {:else}
                   <!-- Description for non-labor/materials items -->
                   <div>
@@ -2356,7 +2171,7 @@
       {#if currentStep > 1}
         <button 
           type="button" 
-          class="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-dryd-blue-dark hover:shadow-md transition-all duration-200"
+          class="px-6 py-2.5 bg-white text-dryd-blue border border-dryd-blue rounded-lg hover:bg-gray-50 hover:shadow-sm transition-all duration-200"
           on:click={prevStep}
         >
           <span class="flex items-center">
@@ -2373,7 +2188,7 @@
       {#if currentStep < totalSteps}
         <button 
           type="button" 
-          class="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-dryd-blue-dark hover:shadow-md transition-all duration-200"
+          class="px-6 py-2.5 bg-dryd-blue text-white rounded-lg hover:bg-dryd-blue-dark hover:shadow-md transition-all duration-200"
           on:click={nextStep}
         >
           <span class="flex items-center">
@@ -2386,7 +2201,7 @@
       {:else}
         <button 
           type="submit" 
-          class="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-dryd-blue-dark hover:shadow-md transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed"
+          class="px-6 py-2.5 bg-dryd-blue text-white rounded-lg hover:bg-dryd-blue-dark hover:shadow-md transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed"
           disabled={isSubmitting}
         >
           {#if isSubmitting}
@@ -2407,7 +2222,7 @@
     <!-- New Customer Modal -->
     {#if showNewCustomerForm}
       <div class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-        <div class="bg-gray-100 rounded-lg shadow-xl max-w-2xl w-full max-h-screen overflow-y-auto">
+        <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-screen overflow-y-auto">
           <div class="p-6">
             <div class="flex justify-between items-center mb-4">
               <h2 class="text-xl font-semibold text-gray-800">Create New Customer</h2>

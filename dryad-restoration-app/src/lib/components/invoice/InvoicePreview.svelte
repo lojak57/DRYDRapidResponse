@@ -7,6 +7,8 @@
   import { getUserById } from '$lib/services/users';
   import { onMount } from 'svelte';
   import Logo from '$lib/components/common/Logo.svelte';
+  import { currentUser } from '$lib/stores/authStore';
+  import { Role } from '$lib/types/User';
   
   // Re-define CustomLineItem type since we can't import it directly from JobFinalizeForm
   interface CustomLineItem {
@@ -14,6 +16,7 @@
     description: string;
     quantity: number;
     unitPrice: number;
+    internalCost?: number;
     total: number;
     category: string;
   }
@@ -24,6 +27,7 @@
   export let materialsCost: number = job.materialsCost || 0;
   export let equipmentCost: number = job.equipmentCost || 0;
   export let mode: 'create' | 'review' = 'review';
+  export let showInternalCosts: boolean = false; // New prop to toggle internal cost view
   
   // Create event dispatcher
   const dispatch = createEventDispatcher<{
@@ -52,6 +56,20 @@
   $: taxRate = 0.07; // 7% tax rate
   $: taxAmount = subtotal * taxRate;
   $: total = subtotal + taxAmount;
+  
+  // Calculate profit margin (for admin/internal view)
+  $: totalInternalCost = [
+    ...lineItems.map(item => ({category: item.category, cost: (item.internalCost || 0) * item.quantity})), 
+    {category: 'LABOR', cost: laborCost * 0.65}, // Assuming labor internal cost is 65% of billed
+    {category: 'MATERIALS', cost: materialsCost * 0.80}, // Assuming materials cost is 80% of billed
+    {category: 'EQUIPMENT', cost: equipmentCost * 0.60} // Assuming equipment cost is 60% of billed
+  ].reduce((sum, item) => sum + item.cost, 0);
+  
+  $: profitAmount = subtotal - totalInternalCost;
+  $: profitMarginPercentage = subtotal > 0 ? (profitAmount / subtotal) * 100 : 0;
+  
+  // Track if current user is admin/office for viewing internal costs
+  $: canViewInternalCosts = $currentUser?.role === Role.ADMIN || $currentUser?.role === Role.OFFICE;
   
   // Format date for invoice
   const formatDate = (date: Date | string | undefined): string => {
@@ -142,6 +160,23 @@
       <p class="text-red-700">{error}</p>
     </div>
   {:else}
+    <!-- Internal Cost Toggle (Admin/Office Only) -->
+    {#if canViewInternalCosts}
+      <div class="mb-4 flex justify-end">
+        <label class="inline-flex items-center cursor-pointer">
+          <span class="mr-2 text-sm text-gray-600">Show Internal View</span>
+          <div class="relative">
+            <input 
+              type="checkbox" 
+              bind:checked={showInternalCosts} 
+              class="sr-only peer"
+            >
+            <div class="w-10 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+          </div>
+        </label>
+      </div>
+    {/if}
+
     <!-- Invoice Header with Logo -->
     <div class="flex justify-between items-start">
       <div class="flex-1">
@@ -252,6 +287,10 @@
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Description</th>
             <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider">Quantity</th>
             <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">Unit Price</th>
+            {#if showInternalCosts && canViewInternalCosts}
+              <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">Int. Cost</th>
+              <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">Margin</th>
+            {/if}
             <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">Total</th>
           </tr>
         </thead>
@@ -262,6 +301,16 @@
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Labor Services</td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-center">1</td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-right">${laborCost.toFixed(2)}</td>
+              {#if showInternalCosts && canViewInternalCosts}
+                {@const laborIntCost = laborCost * 0.65}
+                {@const laborMargin = ((laborCost - laborIntCost) / laborCost * 100) || 0}
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-right">${laborIntCost.toFixed(2)}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-right">
+                  <span class={laborMargin < 20 ? 'text-red-600' : laborMargin < 40 ? 'text-yellow-600' : 'text-green-600'}>
+                    {laborMargin.toFixed(1)}%
+                  </span>
+                </td>
+              {/if}
               <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-right">${laborCost.toFixed(2)}</td>
             </tr>
           {/if}
@@ -271,6 +320,16 @@
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Materials & Supplies</td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-center">1</td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-right">${materialsCost.toFixed(2)}</td>
+              {#if showInternalCosts && canViewInternalCosts}
+                {@const matIntCost = materialsCost * 0.80}
+                {@const matMargin = ((materialsCost - matIntCost) / materialsCost * 100) || 0}
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-right">${matIntCost.toFixed(2)}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-right">
+                  <span class={matMargin < 20 ? 'text-red-600' : matMargin < 40 ? 'text-yellow-600' : 'text-green-600'}>
+                    {matMargin.toFixed(1)}%
+                  </span>
+                </td>
+              {/if}
               <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-right">${materialsCost.toFixed(2)}</td>
             </tr>
           {/if}
@@ -280,6 +339,16 @@
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Equipment Usage</td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-center">1</td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-right">${equipmentCost.toFixed(2)}</td>
+              {#if showInternalCosts && canViewInternalCosts}
+                {@const equipIntCost = equipmentCost * 0.60}
+                {@const equipMargin = ((equipmentCost - equipIntCost) / equipmentCost * 100) || 0}
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-right">${equipIntCost.toFixed(2)}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-right">
+                  <span class={equipMargin < 20 ? 'text-red-600' : equipMargin < 40 ? 'text-yellow-600' : 'text-green-600'}>
+                    {equipMargin.toFixed(1)}%
+                  </span>
+                </td>
+              {/if}
               <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-right">${equipmentCost.toFixed(2)}</td>
             </tr>
           {/if}
@@ -290,21 +359,45 @@
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.description}</td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-center">{item.quantity}</td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-right">${item.unitPrice.toFixed(2)}</td>
+              {#if showInternalCosts && canViewInternalCosts}
+                {@const itemIntCost = item.internalCost || (item.unitPrice * 0.7)}
+                {@const itemMargin = ((item.unitPrice - itemIntCost) / item.unitPrice * 100) || 0}
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-right">${itemIntCost.toFixed(2)}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-right">
+                  <span class={itemMargin < 20 ? 'text-red-600' : itemMargin < 40 ? 'text-yellow-600' : 'text-green-600'}>
+                    {itemMargin.toFixed(1)}%
+                  </span>
+                </td>
+              {/if}
               <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-right">${item.total.toFixed(2)}</td>
             </tr>
           {/each}
         </tbody>
         <tfoot class="bg-gray-50">
           <tr>
-            <td colspan="3" class="px-6 py-3 text-right text-sm font-medium text-gray-700">Subtotal</td>
+            <td colspan={showInternalCosts && canViewInternalCosts ? 5 : 3} class="px-6 py-3 text-right text-sm font-medium text-gray-700">Subtotal</td>
             <td class="px-6 py-3 text-right text-sm font-medium text-gray-900">${subtotal.toFixed(2)}</td>
           </tr>
+          
+          {#if showInternalCosts && canViewInternalCosts}
+            <tr>
+              <td colspan="5" class="px-6 py-3 text-right text-sm font-medium text-gray-700">Total Internal Cost</td>
+              <td class="px-6 py-3 text-right text-sm font-medium text-gray-900">${totalInternalCost.toFixed(2)}</td>
+            </tr>
+            <tr>
+              <td colspan="5" class="px-6 py-3 text-right text-sm font-medium text-gray-700">
+                Profit Margin ({profitMarginPercentage.toFixed(1)}%)
+              </td>
+              <td class="px-6 py-3 text-right text-sm font-medium text-green-600 font-bold">${profitAmount.toFixed(2)}</td>
+            </tr>
+          {/if}
+          
           <tr>
-            <td colspan="3" class="px-6 py-3 text-right text-sm font-medium text-gray-700">Tax ({(taxRate * 100).toFixed(0)}%)</td>
+            <td colspan={showInternalCosts && canViewInternalCosts ? 5 : 3} class="px-6 py-3 text-right text-sm font-medium text-gray-700">Tax ({(taxRate * 100).toFixed(0)}%)</td>
             <td class="px-6 py-3 text-right text-sm font-medium text-gray-900">${taxAmount.toFixed(2)}</td>
           </tr>
           <tr class="bg-gray-100">
-            <td colspan="3" class="px-6 py-3 text-right text-base font-bold text-gray-800">Total Due</td>
+            <td colspan={showInternalCosts && canViewInternalCosts ? 5 : 3} class="px-6 py-3 text-right text-base font-bold text-gray-800">Total Due</td>
             <td class="px-6 py-3 text-right text-base font-bold text-dryd-blue">${total.toFixed(2)}</td>
           </tr>
         </tfoot>

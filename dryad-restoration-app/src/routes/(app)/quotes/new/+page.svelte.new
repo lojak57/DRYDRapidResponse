@@ -1053,6 +1053,9 @@
   let selectedEquipmentCategory = '';
   let selectedEquipmentType = '';
   
+  // Initialize typedEquipmentCategories from EQUIPMENT_CATEGORIES
+  const typedEquipmentCategories = EQUIPMENT_CATEGORIES as Record<string, string[]>;
+  
   // Add these functions in the script section
   function formatEquipmentCategory(category: string): string {
     return category.replace(/_/g, ' ').split(' ').map(word => 
@@ -1086,7 +1089,7 @@
   }
   
   // Update the lineItems declaration
-  let lineItems: LineItem[] = [
+  let lineItems: LineItem[] = [];
     { 
       id: crypto.randomUUID(), 
       description: '', 
@@ -1100,40 +1103,6 @@
   ];
   
   // Update setEquipmentType function to properly cast selectedEquipmentCategory
-  function setEquipmentType(equipType: string) {
-    selectedEquipmentType = equipType;
-    lineItemWizard.description = `${formatEquipmentType(equipType)} - ${EQUIPMENT_DESCRIPTIONS[equipType]}`;
-    lineItemWizard.unitPrice = EQUIPMENT_DAILY_RATES[equipType];
-    lineItemWizard.internalCost = Math.round(EQUIPMENT_DAILY_RATES[equipType] * 0.6 * 100) / 100;
-  }
-  
-  // Updated lineItemWizard object with internalCost property
-  let lineItemWizard = {
-    description: '',
-    quantity: 1,
-    unitPrice: 0,
-    internalCost: 0,
-    isEstimate: false,
-    category: ''
-  };
-  
-  // Update resetLineItemWizard to include internalCost
-  function resetLineItemWizard() {
-    lineItemWizard = {
-      description: '',
-      quantity: 1,
-      unitPrice: 0,
-      internalCost: 0,
-      isEstimate: false,
-      category: ''
-    };
-    selectedEquipmentCategory = '';
-    selectedEquipmentType = '';
-  }
-  
-  // Update the EQUIPMENT_CATEGORIES mapping in the Equipment component's code block
-  // Type assertion for EQUIPMENT_CATEGORIES
-  const typedEquipmentCategories = EQUIPMENT_CATEGORIES as Record<string, string[]>;
 </script>
 
 <div class="container mx-auto px-4 py-8">
@@ -1894,7 +1863,386 @@
                 {:else if lineItemWizard.category === 'Subcontractor'}
                   <!-- Subcontractor section content -->
                   <div class="border-t border-blue-200 pt-4">
-                    <!-- ... -->
+                    <div class="mb-4">
+                      <label class="block text-sm font-medium text-gray-700 mb-1">Subcontractor Type</label>
+                      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {#each [
+                          { title: 'Plumber', unit: 'service', unitPrice: 350, description: 'Licensed plumbing services' },
+                          { title: 'Electrician', unit: 'service', unitPrice: 375, description: 'Licensed electrical work' },
+                          { title: 'HVAC', unit: 'service', unitPrice: 450, description: 'HVAC system services' },
+                          { title: 'Roofing', unit: 'job', unitPrice: 850, description: 'Roofing repair/replacement' },
+                          { title: 'Drywall', unit: 'job', unitPrice: 275, description: 'Drywall installation/repair' },
+                          { title: 'Flooring', unit: 'job', unitPrice: 425, description: 'Flooring installation' },
+                          { title: 'Painting', unit: 'job', unitPrice: 300, description: 'Professional painting services' },
+                          { title: 'Specialty', unit: 'service', unitPrice: 500, description: 'Specialized contractor services' }
+                        ] as subcontractor}
+                          <button 
+                            type="button"
+                            class="p-3 border rounded text-left text-sm transition-all {lineItemWizard.description.includes(subcontractor.title) ? 'bg-blue-100 border-blue-400 shadow-sm' : 'border-gray-300 hover:bg-gray-50'}"
+                            on:click={() => {
+                              lineItemWizard.description = `${subcontractor.title} Services - ${subcontractor.description}`;
+                              lineItemWizard.unitPrice = subcontractor.unitPrice;
+                              lineItemWizard.internalCost = Math.round(subcontractor.unitPrice * 0.8 * 100) / 100;
+                            }}
+                          >
+                            <div class="font-medium">{subcontractor.title}</div>
+                            <div class="flex justify-between text-xs mt-1">
+                              <span class="text-gray-600">{subcontractor.description}</span>
+                              <span class="font-medium text-blue-700">${subcontractor.unitPrice}/{subcontractor.unit}</span>
+                            </div>
+                          </button>
+                        {/each}
+                      </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Service Quantity</label>
+                        <input 
+                          type="number"
+                          bind:value={lineItemWizard.quantity}
+                          min="1"
+                          class="w-full p-2 border border-gray-300 rounded-lg"
+                        />
+                        <p class="text-xs text-gray-500 mt-1">Number of service calls or jobs</p>
+                      </div>
+                      
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Unit Price ($)</label>
+                        <div class="relative">
+                          <span class="absolute inset-y-0 left-0 flex items-center pl-2 pointer-events-none text-gray-500 text-sm">$</span>
+                          <input 
+                            type="number"
+                            bind:value={lineItemWizard.unitPrice}
+                            min="0"
+                            step="0.01"
+                            class="w-full p-2 pl-6 border border-gray-300 rounded-lg"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {#if $currentUser?.role === 'ADMIN' || $currentUser?.role === 'OFFICE'}
+                      <div class="mt-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Internal Cost ($)</label>
+                        <div class="relative">
+                          <span class="absolute inset-y-0 left-0 flex items-center pl-2 pointer-events-none text-gray-500 text-sm">$</span>
+                          <input 
+                            type="number"
+                            bind:value={lineItemWizard.internalCost}
+                            min="0"
+                            step="0.01"
+                            class="w-full p-2 pl-6 border border-gray-300 rounded-lg"
+                          />
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">Default cost is 80% of the subcontractor price (markup 20%)</p>
+                      </div>
+                    {/if}
+                    
+                    <div class="mt-4">
+                      <label class="block text-sm font-medium text-gray-700 mb-1">Additional Notes</label>
+                      <textarea 
+                        bind:value={lineItemWizard.description}
+                        rows="2"
+                        placeholder="Additional details about the subcontractor work"
+                        class="w-full p-2 border border-gray-300 rounded-lg"
+                      ></textarea>
+                    </div>
+                    
+                    <div class="p-3 bg-gray-50 rounded-lg border border-gray-200 mt-4 mb-4">
+                      <div class="flex justify-between items-center">
+                        <span class="font-medium text-gray-700">Summary</span>
+                        <span class="font-bold text-dryd-blue">{formatCurrency(lineItemWizard.unitPrice * lineItemWizard.quantity)}</span>
+                      </div>
+                      <div class="text-sm text-gray-600 mt-1">
+                        {lineItemWizard.description || 'Subcontractor Services'} - {lineItemWizard.quantity} × ${lineItemWizard.unitPrice}
+                      </div>
+                    </div>
+                  </div>
+                {:else if lineItemWizard.category === 'Permit'}
+                  <!-- Permit section content -->
+                  <div class="border-t border-blue-200 pt-4">
+                    <div class="mb-4">
+                      <label class="block text-sm font-medium text-gray-700 mb-1">Permit Type</label>
+                      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {#each [
+                          { title: 'Building Permit', unitPrice: 450, description: 'General building permit for construction/renovation' },
+                          { title: 'Electrical Permit', unitPrice: 225, description: 'For electrical work and inspections' },
+                          { title: 'Plumbing Permit', unitPrice: 195, description: 'For plumbing work and inspections' },
+                          { title: 'Mechanical Permit', unitPrice: 210, description: 'For HVAC and mechanical systems' },
+                          { title: 'Demolition Permit', unitPrice: 275, description: 'For structural demolition work' },
+                          { title: 'Zoning Permit', unitPrice: 180, description: 'Local zoning and planning approval' },
+                          { title: 'Fire Safety Permit', unitPrice: 235, description: 'Fire department inspection and approval' },
+                          { title: 'Environmental Permit', unitPrice: 350, description: 'Environmental impact assessment fees' }
+                        ] as permit}
+                          <button 
+                            type="button"
+                            class="p-3 border rounded text-left text-sm transition-all {lineItemWizard.description.includes(permit.title) ? 'bg-blue-100 border-blue-400 shadow-sm' : 'border-gray-300 hover:bg-gray-50'}"
+                            on:click={() => {
+                              lineItemWizard.description = `${permit.title} - ${permit.description}`;
+                              lineItemWizard.unitPrice = permit.unitPrice;
+                              lineItemWizard.internalCost = permit.unitPrice; // Pass-through cost with no markup
+                            }}
+                          >
+                            <div class="font-medium">{permit.title}</div>
+                            <div class="flex justify-between text-xs mt-1">
+                              <span class="text-gray-600">{permit.description}</span>
+                              <span class="font-medium text-blue-700">${permit.unitPrice}</span>
+                            </div>
+                          </button>
+                        {/each}
+                      </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+                        <input 
+                          type="number"
+                          bind:value={lineItemWizard.quantity}
+                          min="1"
+                          class="w-full p-2 border border-gray-300 rounded-lg"
+                        />
+                        <p class="text-xs text-gray-500 mt-1">Usually one permit per type is needed</p>
+                      </div>
+                      
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Permit Fee ($)</label>
+                        <div class="relative">
+                          <span class="absolute inset-y-0 left-0 flex items-center pl-2 pointer-events-none text-gray-500 text-sm">$</span>
+                          <input 
+                            type="number"
+                            bind:value={lineItemWizard.unitPrice}
+                            min="0"
+                            step="0.01"
+                            class="w-full p-2 pl-6 border border-gray-300 rounded-lg"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {#if $currentUser?.role === 'ADMIN' || $currentUser?.role === 'OFFICE'}
+                      <div class="mt-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Internal Cost ($)</label>
+                        <div class="relative">
+                          <span class="absolute inset-y-0 left-0 flex items-center pl-2 pointer-events-none text-gray-500 text-sm">$</span>
+                          <input 
+                            type="number"
+                            bind:value={lineItemWizard.internalCost}
+                            min="0"
+                            step="0.01"
+                            class="w-full p-2 pl-6 border border-gray-300 rounded-lg"
+                          />
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">Permit fees are typically passed through with no markup</p>
+                      </div>
+                    {/if}
+                    
+                    <div class="mt-4">
+                      <label class="block text-sm font-medium text-gray-700 mb-1">Permit Information</label>
+                      <textarea 
+                        bind:value={lineItemWizard.description}
+                        rows="2"
+                        placeholder="Additional details about the permit (agency, application #, etc.)"
+                        class="w-full p-2 border border-gray-300 rounded-lg"
+                      ></textarea>
+                    </div>
+                    
+                    <div class="p-3 bg-gray-50 rounded-lg border border-gray-200 mt-4 mb-4">
+                      <div class="flex justify-between items-center">
+                        <span class="font-medium text-gray-700">Summary</span>
+                        <span class="font-bold text-dryd-blue">{formatCurrency(lineItemWizard.unitPrice * lineItemWizard.quantity)}</span>
+                      </div>
+                      <div class="text-sm text-gray-600 mt-1">
+                        {lineItemWizard.description || 'Permit Fee'} - {lineItemWizard.quantity} × ${lineItemWizard.unitPrice}
+                      </div>
+                    </div>
+                  </div>
+                {:else if lineItemWizard.category === 'Disposal'}
+                  <!-- Disposal section content -->
+                  <div class="border-t border-blue-200 pt-4">
+                    <div class="mb-4">
+                      <label class="block text-sm font-medium text-gray-700 mb-1">Disposal Type</label>
+                      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {#each [
+                          { title: 'Dumpster Rental', unit: 'unit', unitPrice: 425, description: '10-yard dumpster (1 week)' },
+                          { title: 'Dumpster Rental - Large', unit: 'unit', unitPrice: 575, description: '20-yard dumpster (1 week)' },
+                          { title: 'Hazardous Material', unit: 'load', unitPrice: 650, description: 'Properly disposed hazardous waste' },
+                          { title: 'Construction Debris', unit: 'load', unitPrice: 295, description: 'Non-hazardous construction waste' },
+                          { title: 'Water Removal', unit: 'load', unitPrice: 175, description: 'Contaminated water disposal' },
+                          { title: 'Electronics', unit: 'load', unitPrice: 225, description: 'Electronic waste disposal' },
+                          { title: 'Mold Materials', unit: 'load', unitPrice: 475, description: 'Mold-contaminated materials' },
+                          { title: 'Dump Fee', unit: 'trip', unitPrice: 150, description: 'Standard landfill dumping fee' }
+                        ] as disposal}
+                          <button 
+                            type="button"
+                            class="p-3 border rounded text-left text-sm transition-all {lineItemWizard.description.includes(disposal.title) ? 'bg-blue-100 border-blue-400 shadow-sm' : 'border-gray-300 hover:bg-gray-50'}"
+                            on:click={() => {
+                              lineItemWizard.description = `${disposal.title} - ${disposal.description}`;
+                              lineItemWizard.unitPrice = disposal.unitPrice;
+                              lineItemWizard.internalCost = Math.round(disposal.unitPrice * 0.7 * 100) / 100;
+                            }}
+                          >
+                            <div class="font-medium">{disposal.title}</div>
+                            <div class="flex justify-between text-xs mt-1">
+                              <span class="text-gray-600">{disposal.description}</span>
+                              <span class="font-medium text-blue-700">${disposal.unitPrice}/{disposal.unit}</span>
+                            </div>
+                          </button>
+                        {/each}
+                      </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+                        <input 
+                          type="number"
+                          bind:value={lineItemWizard.quantity}
+                          min="1"
+                          class="w-full p-2 border border-gray-300 rounded-lg"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Unit Price ($)</label>
+                        <div class="relative">
+                          <span class="absolute inset-y-0 left-0 flex items-center pl-2 pointer-events-none text-gray-500 text-sm">$</span>
+                          <input 
+                            type="number"
+                            bind:value={lineItemWizard.unitPrice}
+                            min="0"
+                            step="0.01"
+                            class="w-full p-2 pl-6 border border-gray-300 rounded-lg"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {#if $currentUser?.role === 'ADMIN' || $currentUser?.role === 'OFFICE'}
+                      <div class="mt-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Internal Cost ($)</label>
+                        <div class="relative">
+                          <span class="absolute inset-y-0 left-0 flex items-center pl-2 pointer-events-none text-gray-500 text-sm">$</span>
+                          <input 
+                            type="number"
+                            bind:value={lineItemWizard.internalCost}
+                            min="0"
+                            step="0.01"
+                            class="w-full p-2 pl-6 border border-gray-300 rounded-lg"
+                          />
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">Default cost is 70% of the disposal fee (30% markup)</p>
+                      </div>
+                    {/if}
+                    
+                    <div class="mt-4">
+                      <label class="block text-sm font-medium text-gray-700 mb-1">Additional Details</label>
+                      <textarea 
+                        bind:value={lineItemWizard.description}
+                        rows="2"
+                        placeholder="Additional details about the disposal (location, restrictions, etc.)"
+                        class="w-full p-2 border border-gray-300 rounded-lg"
+                      ></textarea>
+                    </div>
+                    
+                    <div class="p-3 bg-gray-50 rounded-lg border border-gray-200 mt-4 mb-4">
+                      <div class="flex justify-between items-center">
+                        <span class="font-medium text-gray-700">Summary</span>
+                        <span class="font-bold text-dryd-blue">{formatCurrency(lineItemWizard.unitPrice * lineItemWizard.quantity)}</span>
+                      </div>
+                      <div class="text-sm text-gray-600 mt-1">
+                        {lineItemWizard.description || 'Disposal Fee'} - {lineItemWizard.quantity} × ${lineItemWizard.unitPrice}
+                      </div>
+                    </div>
+                  </div>
+                {:else if lineItemWizard.category === 'Supplies'}
+                  <!-- Supplies section content -->
+                  <div class="border-t border-blue-200 pt-4">
+                    <div class="mb-4">
+                      <label class="block text-sm font-medium text-gray-700 mb-1">Supply Type</label>
+                      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                        {#each [
+                          { title: 'Cleaning Supplies', price: 75, description: 'Basic cleaning package' },
+                          { title: 'PPE', price: 45, description: 'Personal protective equipment' },
+                          { title: 'Plastic Sheeting', price: 35, description: 'Containment plastic' },
+                          { title: 'Antimicrobial', price: 85, description: 'Antimicrobial treatment' },
+                          { title: 'Chemicals', price: 95, description: 'Cleaning & treatment chemicals' },
+                          { title: 'Packing Materials', price: 55, description: 'Materials for packing contents' },
+                          { title: 'Tape & Sealants', price: 30, description: 'Various tapes and sealants' },
+                          { title: 'Testing Supplies', price: 65, description: 'Moisture/mold testing supplies' }
+                        ] as supplyItem}
+                          <button 
+                            type="button"
+                            class="p-2 border rounded text-left text-sm transition-all {lineItemWizard.description === supplyItem.title ? 'bg-blue-100 border-blue-400 shadow-sm' : 'border-gray-300 hover:bg-gray-50'}"
+                            on:click={() => {
+                              lineItemWizard.description = supplyItem.title;
+                              lineItemWizard.unitPrice = supplyItem.price;
+                              lineItemWizard.internalCost = Math.round(supplyItem.price * 0.6 * 100) / 100;
+                            }}
+                          >
+                            <div class="font-medium">{supplyItem.title}</div>
+                            <div class="flex justify-between text-xs">
+                              <span class="text-gray-600">{supplyItem.description}</span>
+                              <span class="font-medium text-blue-700">${supplyItem.price}</span>
+                            </div>
+                          </button>
+                        {/each}
+                      </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+                        <input 
+                          type="number"
+                          bind:value={lineItemWizard.quantity}
+                          min="1"
+                          class="w-full p-2 border border-gray-300 rounded-lg"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Unit Price ($)</label>
+                        <div class="relative">
+                          <span class="absolute inset-y-0 left-0 flex items-center pl-2 pointer-events-none text-gray-500 text-sm">$</span>
+                          <input 
+                            type="number"
+                            bind:value={lineItemWizard.unitPrice}
+                            min="0"
+                            step="0.01"
+                            class="w-full p-2 pl-6 border border-gray-300 rounded-lg"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {#if $currentUser?.role === 'ADMIN' || $currentUser?.role === 'OFFICE'}
+                      <div class="mt-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Internal Cost ($)</label>
+                        <div class="relative">
+                          <span class="absolute inset-y-0 left-0 flex items-center pl-2 pointer-events-none text-gray-500 text-sm">$</span>
+                          <input 
+                            type="number"
+                            bind:value={lineItemWizard.internalCost}
+                            min="0"
+                            step="0.01"
+                            class="w-full p-2 pl-6 border border-gray-300 rounded-lg"
+                          />
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">Default cost is 60% of the supply price</p>
+                      </div>
+                    {/if}
+                    
+                    <div class="p-3 bg-gray-50 rounded-lg border border-gray-200 mt-4 mb-4">
+                      <div class="flex justify-between items-center">
+                        <span class="font-medium text-gray-700">Summary</span>
+                        <span class="font-bold text-dryd-blue">{formatCurrency(lineItemWizard.unitPrice * lineItemWizard.quantity)}</span>
+                      </div>
+                      <div class="text-sm text-gray-600 mt-1">
+                        {lineItemWizard.description || 'Supplies'} - {lineItemWizard.quantity} × ${lineItemWizard.unitPrice}
+                      </div>
+                    </div>
                   </div>
                 {:else}
                   <!-- Description for non-labor/materials items -->

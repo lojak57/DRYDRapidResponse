@@ -11,12 +11,6 @@
   import type { Customer } from '$lib/types/Customer';
   import { createQuote } from '$lib/services/quotes';
   import { addNotification } from '$lib/stores/notificationStore';
-  import { 
-    EQUIPMENT_DAILY_RATES, 
-    EQUIPMENT_DESCRIPTIONS, 
-    EQUIPMENT_CATEGORIES 
-  } from '$lib/config/equipmentRates';
-  import { EquipmentType } from '$lib/types/Equipment';
   
   // Step tracking for multi-step form
   let currentStep = 1;
@@ -223,6 +217,9 @@
     state: '',
     zip: '',
   };
+  let lineItems = [
+    { id: crypto.randomUUID(), description: '', quantity: 1, unitPrice: 0, total: 0, isEstimate: false, category: '' }
+  ];
   
   // Track if site address was manually edited
   let siteAddressManuallyEdited = {
@@ -447,7 +444,6 @@
   
   // Labor rate presets
   const laborRates = [
-    { title: 'Emergency Response', rate: 175, description: 'After-hours emergency calls' },
     { title: 'Technician', rate: 75, description: 'General restoration technician' },
     { title: 'Senior Tech', rate: 95, description: 'Senior restoration technician' },
     { title: 'Supervisor', rate: 110, description: 'Site supervisor' },
@@ -468,68 +464,102 @@
     'Site Inspection'
   ];
   
-  // Common materials with pricing and internal cost
-  const materialItems = [
-    { 
-      title: 'Drywall', 
-      unit: 'sheet', 
-      unitPrice: 45.00, 
-      internalCost: 25.00, 
-      description: 'Standard drywall (4x8)' 
-    },
-    { 
-      title: 'Paint', 
-      unit: 'gallon', 
-      unitPrice: 35.00, 
-      internalCost: 18.50, 
-      description: 'Interior paint' 
-    },
-    { 
-      title: 'Carpet', 
-      unit: 'sq ft', 
-      unitPrice: 4.50, 
-      internalCost: 2.25, 
-      description: 'Standard carpet and pad' 
-    },
-    { 
-      title: 'Lumber - 2x4', 
-      unit: 'piece', 
-      unitPrice: 8.50, 
-      internalCost: 4.25, 
-      description: 'Standard framing lumber' 
-    },
-    { 
-      title: 'Antimicrobial Spray', 
-      unit: 'gallon', 
-      unitPrice: 75.00, 
-      internalCost: 42.00, 
-      description: 'Commercial-grade disinfectant' 
-    },
-    { 
-      title: 'Moisture Barrier', 
-      unit: 'roll', 
-      unitPrice: 120.00, 
-      internalCost: 65.00, 
-      description: 'Vapor barrier (100 sq ft)' 
-    },
-    { 
-      title: 'Laminate Flooring', 
-      unit: 'sq ft', 
-      unitPrice: 3.75, 
-      internalCost: 1.85, 
-      description: 'Standard laminate' 
-    },
-    { 
-      title: 'Insulation', 
-      unit: 'bag', 
-      unitPrice: 55.00, 
-      internalCost: 32.00, 
-      description: 'R-15 insulation' 
-    }
+  // Materials presets
+  const materialTypes = [
+    { title: 'Drywall', unit: 'sheets', unitPrice: 15, description: 'Standard 4x8 drywall sheets' },
+    { title: 'Lumber', unit: 'board ft', unitPrice: 3.50, description: 'Framing lumber' },
+    { title: 'Paint', unit: 'gallons', unitPrice: 35, description: 'Interior paint' },
+    { title: 'Carpet', unit: 'sq ft', unitPrice: 4, description: 'Residential carpet' },
+    { title: 'Flooring', unit: 'sq ft', unitPrice: 6, description: 'Vinyl/laminate flooring' },
+    { title: 'Insulation', unit: 'rolls', unitPrice: 25, description: 'R-19 insulation' }
   ];
   
-  // Common material quantities
-  const commonMaterialQuantities = [1, 2, 5, 10, 25, 50, 100];
+  // Common materials
+  const commonMaterials = [
+    'Drywall & Joint Compound',
+    'Lumber & Framing',
+    'Paint & Primer',
+    'Flooring Materials',
+    'Insulation',
+    'Electrical Supplies',
+    'Plumbing Supplies',
+    'Trim & Molding',
+    'Roofing Materials',
+    'Adhesives & Fasteners'
+  ];
+  
+  // Equipment presets
+  const equipmentTypes = [
+    { title: 'Air Mover', unit: 'days', unitPrice: 35, description: 'Industrial air mover/fan' },
+    { title: 'Dehumidifier', unit: 'days', unitPrice: 75, description: 'Commercial dehumidifier' },
+    { title: 'Air Scrubber', unit: 'days', unitPrice: 85, description: 'HEPA air filtration' },
+    { title: 'Generator', unit: 'days', unitPrice: 120, description: 'Portable power generator' },
+    { title: 'Moisture Meter', unit: 'days', unitPrice: 45, description: 'Moisture detection equipment' }
+  ];
+  
+  // Common equipment
+  const commonEquipment = [
+    'Air Movers',
+    'Dehumidifiers',
+    'Air Scrubbers',
+    'Negative Air Machines',
+    'Moisture Meters',
+    'Thermal Imaging Camera',
+    'Extraction Equipment',
+    'HEPA Vacuums',
+    'Generators',
+    'Drying Equipment'
+  ];
+  
+  // Supplies presets
+  const supplyTypes = [
+    { title: 'Cleaning Supplies', unit: 'package', unitPrice: 75, description: 'Basic cleaning package' },
+    { title: 'PPE', unit: 'kit', unitPrice: 45, description: 'Personal protective equipment' },
+    { title: 'Plastic Sheeting', unit: 'roll', unitPrice: 35, description: 'Containment plastic' },
+    { title: 'Antimicrobial', unit: 'gallon', unitPrice: 85, description: 'Antimicrobial treatment' },
+    { title: 'Chemicals', unit: 'package', unitPrice: 95, description: 'Cleaning & treatment chemicals' },
+  ];
+  
+  // Common supplies
+  const commonSupplies = [
+    'Cleaning Supplies',
+    'PPE & Safety Equipment',
+    'Plastic Sheeting & Containment',
+    'Antimicrobial Products',
+    'Chemical Treatments',
+    'Packing Materials',
+    'Tape & Sealants',
+    'Disposable Equipment',
+    'Filtration Materials',
+    'Testing Supplies'
+  ];
+  
+  // Subcontractor presets
+  const subcontractorTypes = [
+    { title: 'Plumber', unit: 'service', unitPrice: 350, description: 'Licensed plumbing services' },
+    { title: 'Electrician', unit: 'service', unitPrice: 375, description: 'Licensed electrical work' },
+    { title: 'HVAC', unit: 'service', unitPrice: 450, description: 'HVAC system services' },
+    { title: 'Roofing', unit: 'job', unitPrice: 850, description: 'Roofing repair/replacement' },
+    { title: 'Specialty', unit: 'service', unitPrice: 500, description: 'Specialized contractor services' }
+  ];
+  
+  // Permit presets
+  const permitTypes = [
+    { title: 'Building Permit', unit: 'permit', unitPrice: 250, description: 'General building permit' },
+    { title: 'Electrical Permit', unit: 'permit', unitPrice: 120, description: 'Electrical work permit' },
+    { title: 'Plumbing Permit', unit: 'permit', unitPrice: 125, description: 'Plumbing work permit' },
+    { title: 'Demolition Permit', unit: 'permit', unitPrice: 175, description: 'Demolition/removal permit' },
+    { title: 'Inspection Fee', unit: 'inspection', unitPrice: 100, description: 'Required inspection fees' }
+  ];
+  
+  // Disposal presets
+  const disposalTypes = [
+    { title: 'Dumpster', unit: 'week', unitPrice: 350, description: 'On-site waste dumpster' },
+    { title: 'Hazardous Material', unit: 'load', unitPrice: 475, description: 'Hazardous waste disposal' },
+    { title: 'Hauling', unit: 'trip', unitPrice: 225, description: 'Debris hauling service' },
+    { title: 'Dump Fees', unit: 'load', unitPrice: 175, description: 'Landfill/dump fees' },
+    { title: 'Specialized Disposal', unit: 'service', unitPrice: 550, description: 'Specialized waste removal' }
+  ];
   
   // Line item templates for quick add
   const lineItemTemplates = [
@@ -939,32 +969,27 @@
   // For tracking line item wizard state
   let showLineItemWizard = false;
   let lineItemWizard = {
+    category: '',
     description: '',
     quantity: 1,
     unitPrice: 0,
-    internalCost: 0,
-    isEstimate: false,
-    category: ''
+    isEstimate: false
   };
   
   // Reset line item wizard
   function resetLineItemWizard() {
     lineItemWizard = {
+      category: '',
       description: '',
       quantity: 1,
       unitPrice: 0,
-      internalCost: 0,
-      isEstimate: false,
-      category: ''
+      isEstimate: false
     };
-    selectedEquipmentCategory = '';
-    selectedEquipmentType = '';
   }
   
   // Set labor rate preset
   function setLaborRate(ratePreset: typeof laborRates[0]) {
     lineItemWizard.unitPrice = ratePreset.rate;
-    lineItemWizard.internalCost = ratePreset.rate * 0.6; // Example: internal cost is 60% of rate
     if (!lineItemWizard.description.includes(ratePreset.title)) {
       // Only add the title if it's not already there
       const task = lineItemWizard.description.split(' - ')[0] || '';
@@ -986,13 +1011,6 @@
     }
   }
   
-  // Set material item
-  function setMaterialItem(material: typeof materialItems[0]) {
-    lineItemWizard.description = `${material.title} - ${material.description}`;
-    lineItemWizard.unitPrice = material.unitPrice;
-    lineItemWizard.internalCost = material.internalCost;
-  }
-  
   // Add line item from wizard
   function addLineItemFromWizard() {
     if (!lineItemWizard.description.trim()) {
@@ -1006,7 +1024,6 @@
         description: lineItemWizard.description,
         quantity: lineItemWizard.quantity,
         unitPrice: lineItemWizard.unitPrice,
-        internalCost: lineItemWizard.internalCost,
         total: lineItemWizard.quantity * lineItemWizard.unitPrice,
         isEstimate: lineItemWizard.isEstimate,
         category: lineItemWizard.category
@@ -1025,146 +1042,97 @@
     { id: 4, title: 'Review & Submit' }
   ];
 
-  // Service types for display
-  const serviceTypes = [
-    { id: 'water-damage', label: 'Water Damage' },
-    { id: 'fire-damage', label: 'Fire Damage' },
-    { id: 'mold-remediation', label: 'Mold Remediation' },
-    { id: 'storm-damage', label: 'Storm Damage' },
-    { id: 'biohazard', label: 'Biohazard' },
-    { id: 'reconstruction', label: 'Reconstruction' }
-  ];
-
-  // Urgency options
-  const urgencyOptions = [
-    { value: 'emergency', label: 'Emergency', desc: 'Needs immediate attention' },
-    { value: 'urgent', label: 'Urgent', desc: 'Should be started within 24-48 hours' },
-    { value: 'standard', label: 'Standard', desc: 'Can be scheduled normally' }
-  ];
-
-  // Size options
-  const sizeOptions = [
-    { label: 'Small', desc: 'Single room or area' },
-    { label: 'Medium', desc: 'Multiple rooms' },
-    { label: 'Large', desc: 'Entire property' }
-  ];
-
-  // Add these variables in the script section
-  let selectedEquipmentCategory = '';
-  let selectedEquipmentType = '';
-  
-  // Add these functions in the script section
-  function formatEquipmentCategory(category: string): string {
-    return category.replace(/_/g, ' ').split(' ').map(word => 
-      word.charAt(0) + word.slice(1).toLowerCase()
-    ).join(' ');
-  }
-  
-  function formatEquipmentType(type: string): string {
-    return type.split('_').map(word => 
-      word.charAt(0) + word.slice(1).toLowerCase()
-    ).join(' ');
-  }
-  
-  function setEquipmentType(equipType: string) {
-    selectedEquipmentType = equipType;
-    lineItemWizard.description = `${formatEquipmentType(equipType)} - ${EQUIPMENT_DESCRIPTIONS[equipType]}`;
-    lineItemWizard.unitPrice = EQUIPMENT_DAILY_RATES[equipType];
-    lineItemWizard.internalCost = Math.round(EQUIPMENT_DAILY_RATES[equipType] * 0.6 * 100) / 100;
-  }
-  
-  // Define the LineItem interface to include internalCost property
-  interface LineItem {
-    id: `${string}-${string}-${string}-${string}-${string}`;
-    description: string;
-    quantity: number;
-    unitPrice: number;
-    internalCost?: number;
-    total: number;
-    isEstimate: boolean;
-    category: string;
-  }
-  
-  // Update the lineItems declaration
-  let lineItems: LineItem[] = [
-    { 
-      id: crypto.randomUUID(), 
-      description: '', 
-      quantity: 1, 
-      unitPrice: 0, 
-      internalCost: 0,
-      total: 0, 
-      isEstimate: false, 
-      category: '' 
+  // Set material type preset
+  function setMaterialType(materialPreset: typeof materialTypes[0]) {
+    lineItemWizard.unitPrice = materialPreset.unitPrice;
+    if (!lineItemWizard.description) {
+      lineItemWizard.description = `${materialPreset.title} (${materialPreset.description})`;
     }
-  ];
-  
-  // Update setEquipmentType function to properly cast selectedEquipmentCategory
-  function setEquipmentType(equipType: string) {
-    selectedEquipmentType = equipType;
-    lineItemWizard.description = `${formatEquipmentType(equipType)} - ${EQUIPMENT_DESCRIPTIONS[equipType]}`;
-    lineItemWizard.unitPrice = EQUIPMENT_DAILY_RATES[equipType];
-    lineItemWizard.internalCost = Math.round(EQUIPMENT_DAILY_RATES[equipType] * 0.6 * 100) / 100;
   }
-  
-  // Updated lineItemWizard object with internalCost property
-  let lineItemWizard = {
-    description: '',
-    quantity: 1,
-    unitPrice: 0,
-    internalCost: 0,
-    isEstimate: false,
-    category: ''
-  };
-  
-  // Update resetLineItemWizard to include internalCost
-  function resetLineItemWizard() {
-    lineItemWizard = {
-      description: '',
-      quantity: 1,
-      unitPrice: 0,
-      internalCost: 0,
-      isEstimate: false,
-      category: ''
-    };
-    selectedEquipmentCategory = '';
-    selectedEquipmentType = '';
+
+  // Set common material
+  function setCommonMaterial(material: string) {
+    lineItemWizard.description = material;
+    // Find matching preset if available
+    const preset = materialTypes.find(p => material.includes(p.title));
+    if (preset) {
+      lineItemWizard.unitPrice = preset.unitPrice;
+    }
   }
-  
-  // Update the EQUIPMENT_CATEGORIES mapping in the Equipment component's code block
-  // Type assertion for EQUIPMENT_CATEGORIES
-  const typedEquipmentCategories = EQUIPMENT_CATEGORIES as Record<string, string[]>;
+
+  // Set equipment type preset
+  function setEquipmentType(equipmentPreset: typeof equipmentTypes[0]) {
+    lineItemWizard.unitPrice = equipmentPreset.unitPrice;
+    if (!lineItemWizard.description) {
+      lineItemWizard.description = `${equipmentPreset.title} Rental (${equipmentPreset.unit})`;
+    }
+  }
+
+  // Set common equipment
+  function setCommonEquipment(equipment: string) {
+    lineItemWizard.description = `${equipment} Rental`;
+    // Find matching preset if available
+    const preset = equipmentTypes.find(p => equipment.includes(p.title));
+    if (preset) {
+      lineItemWizard.unitPrice = preset.unitPrice;
+    }
+  }
+
+  // Set supply type preset
+  function setSupplyType(supplyPreset: typeof supplyTypes[0]) {
+    lineItemWizard.unitPrice = supplyPreset.unitPrice;
+    if (!lineItemWizard.description) {
+      lineItemWizard.description = `${supplyPreset.title} (${supplyPreset.description})`;
+    }
+  }
+
+  // Set common supply
+  function setCommonSupply(supply: string) {
+    lineItemWizard.description = supply;
+    // Find matching preset if available
+    const preset = supplyTypes.find(p => supply.includes(p.title));
+    if (preset) {
+      lineItemWizard.unitPrice = preset.unitPrice;
+    }
+  }
+
+  // Set subcontractor preset
+  function setSubcontractor(subPreset: typeof subcontractorTypes[0]) {
+    lineItemWizard.unitPrice = subPreset.unitPrice;
+    if (!lineItemWizard.description) {
+      lineItemWizard.description = `${subPreset.title} Services (${subPreset.description})`;
+    }
+  }
+
+  // Set permit preset
+  function setPermitType(permitPreset: typeof permitTypes[0]) {
+    lineItemWizard.unitPrice = permitPreset.unitPrice;
+    lineItemWizard.description = `${permitPreset.title} - ${permitPreset.description}`;
+  }
+
+  // Set disposal preset
+  function setDisposalType(disposalPreset: typeof disposalTypes[0]) {
+    lineItemWizard.unitPrice = disposalPreset.unitPrice;
+    lineItemWizard.description = `${disposalPreset.title} - ${disposalPreset.description}`;
+  }
 </script>
 
 <div class="container mx-auto px-4 py-8">
   <div class="flex justify-between items-center mb-8">
     <h1 class="text-2xl font-semibold text-gray-800">Create New Quote</h1>
     
-    <div class="flex gap-4">
-      <button
-        type="button"
-        class="flex items-center px-4 py-2 bg-dryd-blue text-white rounded-lg hover:bg-dryd-blue-dark transition-colors duration-200 shadow-sm"
-        on:click={() => goto('/dashboard')}
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1.5" viewBox="0 0 20 20" fill="currentColor">
-          <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+    <button
+      type="button"
+      class="text-gray-600 hover:text-gray-900"
+      on:click={() => goto('/quotes')}
+    >
+      <span class="flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
         </svg>
-        Back to Dashboard
-      </button>
-      
-      <button
-        type="button"
-        class="text-gray-600 hover:text-gray-900"
-        on:click={() => goto('/quotes')}
-      >
-        <span class="flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
-          </svg>
-          Back to Quotes
-        </span>
-      </button>
-    </div>
+        Back to Quotes
+      </span>
+    </button>
   </div>
   
   <!-- Progress Bar -->
@@ -1450,23 +1418,23 @@
             <div>
               <p class="font-medium text-gray-700 mb-2">What type of project is this?</p>
               <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                {#each serviceTypes as projectType}
+                {#each ['Water Damage', 'Fire Damage', 'Mold Remediation', 'Storm Damage', 'Biohazard', 'Reconstruction'] as projectType}
                   <button
                     type="button"
                     class="border rounded-lg p-3 text-left hover:bg-blue-50 hover:border-blue-300 transition-all focus:outline-none focus:ring-2 focus:ring-blue-300
-                    {selectedProjectTypes.includes(projectType.id) ? 'border-blue-500 bg-blue-50 shadow-sm' : 'border-gray-300'}"
-                    on:click={() => toggleProjectType(projectType.id)}
+                    {selectedProjectTypes.includes(projectType) ? 'border-blue-500 bg-blue-50 shadow-sm' : 'border-gray-300'}"
+                    on:click={() => toggleProjectType(projectType)}
                   >
                     <div class="font-medium flex items-center">
                       <div class="w-5 h-5 border rounded mr-2 flex items-center justify-center
-                        {selectedProjectTypes.includes(projectType.id) ? 'bg-blue-500 border-blue-500' : 'border-gray-400'}">
-                        {#if selectedProjectTypes.includes(projectType.id)}
+                        {selectedProjectTypes.includes(projectType) ? 'bg-blue-500 border-blue-500' : 'border-gray-400'}">
+                        {#if selectedProjectTypes.includes(projectType)}
                           <svg class="w-3 h-3 text-white" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                           </svg>
                         {/if}
                       </div>
-                      {projectType.label}
+                      {projectType}
                     </div>
                     <p class="text-sm text-gray-500 mt-1 ml-7">Click to select</p>
                   </button>
@@ -1477,17 +1445,21 @@
             <div>
               <p class="font-medium text-gray-700 mb-2">How urgent is this project?</p>
               <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                {#each urgencyOptions as urgency}
+                {#each [
+                  { label: 'Emergency', desc: 'Needs immediate attention' },
+                  { label: 'Urgent', desc: 'Should be started within 24-48 hours' },
+                  { label: 'Standard', desc: 'Can be scheduled normally' }
+                ] as urgency}
                   <button
                     type="button"
                     class="border rounded-lg p-3 text-left hover:bg-blue-50 hover:border-blue-300 transition-all focus:outline-none focus:ring-2 focus:ring-blue-300
-                    {selectedUrgency === urgency.value ? 'border-blue-500 bg-blue-50 shadow-sm' : 'border-gray-300'}"
-                    on:click={() => selectUrgency(urgency.value)}
+                    {selectedUrgency === urgency.label ? 'border-blue-500 bg-blue-50 shadow-sm' : 'border-gray-300'}"
+                    on:click={() => selectUrgency(urgency.label)}
                   >
                     <div class="font-medium flex items-center">
                       <div class="w-5 h-5 border rounded-full mr-2 flex items-center justify-center
-                        {selectedUrgency === urgency.value ? 'bg-blue-500 border-blue-500' : 'border-gray-400'}">
-                        {#if selectedUrgency === urgency.value}
+                        {selectedUrgency === urgency.label ? 'bg-blue-500 border-blue-500' : 'border-gray-400'}">
+                        {#if selectedUrgency === urgency.label}
                           <div class="w-2.5 h-2.5 bg-white rounded-full"></div>
                         {/if}
                       </div>
@@ -1502,7 +1474,11 @@
             <div>
               <p class="font-medium text-gray-700 mb-2">Estimated project size?</p>
               <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                {#each sizeOptions as size}
+                {#each [
+                  { label: 'Small', desc: 'Single room or area' },
+                  { label: 'Medium', desc: 'Multiple rooms' },
+                  { label: 'Large', desc: 'Entire property' }
+                ] as size}
                   <button
                     type="button"
                     class="border rounded-lg p-3 text-left hover:bg-blue-50 hover:border-blue-300 transition-all focus:outline-none focus:ring-2 focus:ring-blue-300
@@ -1639,8 +1615,9 @@
                   </div>
                 </div>
                 
-                <!-- Labor-specific options -->
+                <!-- Category-specific options -->
                 {#if lineItemWizard.category === 'Labor'}
+                  <!-- Labor section content -->
                   <div class="border-t border-blue-200 pt-4">
                     <div class="mb-4">
                       <label class="block text-sm font-medium text-gray-700 mb-1">Labor Type & Rate</label>
@@ -1715,25 +1692,18 @@
                   <!-- Materials section content -->
                   <div class="border-t border-blue-200 pt-4">
                     <div class="mb-4">
-                      <label class="block text-sm font-medium text-gray-700 mb-1">Common Materials</label>
-                      <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                        {#each materialItems as material}
+                      <label class="block text-sm font-medium text-gray-700 mb-1">Material Type & Price</label>
+                      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                        {#each materialTypes as materialPreset}
                           <button 
                             type="button"
-                            class="p-2 border rounded text-left text-sm transition-all {lineItemWizard.description === `${material.title} - ${material.description}` ? 'bg-blue-100 border-blue-400 shadow-sm' : 'border-gray-300 hover:bg-gray-50'}"
-                            on:click={() => setMaterialItem(material)}
+                            class="p-2 border rounded text-left text-sm transition-all {lineItemWizard.unitPrice === materialPreset.unitPrice && lineItemWizard.description.includes(materialPreset.title) ? 'bg-blue-100 border-blue-400 shadow-sm' : 'border-gray-300 hover:bg-gray-50'}"
+                            on:click={() => setMaterialType(materialPreset)}
                           >
-                            <div class="font-medium">{material.title}</div>
+                            <div class="font-medium">{materialPreset.title}</div>
                             <div class="flex justify-between text-xs">
-                              <span class="text-gray-600">{material.description}</span>
-                              <span class="font-medium text-blue-700">
-                                ${material.unitPrice}/{material.unit}
-                                {#if $currentUser?.role === 'ADMIN' || $currentUser?.role === 'OFFICE'}
-                                  <span class="text-gray-500 ml-1">
-                                    (cost: ${material.internalCost})
-                                  </span>
-                                {/if}
-                              </span>
+                              <span class="text-gray-600">{materialPreset.description}</span>
+                              <span class="font-medium text-blue-700">${materialPreset.unitPrice}/{materialPreset.unit}</span>
                             </div>
                           </button>
                         {/each}
@@ -1741,163 +1711,363 @@
                     </div>
                     
                     <div class="mb-4">
-                      <label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
-                      <div class="flex items-center">
-                        <input 
-                          type="number"
-                          bind:value={lineItemWizard.quantity}
-                          min="1"
-                          class="w-24 p-2 border border-gray-300 rounded-lg text-center"
-                        />
-                        <span class="ml-2 text-sm text-gray-600">
-                          {#if lineItemWizard.description}
-                            {materialItems.find(m => lineItemWizard.description.startsWith(m.title))?.unit || 'units'}
-                          {:else}
-                            units
-                          {/if}
-                        </span>
-                      </div>
-                      <div class="flex flex-wrap gap-2 mt-2">
-                        {#each commonMaterialQuantities as qty}
+                      <label class="block text-sm font-medium text-gray-700 mb-1">Common Materials</label>
+                      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                        {#each commonMaterials as material}
                           <button 
                             type="button"
-                            class="px-2 py-1 text-xs {lineItemWizard.quantity === qty ? 'bg-blue-100 text-blue-700 font-medium rounded' : 'text-gray-600 hover:bg-gray-100 rounded'}"
-                            on:click={() => lineItemWizard.quantity = qty}
+                            class="p-2 border rounded text-center text-sm transition-all {lineItemWizard.description === material ? 'bg-blue-100 border-blue-400 shadow-sm' : 'border-gray-300 hover:bg-gray-50'}"
+                            on:click={() => setCommonMaterial(material)}
                           >
-                            {qty}
+                            {material}
                           </button>
                         {/each}
                       </div>
                     </div>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-2 gap-4">
                       <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Unit Price ($)</label>
-                        <div class="relative">
-                          <span class="absolute inset-y-0 left-0 flex items-center pl-2 pointer-events-none text-gray-500 text-sm">$</span>
-                          <input 
-                            type="number"
-                            bind:value={lineItemWizard.unitPrice}
-                            min="0"
-                            step="0.01"
-                            class="w-full p-2 pl-6 border border-gray-300 rounded-lg"
-                          />
-                        </div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+                        <input 
+                          type="number"
+                          bind:value={lineItemWizard.quantity}
+                          min="1"
+                          class="w-full p-2 border border-gray-300 rounded-lg"
+                        />
                       </div>
                       
-                      {#if $currentUser?.role === 'ADMIN' || $currentUser?.role === 'OFFICE'}
-                        <div>
-                          <label class="block text-sm font-medium text-gray-700 mb-1">Internal Cost ($)</label>
-                          <div class="relative">
-                            <span class="absolute inset-y-0 left-0 flex items-center pl-2 pointer-events-none text-gray-500 text-sm">$</span>
-                            <input 
-                              type="number"
-                              bind:value={lineItemWizard.internalCost}
-                              min="0"
-                              step="0.01"
-                              class="w-full p-2 pl-6 border border-gray-300 rounded-lg"
-                            />
-                          </div>
-                        </div>
-                      {/if}
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Unit Price ($)</label>
+                        <input 
+                          type="number"
+                          bind:value={lineItemWizard.unitPrice}
+                          min="0"
+                          step="0.01"
+                          class="w-full p-2 border border-gray-300 rounded-lg"
+                        />
+                      </div>
+                    </div>
+                    
+                    <div class="mt-3">
+                      <label class="flex items-center text-sm">
+                        <input 
+                          type="checkbox" 
+                          bind:checked={lineItemWizard.isEstimate}
+                          class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        >
+                        <span class="ml-2">This is an estimated cost (for T&E quotes)</span>
+                      </label>
                     </div>
                   </div>
                 {:else if lineItemWizard.category === 'Equipment'}
                   <!-- Equipment section content -->
                   <div class="border-t border-blue-200 pt-4">
                     <div class="mb-4">
-                      <label class="block text-sm font-medium text-gray-700 mb-1">Equipment Type</label>
-                      <div class="grid grid-cols-1 gap-2">
-                        <select 
-                          bind:value={selectedEquipmentCategory}
-                          class="w-full p-2 border border-gray-300 rounded-lg"
-                        >
-                          <option value="">-- Select Equipment Category --</option>
-                          {#each Object.keys(typedEquipmentCategories) as category}
-                            <option value={category}>{formatEquipmentCategory(category)}</option>
-                          {/each}
-                        </select>
-                        
-                        {#if selectedEquipmentCategory}
-                          <div class="mt-2">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                              {#each typedEquipmentCategories[selectedEquipmentCategory] as equipType}
-                                <button 
-                                  type="button"
-                                  class="p-2 border rounded text-left text-sm transition-all {selectedEquipmentType === equipType ? 'bg-blue-100 border-blue-400 shadow-sm' : 'border-gray-300 hover:bg-gray-50'}"
-                                  on:click={() => setEquipmentType(equipType)}
-                                >
-                                  <div class="font-medium">{formatEquipmentType(equipType)}</div>
-                                  <div class="flex justify-between text-xs">
-                                    <span class="text-gray-600">{EQUIPMENT_DESCRIPTIONS[equipType]}</span>
-                                    <span class="font-medium text-blue-700">${EQUIPMENT_DAILY_RATES[equipType]}/day</span>
-                                  </div>
-                                </button>
-                              {/each}
-                            </div>
-                          </div>
-                        {/if}
-                      </div>
-                    </div>
-                    
-                    <div class="mb-4">
-                      <label class="block text-sm font-medium text-gray-700 mb-1">Rental Duration (Days)</label>
-                      <div class="flex items-center">
-                        <input 
-                          type="number"
-                          bind:value={lineItemWizard.quantity}
-                          min="1"
-                          class="w-24 p-2 border border-gray-300 rounded-lg text-center"
-                        />
-                        <span class="ml-2 text-sm text-gray-600">days</span>
-                      </div>
-                      <div class="flex flex-wrap gap-2 mt-2">
-                        {#each [1, 3, 5, 7, 14, 30] as days}
+                      <label class="block text-sm font-medium text-gray-700 mb-1">Equipment Type & Rate</label>
+                      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                        {#each equipmentTypes as equipmentPreset}
                           <button 
                             type="button"
-                            class="px-2 py-1 text-xs {lineItemWizard.quantity === days ? 'bg-blue-100 text-blue-700 font-medium rounded' : 'text-gray-600 hover:bg-gray-100 rounded'}"
-                            on:click={() => lineItemWizard.quantity = days}
+                            class="p-2 border rounded text-left text-sm transition-all {lineItemWizard.unitPrice === equipmentPreset.unitPrice && lineItemWizard.description.includes(equipmentPreset.title) ? 'bg-blue-100 border-blue-400 shadow-sm' : 'border-gray-300 hover:bg-gray-50'}"
+                            on:click={() => setEquipmentType(equipmentPreset)}
                           >
-                            {days} {days === 1 ? 'day' : 'days'}
+                            <div class="font-medium">{equipmentPreset.title}</div>
+                            <div class="flex justify-between text-xs">
+                              <span class="text-gray-600">{equipmentPreset.description}</span>
+                              <span class="font-medium text-blue-700">${equipmentPreset.unitPrice}/{equipmentPreset.unit}</span>
+                            </div>
                           </button>
                         {/each}
                       </div>
                     </div>
                     
-                    {#if $currentUser?.role === 'ADMIN' || $currentUser?.role === 'OFFICE'}
-                      <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Internal Cost ($)</label>
-                        <div class="relative">
-                          <span class="absolute inset-y-0 left-0 flex items-center pl-2 pointer-events-none text-gray-500 text-sm">$</span>
+                    <div class="mb-4">
+                      <label class="block text-sm font-medium text-gray-700 mb-1">Common Equipment</label>
+                      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                        {#each commonEquipment as equipment}
+                          <button 
+                            type="button"
+                            class="p-2 border rounded text-center text-sm transition-all {lineItemWizard.description === `${equipment} Rental` ? 'bg-blue-100 border-blue-400 shadow-sm' : 'border-gray-300 hover:bg-gray-50'}"
+                            on:click={() => setCommonEquipment(equipment)}
+                          >
+                            {equipment}
+                          </button>
+                        {/each}
+                      </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                      <label class="block text-sm font-medium text-gray-700 mb-1">Rental Duration</label>
+                      <div class="flex items-center">
+                        <input 
+                          type="range"
+                          min="1"
+                          max="14"
+                          step="1"
+                          bind:value={lineItemWizard.quantity}
+                          class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                        />
+                        <div class="ml-4 flex items-center">
                           <input 
                             type="number"
-                            bind:value={lineItemWizard.internalCost}
-                            min="0"
-                            step="0.01"
-                            class="w-full p-2 pl-6 border border-gray-300 rounded-lg"
+                            bind:value={lineItemWizard.quantity}
+                            min="1"
+                            step="1"
+                            class="w-20 p-2 border border-gray-300 rounded-lg text-center"
                           />
+                          <span class="ml-2 text-sm text-gray-600">days</span>
                         </div>
-                        <p class="text-xs text-gray-500 mt-1">Default cost is 60% of the rental rate</p>
                       </div>
-                    {/if}
+                      <div class="flex justify-around mt-2">
+                        {#each [1, 3, 5, 7, 14] as day}
+                          <button 
+                            type="button"
+                            class="px-2 py-1 text-xs {lineItemWizard.quantity === day ? 'bg-blue-100 text-blue-700 font-medium rounded' : 'text-gray-600 hover:bg-gray-100 rounded'}"
+                            on:click={() => lineItemWizard.quantity = day}
+                          >
+                            {day}d
+                          </button>
+                        {/each}
+                      </div>
+                    </div>
                     
-                    <div class="p-3 bg-gray-50 rounded-lg border border-gray-200 mb-4">
-                      <div class="flex justify-between items-center">
-                        <span class="font-medium text-gray-700">Summary</span>
-                        <span class="font-bold text-dryd-blue">{formatCurrency(lineItemWizard.unitPrice * lineItemWizard.quantity)}</span>
+                    <div class="mt-3">
+                      <label class="flex items-center text-sm">
+                        <input 
+                          type="checkbox" 
+                          bind:checked={lineItemWizard.isEstimate}
+                          class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        >
+                        <span class="ml-2">This is an estimated cost (for T&E quotes)</span>
+                      </label>
+                    </div>
+                  </div>
+                {:else if lineItemWizard.category === 'Supplies'}
+                  <div class="border-t border-blue-200 pt-4">
+                    <div class="mb-4">
+                      <label class="block text-sm font-medium text-gray-700 mb-1">Supply Type & Price</label>
+                      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                        {#each supplyTypes as supplyPreset}
+                          <button 
+                            type="button"
+                            class="p-2 border rounded text-left text-sm transition-all {lineItemWizard.unitPrice === supplyPreset.unitPrice && lineItemWizard.description.includes(supplyPreset.title) ? 'bg-blue-100 border-blue-400 shadow-sm' : 'border-gray-300 hover:bg-gray-50'}"
+                            on:click={() => setSupplyType(supplyPreset)}
+                          >
+                            <div class="font-medium">{supplyPreset.title}</div>
+                            <div class="flex justify-between text-xs">
+                              <span class="text-gray-600">{supplyPreset.description}</span>
+                              <span class="font-medium text-blue-700">${supplyPreset.unitPrice}/{supplyPreset.unit}</span>
+                            </div>
+                          </button>
+                        {/each}
                       </div>
-                      <div class="text-sm text-gray-600 mt-1">
-                        {lineItemWizard.description || 'Equipment rental'} - {lineItemWizard.quantity} {lineItemWizard.quantity === 1 ? 'day' : 'days'} x ${lineItemWizard.unitPrice}/day
+                    </div>
+                    
+                    <div class="mb-4">
+                      <label class="block text-sm font-medium text-gray-700 mb-1">Common Supplies</label>
+                      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                        {#each commonSupplies as supply}
+                          <button 
+                            type="button"
+                            class="p-2 border rounded text-center text-sm transition-all {lineItemWizard.description === supply ? 'bg-blue-100 border-blue-400 shadow-sm' : 'border-gray-300 hover:bg-gray-50'}"
+                            on:click={() => setCommonSupply(supply)}
+                          >
+                            {supply}
+                          </button>
+                        {/each}
                       </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+                        <input 
+                          type="number"
+                          bind:value={lineItemWizard.quantity}
+                          min="1"
+                          class="w-full p-2 border border-gray-300 rounded-lg"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Unit Price ($)</label>
+                        <input 
+                          type="number"
+                          bind:value={lineItemWizard.unitPrice}
+                          min="0"
+                          step="0.01"
+                          class="w-full p-2 border border-gray-300 rounded-lg"
+                        />
+                      </div>
+                    </div>
+                    
+                    <div class="mt-3">
+                      <label class="flex items-center text-sm">
+                        <input 
+                          type="checkbox" 
+                          bind:checked={lineItemWizard.isEstimate}
+                          class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        >
+                        <span class="ml-2">This is an estimated cost (for T&E quotes)</span>
+                      </label>
                     </div>
                   </div>
                 {:else if lineItemWizard.category === 'Subcontractor'}
-                  <!-- Subcontractor section content -->
                   <div class="border-t border-blue-200 pt-4">
-                    <!-- ... -->
+                    <div class="mb-4">
+                      <label class="block text-sm font-medium text-gray-700 mb-1">Subcontractor Type</label>
+                      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                        {#each subcontractorTypes as subPreset}
+                          <button 
+                            type="button"
+                            class="p-2 border rounded text-left text-sm transition-all {lineItemWizard.unitPrice === subPreset.unitPrice && lineItemWizard.description.includes(subPreset.title) ? 'bg-blue-100 border-blue-400 shadow-sm' : 'border-gray-300 hover:bg-gray-50'}"
+                            on:click={() => setSubcontractor(subPreset)}
+                          >
+                            <div class="font-medium">{subPreset.title}</div>
+                            <div class="flex justify-between text-xs">
+                              <span class="text-gray-600">{subPreset.description}</span>
+                              <span class="font-medium text-blue-700">${subPreset.unitPrice}/{subPreset.unit}</span>
+                            </div>
+                          </button>
+                        {/each}
+                      </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                      <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                      <input 
+                        type="text"
+                        bind:value={lineItemWizard.description}
+                        placeholder="Enter specific subcontractor details"
+                        class="w-full p-2 border border-gray-300 rounded-lg"
+                      />
+                      <p class="text-sm text-gray-500 mt-1">Example: "Plumber Services - Water line repair"</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+                        <input 
+                          type="number"
+                          bind:value={lineItemWizard.quantity}
+                          min="1"
+                          class="w-full p-2 border border-gray-300 rounded-lg"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Unit Price ($)</label>
+                        <input 
+                          type="number"
+                          bind:value={lineItemWizard.unitPrice}
+                          min="0"
+                          step="0.01"
+                          class="w-full p-2 border border-gray-300 rounded-lg"
+                        />
+                      </div>
+                    </div>
+                    
+                    <div class="mt-3">
+                      <label class="flex items-center text-sm">
+                        <input 
+                          type="checkbox" 
+                          bind:checked={lineItemWizard.isEstimate}
+                          class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        >
+                        <span class="ml-2">This is an estimated cost (for T&E quotes)</span>
+                      </label>
+                    </div>
+                  </div>
+                {:else if lineItemWizard.category === 'Permit'}
+                  <div class="border-t border-blue-200 pt-4">
+                    <div class="mb-4">
+                      <label class="block text-sm font-medium text-gray-700 mb-1">Permit Type</label>
+                      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                        {#each permitTypes as permitPreset}
+                          <button 
+                            type="button"
+                            class="p-2 border rounded text-left text-sm transition-all {lineItemWizard.unitPrice === permitPreset.unitPrice && lineItemWizard.description.includes(permitPreset.title) ? 'bg-blue-100 border-blue-400 shadow-sm' : 'border-gray-300 hover:bg-gray-50'}"
+                            on:click={() => setPermitType(permitPreset)}
+                          >
+                            <div class="font-medium">{permitPreset.title}</div>
+                            <div class="flex justify-between text-xs">
+                              <span class="text-gray-600">{permitPreset.description}</span>
+                              <span class="font-medium text-blue-700">${permitPreset.unitPrice}/{permitPreset.unit}</span>
+                            </div>
+                          </button>
+                        {/each}
+                      </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+                        <input 
+                          type="number"
+                          bind:value={lineItemWizard.quantity}
+                          min="1"
+                          class="w-full p-2 border border-gray-300 rounded-lg"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Unit Price ($)</label>
+                        <input 
+                          type="number"
+                          bind:value={lineItemWizard.unitPrice}
+                          min="0"
+                          step="0.01"
+                          class="w-full p-2 border border-gray-300 rounded-lg"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                {:else if lineItemWizard.category === 'Disposal'}
+                  <div class="border-t border-blue-200 pt-4">
+                    <div class="mb-4">
+                      <label class="block text-sm font-medium text-gray-700 mb-1">Disposal Type</label>
+                      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                        {#each disposalTypes as disposalPreset}
+                          <button 
+                            type="button"
+                            class="p-2 border rounded text-left text-sm transition-all {lineItemWizard.unitPrice === disposalPreset.unitPrice && lineItemWizard.description.includes(disposalPreset.title) ? 'bg-blue-100 border-blue-400 shadow-sm' : 'border-gray-300 hover:bg-gray-50'}"
+                            on:click={() => setDisposalType(disposalPreset)}
+                          >
+                            <div class="font-medium">{disposalPreset.title}</div>
+                            <div class="flex justify-between text-xs">
+                              <span class="text-gray-600">{disposalPreset.description}</span>
+                              <span class="font-medium text-blue-700">${disposalPreset.unitPrice}/{disposalPreset.unit}</span>
+                            </div>
+                          </button>
+                        {/each}
+                      </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+                        <input 
+                          type="number"
+                          bind:value={lineItemWizard.quantity}
+                          min="1"
+                          class="w-full p-2 border border-gray-300 rounded-lg"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Unit Price ($)</label>
+                        <input 
+                          type="number"
+                          bind:value={lineItemWizard.unitPrice}
+                          min="0"
+                          step="0.01"
+                          class="w-full p-2 border border-gray-300 rounded-lg"
+                        />
+                      </div>
+                    </div>
                   </div>
                 {:else}
-                  <!-- Description for non-labor/materials items -->
+                  <!-- Description for other item types -->
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
                     <input 
@@ -1921,33 +2091,14 @@
                     
                     <div>
                       <label class="block text-sm font-medium text-gray-700 mb-1">Unit Price ($)</label>
-                      <div class="relative">
-                        <span class="absolute inset-y-0 left-0 flex items-center pl-2 pointer-events-none text-gray-500 text-sm">$</span>
-                        <input 
-                          type="number"
-                          bind:value={lineItemWizard.unitPrice}
-                          min="0"
-                          step="0.01"
-                          class="w-full p-2 pl-6 border border-gray-300 rounded-lg"
-                        />
-                      </div>
+                      <input 
+                        type="number"
+                        bind:value={lineItemWizard.unitPrice}
+                        min="0"
+                        step="0.01"
+                        class="w-full p-2 border border-gray-300 rounded-lg"
+                      />
                     </div>
-                    
-                    {#if $currentUser?.role === 'ADMIN' || $currentUser?.role === 'OFFICE'}
-                      <div class="col-span-2">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Internal Cost ($)</label>
-                        <div class="relative">
-                          <span class="absolute inset-y-0 left-0 flex items-center pl-2 pointer-events-none text-gray-500 text-sm">$</span>
-                          <input 
-                            type="number"
-                            bind:value={lineItemWizard.internalCost}
-                            min="0"
-                            step="0.01"
-                            class="w-full p-2 pl-6 border border-gray-300 rounded-lg"
-                          />
-                        </div>
-                      </div>
-                    {/if}
                   </div>
                 {/if}
                 
@@ -1964,45 +2115,55 @@
                   </div>
                 {/if}
                 
-                <div class="border-t border-gray-200 pt-4 flex items-center justify-between">
-                  <div class="text-sm">
-                    <div class="font-medium text-gray-700">Summary:</div>
-                    {#if lineItemWizard.description}
-                      <div class="text-gray-800 font-medium">{lineItemWizard.description}</div>
-                    {/if}
-                    <div>
-                      <span class="text-gray-600">{lineItemWizard.quantity} × ${lineItemWizard.unitPrice} =</span> 
-                      <span class="font-bold">{formatCurrency(lineItemWizard.quantity * lineItemWizard.unitPrice)}</span>
+                <div class="border-t border-gray-200 pt-4 mt-2">
+                  <h4 class="font-medium text-sm text-gray-700 mb-2">Summary</h4>
+                  <div class="bg-white p-3 rounded-lg border border-blue-100 shadow-sm">
+                    <div class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                      <div class="font-medium">Description:</div>
+                      <div class="text-gray-700">{lineItemWizard.description || '(Not specified)'}</div>
+                      
+                      <div class="font-medium">Category:</div>
+                      <div class="text-gray-700">{lineItemWizard.category || '(Not specified)'}</div>
+                      
+                      <div class="font-medium">Quantity:</div>
+                      <div class="text-gray-700">{lineItemWizard.quantity}</div>
+                      
+                      <div class="font-medium">Unit Price:</div>
+                      <div class="text-gray-700">${lineItemWizard.unitPrice.toFixed(2)}</div>
+                      
+                      <div class="font-medium">Estimated:</div>
+                      <div class="text-gray-700">{lineItemWizard.isEstimate ? 'Yes' : 'No'}</div>
+                      
+                      <div class="col-span-2 border-t border-gray-100 mt-1 pt-2">
+                        <div class="flex justify-between font-medium mt-1">
+                          <span>Total:</span>
+                          <span class="text-blue-700">${(lineItemWizard.quantity * lineItemWizard.unitPrice).toFixed(2)}</span>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                  
-                  <div class="flex gap-2">
-                    <button 
-                      type="button" 
-                      class="px-3 py-2 border border-gray-300 text-gray-700 rounded hover:bg-gray-50"
-                      on:click={() => {
-                        resetLineItemWizard();
-                      }}
-                    >
-                      Reset
-                    </button>
-                    
-                    <button 
-                      type="button" 
-                      class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                      on:click={addLineItemFromWizard}
-                      disabled={!lineItemWizard.description.trim() || lineItemWizard.quantity <= 0}
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-1" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
-                      </svg>
-                      Add to Quote
-                    </button>
                   </div>
                 </div>
               </div>
+              
+              <!-- Action Buttons -->
+              <div class="flex justify-end space-x-3">
+                <button 
+                  type="button"
+                  class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-dryd-blue"
+                  on:click={resetLineItemWizard}
+                >
+                  Reset
+                </button>
+                <button 
+                  type="button"
+                  class="px-4 py-2 text-sm font-medium text-white bg-dryd-blue border border-transparent rounded-md shadow-sm hover:bg-dryd-blue-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-dryd-blue"
+                  on:click={addLineItemFromWizard}
+                  disabled={!lineItemWizard.description.trim() || !lineItemWizard.category}
+                >
+                  Add Line Item
+                </button>
+              </div>
             </div>
-          {/if}
           
           <!-- Line Items Table -->
           {#if lineItems.length === 0}
@@ -2017,9 +2178,6 @@
                     <th class="px-2 py-2 text-left text-sm font-medium text-gray-500">Description</th>
                     <th class="px-2 py-2 text-right text-sm font-medium text-gray-500">Qty</th>
                     <th class="px-2 py-2 text-right text-sm font-medium text-gray-500">Unit Price</th>
-                    {#if $currentUser?.role === 'ADMIN' || $currentUser?.role === 'OFFICE'}
-                      <th class="px-2 py-2 text-right text-sm font-medium text-gray-500">Int. Cost</th>
-                    {/if}
                     <th class="px-2 py-2 text-right text-sm font-medium text-gray-500">Total</th>
                     {#if quoteType === QuoteType.T_AND_E}
                       <th class="px-2 py-2 text-center text-sm font-medium text-gray-500">Est?</th>
@@ -2072,20 +2230,6 @@
                           {/if}
                         </div>
                       </td>
-                      {#if $currentUser?.role === 'ADMIN' || $currentUser?.role === 'OFFICE'}
-                        <td class="px-2 py-2">
-                          <div class="relative">
-                            <span class="absolute inset-y-0 left-0 flex items-center pl-2 pointer-events-none text-gray-500 text-sm">$</span>
-                            <input 
-                              type="number"
-                              bind:value={item.internalCost}
-                              min="0"
-                              step="0.01"
-                              class="w-32 p-1.5 pl-6 border border-gray-300 rounded-md focus:ring-dryd-blue focus:border-dryd-blue text-sm text-right"
-                            />
-                          </div>
-                        </td>
-                      {/if}
                       <td class="px-2 py-2 text-right font-medium">
                         {formatCurrency(item.total)}
                       </td>
@@ -2351,260 +2495,260 @@
       </Card>
     {/if}
     
-    <!-- Navigation Buttons -->
-    <div class="flex justify-between mt-8 mb-4">
-      {#if currentStep > 1}
-        <button 
-          type="button" 
-          class="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-dryd-blue-dark hover:shadow-md transition-all duration-200"
-          on:click={prevStep}
-        >
-          <span class="flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
-            </svg>
-            Previous
-          </span>
-        </button>
-      {:else}
-        <div></div> <!-- Empty div for flex layout -->
-      {/if}
+    <!-- Form Navigation Buttons -->
+    <div class="flex justify-between mt-8">
+      <button
+        type="button"
+        class="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 disabled:opacity-50"
+        on:click={prevStep}
+        disabled={currentStep === 1}
+      >
+        <span class="flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+          </svg>
+          Previous
+        </span>
+      </button>
       
-      {#if currentStep < totalSteps}
-        <button 
-          type="button" 
-          class="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-dryd-blue-dark hover:shadow-md transition-all duration-200"
+      {#if currentStep < 4}
+        <button
+          type="button"
+          class="px-4 py-2 bg-dryd-blue text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-dryd-blue"
           on:click={nextStep}
         >
           <span class="flex items-center">
             Next
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-2" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-1" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
             </svg>
           </span>
         </button>
       {:else}
-        <button 
-          type="submit" 
-          class="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-dryd-blue-dark hover:shadow-md transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed"
+        <button
+          type="button"
+          class="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-70"
+          on:click={submitQuote}
           disabled={isSubmitting}
         >
-          {#if isSubmitting}
-            <span class="flex items-center">
+          <span class="flex items-center">
+            {#if isSubmitting}
               <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
-              Submitting...
-            </span>
-          {:else}
-            Submit Quote
-          {/if}
+              Saving...
+            {:else}
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+              </svg>
+              Create Quote
+            {/if}
+          </span>
         </button>
       {/if}
     </div>
-    
-    <!-- New Customer Modal -->
-    {#if showNewCustomerForm}
-      <div class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-        <div class="bg-gray-100 rounded-lg shadow-xl max-w-2xl w-full max-h-screen overflow-y-auto">
-          <div class="p-6">
-            <div class="flex justify-between items-center mb-4">
-              <h2 class="text-xl font-semibold text-gray-800">Create New Customer</h2>
-              <button 
-                type="button"
-                class="text-gray-500 hover:text-gray-700"
-                on:click={() => showNewCustomerForm = false}
-                aria-label="Close"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
+</div>
+
+{#if showNewCustomerForm}
+  <!-- New Customer Modal -->
+  <div class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-screen overflow-y-auto">
+      <div class="p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-xl font-semibold text-gray-800">Create New Customer</h2>
+          <button 
+            type="button"
+            class="text-gray-500 hover:text-gray-700"
+            on:click={() => showNewCustomerForm = false}
+            aria-label="Close"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        
+        <form on:submit|preventDefault={createNewCustomer} class="space-y-4">
+          <!-- Customer Name -->
+          <div>
+            <label for="newCustomerName" class="block text-sm font-medium text-gray-700 mb-1">
+              Customer Name <span class="text-red-500">*</span>
+            </label>
+            <input 
+              id="newCustomerName"
+              type="text"
+              bind:value={newCustomer.name}
+              class="w-full p-2 border {newCustomerValidationErrors.name ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-dryd-blue focus:border-dryd-blue"
+              placeholder="Enter customer name"
+            />
+            {#if newCustomerValidationErrors.name}
+              <p class="mt-1 text-sm text-red-600">{newCustomerValidationErrors.name}</p>
+            {/if}
+          </div>
+          
+          <!-- Contact Person -->
+          <div>
+            <label for="newCustomerContact" class="block text-sm font-medium text-gray-700 mb-1">
+              Contact Person
+            </label>
+            <input 
+              id="newCustomerContact"
+              type="text"
+              bind:value={newCustomer.contactPerson}
+              class="w-full p-2 border border-gray-300 rounded-lg focus:ring-dryd-blue focus:border-dryd-blue"
+              placeholder="Enter contact person's name"
+            />
+          </div>
+          
+          <!-- Email and Phone - Two columns -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label for="newCustomerEmail" class="block text-sm font-medium text-gray-700 mb-1">
+                Email <span class="text-red-500">*</span>
+              </label>
+              <input 
+                id="newCustomerEmail"
+                type="email"
+                bind:value={newCustomer.email}
+                class="w-full p-2 border {newCustomerValidationErrors.email ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-dryd-blue focus:border-dryd-blue"
+                placeholder="Enter email address"
+              />
+              {#if newCustomerValidationErrors.email}
+                <p class="mt-1 text-sm text-red-600">{newCustomerValidationErrors.email}</p>
+              {/if}
+            </div>
+            <div>
+              <label for="newCustomerPhone" class="block text-sm font-medium text-gray-700 mb-1">
+                Phone <span class="text-red-500">*</span>
+              </label>
+              <input 
+                id="newCustomerPhone"
+                type="tel"
+                bind:value={newCustomer.phone}
+                class="w-full p-2 border {newCustomerValidationErrors.phone ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-dryd-blue focus:border-dryd-blue"
+                placeholder="Enter phone number"
+              />
+              {#if newCustomerValidationErrors.phone}
+                <p class="mt-1 text-sm text-red-600">{newCustomerValidationErrors.phone}</p>
+              {/if}
+            </div>
+          </div>
+          
+          <!-- Address Section -->
+          <div>
+            <h3 class="text-md font-medium text-gray-700 mb-2">Primary Address</h3>
+            
+            <!-- Street -->
+            <div class="mb-3">
+              <label for="newCustomerStreet" class="block text-sm font-medium text-gray-700 mb-1">
+                Street <span class="text-red-500">*</span>
+              </label>
+              <input 
+                id="newCustomerStreet"
+                type="text"
+                bind:value={newCustomer.primaryAddress.street}
+                class="w-full p-2 border {newCustomerValidationErrors.street ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-dryd-blue focus:border-dryd-blue"
+                placeholder="Enter street address"
+              />
+              {#if newCustomerValidationErrors.street}
+                <p class="mt-1 text-sm text-red-600">{newCustomerValidationErrors.street}</p>
+              {/if}
             </div>
             
-            <form on:submit|preventDefault={createNewCustomer} class="space-y-4">
-              <!-- Customer Name -->
-              <div>
-                <label for="newCustomerName" class="block text-sm font-medium text-gray-700 mb-1">
-                  Customer Name <span class="text-red-500">*</span>
+            <!-- City, State, ZIP -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div class="col-span-2">
+                <label for="newCustomerCity" class="block text-sm font-medium text-gray-700 mb-1">
+                  City <span class="text-red-500">*</span>
                 </label>
                 <input 
-                  id="newCustomerName"
+                  id="newCustomerCity"
                   type="text"
-                  bind:value={newCustomer.name}
-                  class="w-full p-2 border {newCustomerValidationErrors.name ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-dryd-blue focus:border-dryd-blue"
-                  placeholder="Enter customer name"
+                  bind:value={newCustomer.primaryAddress.city}
+                  class="w-full p-2 border {newCustomerValidationErrors.city ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-dryd-blue focus:border-dryd-blue"
+                  placeholder="City"
                 />
-                {#if newCustomerValidationErrors.name}
-                  <p class="mt-1 text-sm text-red-600">{newCustomerValidationErrors.name}</p>
+                {#if newCustomerValidationErrors.city}
+                  <p class="mt-1 text-sm text-red-600">{newCustomerValidationErrors.city}</p>
                 {/if}
               </div>
-              
-              <!-- Contact Person -->
               <div>
-                <label for="newCustomerContact" class="block text-sm font-medium text-gray-700 mb-1">
-                  Contact Person
+                <label for="newCustomerState" class="block text-sm font-medium text-gray-700 mb-1">
+                  State <span class="text-red-500">*</span>
                 </label>
                 <input 
-                  id="newCustomerContact"
+                  id="newCustomerState"
                   type="text"
-                  bind:value={newCustomer.contactPerson}
-                  class="w-full p-2 border border-gray-300 rounded-lg focus:ring-dryd-blue focus:border-dryd-blue"
-                  placeholder="Enter contact person's name"
+                  bind:value={newCustomer.primaryAddress.state}
+                  class="w-full p-2 border {newCustomerValidationErrors.state ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-dryd-blue focus:border-dryd-blue"
+                  placeholder="State"
                 />
+                {#if newCustomerValidationErrors.state}
+                  <p class="mt-1 text-sm text-red-600">{newCustomerValidationErrors.state}</p>
+                {/if}
               </div>
-              
-              <!-- Email and Phone - Two columns -->
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label for="newCustomerEmail" class="block text-sm font-medium text-gray-700 mb-1">
-                    Email <span class="text-red-500">*</span>
-                  </label>
-                  <input 
-                    id="newCustomerEmail"
-                    type="email"
-                    bind:value={newCustomer.email}
-                    class="w-full p-2 border {newCustomerValidationErrors.email ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-dryd-blue focus:border-dryd-blue"
-                    placeholder="Enter email address"
-                  />
-                  {#if newCustomerValidationErrors.email}
-                    <p class="mt-1 text-sm text-red-600">{newCustomerValidationErrors.email}</p>
-                  {/if}
-                </div>
-                <div>
-                  <label for="newCustomerPhone" class="block text-sm font-medium text-gray-700 mb-1">
-                    Phone <span class="text-red-500">*</span>
-                  </label>
-                  <input 
-                    id="newCustomerPhone"
-                    type="tel"
-                    bind:value={newCustomer.phone}
-                    class="w-full p-2 border {newCustomerValidationErrors.phone ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-dryd-blue focus:border-dryd-blue"
-                    placeholder="Enter phone number"
-                  />
-                  {#if newCustomerValidationErrors.phone}
-                    <p class="mt-1 text-sm text-red-600">{newCustomerValidationErrors.phone}</p>
-                  {/if}
-                </div>
-              </div>
-              
-              <!-- Address Section -->
               <div>
-                <h3 class="text-md font-medium text-gray-700 mb-2">Primary Address</h3>
-                
-                <!-- Street -->
-                <div class="mb-3">
-                  <label for="newCustomerStreet" class="block text-sm font-medium text-gray-700 mb-1">
-                    Street <span class="text-red-500">*</span>
-                  </label>
-                  <input 
-                    id="newCustomerStreet"
-                    type="text"
-                    bind:value={newCustomer.primaryAddress.street}
-                    class="w-full p-2 border {newCustomerValidationErrors.street ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-dryd-blue focus:border-dryd-blue"
-                    placeholder="Enter street address"
-                  />
-                  {#if newCustomerValidationErrors.street}
-                    <p class="mt-1 text-sm text-red-600">{newCustomerValidationErrors.street}</p>
-                  {/if}
-                </div>
-                
-                <!-- City, State, ZIP -->
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  <div class="col-span-2">
-                    <label for="newCustomerCity" class="block text-sm font-medium text-gray-700 mb-1">
-                      City <span class="text-red-500">*</span>
-                    </label>
-                    <input 
-                      id="newCustomerCity"
-                      type="text"
-                      bind:value={newCustomer.primaryAddress.city}
-                      class="w-full p-2 border {newCustomerValidationErrors.city ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-dryd-blue focus:border-dryd-blue"
-                      placeholder="City"
-                    />
-                    {#if newCustomerValidationErrors.city}
-                      <p class="mt-1 text-sm text-red-600">{newCustomerValidationErrors.city}</p>
-                    {/if}
-                  </div>
-                  <div>
-                    <label for="newCustomerState" class="block text-sm font-medium text-gray-700 mb-1">
-                      State <span class="text-red-500">*</span>
-                    </label>
-                    <input 
-                      id="newCustomerState"
-                      type="text"
-                      bind:value={newCustomer.primaryAddress.state}
-                      class="w-full p-2 border {newCustomerValidationErrors.state ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-dryd-blue focus:border-dryd-blue"
-                      placeholder="State"
-                    />
-                    {#if newCustomerValidationErrors.state}
-                      <p class="mt-1 text-sm text-red-600">{newCustomerValidationErrors.state}</p>
-                    {/if}
-                  </div>
-                  <div>
-                    <label for="newCustomerZip" class="block text-sm font-medium text-gray-700 mb-1">
-                      ZIP <span class="text-red-500">*</span>
-                    </label>
-                    <input 
-                      id="newCustomerZip"
-                      type="text"
-                      bind:value={newCustomer.primaryAddress.zip}
-                      class="w-full p-2 border {newCustomerValidationErrors.zip ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-dryd-blue focus:border-dryd-blue"
-                      placeholder="ZIP"
-                    />
-                    {#if newCustomerValidationErrors.zip}
-                      <p class="mt-1 text-sm text-red-600">{newCustomerValidationErrors.zip}</p>
-                    {/if}
-                  </div>
-                </div>
-              </div>
-              
-              <!-- Notes -->
-              <div>
-                <label for="newCustomerNotes" class="block text-sm font-medium text-gray-700 mb-1">
-                  Notes
+                <label for="newCustomerZip" class="block text-sm font-medium text-gray-700 mb-1">
+                  ZIP <span class="text-red-500">*</span>
                 </label>
-                <textarea 
-                  id="newCustomerNotes"
-                  bind:value={newCustomer.notes}
-                  class="w-full p-2 border border-gray-300 rounded-lg focus:ring-dryd-blue focus:border-dryd-blue"
-                  rows="3"
-                  placeholder="Enter any additional notes about this customer"
-                ></textarea>
+                <input 
+                  id="newCustomerZip"
+                  type="text"
+                  bind:value={newCustomer.primaryAddress.zip}
+                  class="w-full p-2 border {newCustomerValidationErrors.zip ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-dryd-blue focus:border-dryd-blue"
+                  placeholder="ZIP"
+                />
+                {#if newCustomerValidationErrors.zip}
+                  <p class="mt-1 text-sm text-red-600">{newCustomerValidationErrors.zip}</p>
+                {/if}
               </div>
-              
-              <!-- Action Buttons -->
-              <div class="flex justify-end space-x-3 pt-4">
-                <button 
-                  type="button"
-                  class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-dryd-blue"
-                  on:click={() => showNewCustomerForm = false}
-                >
-                  Cancel
-                </button>
-                <button 
-                  type="submit"
-                  class="px-4 py-2 text-sm font-medium text-white bg-dryd-blue border border-transparent rounded-md shadow-sm hover:bg-dryd-blue-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-dryd-blue"
-                  disabled={isCreatingCustomer}
-                >
-                  {#if isCreatingCustomer}
-                    <span class="inline-flex items-center">
-                      <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Creating...
-                    </span>
-                  {:else}
-                    Create Customer
-                  {/if}
-                </button>
-              </div>
-            </form>
+            </div>
           </div>
-        </div>
+          
+          <!-- Notes -->
+          <div>
+            <label for="newCustomerNotes" class="block text-sm font-medium text-gray-700 mb-1">
+              Notes
+            </label>
+            <textarea 
+              id="newCustomerNotes"
+              bind:value={newCustomer.notes}
+              class="w-full p-2 border border-gray-300 rounded-lg focus:ring-dryd-blue focus:border-dryd-blue"
+              rows="3"
+              placeholder="Enter any additional notes about this customer"
+            ></textarea>
+          </div>
+          
+          <!-- Action Buttons -->
+          <div class="flex justify-end space-x-3 pt-4">
+            <button 
+              type="button"
+              class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-dryd-blue"
+              on:click={() => showNewCustomerForm = false}
+            >
+              Cancel
+            </button>
+            <button 
+              type="submit"
+              class="px-4 py-2 text-sm font-medium text-white bg-dryd-blue border border-transparent rounded-md shadow-sm hover:bg-dryd-blue-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-dryd-blue"
+              disabled={isCreatingCustomer}
+            >
+              {#if isCreatingCustomer}
+                <span class="inline-flex items-center">
+                  <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Creating...
+                </span>
+              {:else}
+                Create Customer
+              {/if}
+            </button>
+          </div>
+        </form>
       </div>
-    {/if}
-  </form>
-</div>
+    </div>
+  </div>
+{/if}
