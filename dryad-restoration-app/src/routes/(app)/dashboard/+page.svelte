@@ -289,7 +289,7 @@
     <div class="mb-8 text-center md:text-left">
       <div class="flex flex-col md:flex-row items-center justify-between mb-6">
         <div class="mb-4 md:mb-0">
-          <Logo size="xxl" linkToDashboard={false} showText={false} logoSrc="/dryd-logo-secondary.PNG" />
+          <Logo size="xxxl" linkToDashboard={false} showText={false} logoSrc="/dryd-logo-secondary.PNG" />
         </div>
       </div>
       
