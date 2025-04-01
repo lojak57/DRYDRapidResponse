@@ -11,8 +11,8 @@
   const customerName = writable<string>('');
   
   // Format the address for display
-  $: formattedAddress = job?.siteAddress 
-    ? `${job.siteAddress.street || ''}, ${job.siteAddress.city || ''}, ${job.siteAddress.state || ''} ${job.siteAddress.zip || ''}`
+  $: formattedAddress = job?.location 
+    ? `${job.location.street || ''}, ${job.location.city || ''}, ${job.location.state || ''} ${job.location.zip || ''}`
     : 'Address not available';
     
   // Format date for display
@@ -38,7 +38,7 @@
   });
 </script>
 
-<div class="border border-gray-200 rounded-lg overflow-hidden shadow-md hover:shadow-lg hover:border-gray-300 transition-all duration-200 ease-in-out bg-gray-100">
+<div class="card-float overflow-hidden my-8">
   <div class="border-l-4 {
     job.status === 'NEW' ? 'border-blue-500' : 
     job.status === 'SCHEDULED' ? 'border-purple-500' : 
@@ -68,7 +68,7 @@
         </svg>
         <div>
           <p class="text-sm font-medium text-gray-600">Type</p>
-          <p class="text-gray-900 font-medium">{job.jobType}</p>
+          <p class="text-gray-900 font-medium">{job.type}</p>
         </div>
       </div>
       
@@ -99,7 +99,7 @@
         <svg class="h-4 w-4 text-gray-500 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
         </svg>
-        {job.incidentDate ? formatDate(job.incidentDate) : 'No incident date'}
+        No incident date
       </div>
       <a 
         href="/jobs/{job.id}" 
