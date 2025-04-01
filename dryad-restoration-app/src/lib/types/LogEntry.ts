@@ -14,7 +14,8 @@ export enum LogEntryType {
   SIGNATURE = 'SIGNATURE',
   CHECKLIST = 'CHECKLIST',
   TASK_COMPLETION = 'TASK_COMPLETION',
-  EXPENSE = 'EXPENSE'
+  EXPENSE = 'EXPENSE',
+  PAYMENT = 'PAYMENT'
 }
 
 /**
@@ -90,6 +91,20 @@ export interface ExpenseData {
 }
 
 /**
+ * Data for payment log entries
+ */
+export interface PaymentData {
+  /** Amount paid */
+  amount: number;
+  /** Payment method used */
+  method: string;
+  /** Reference number for the payment (check #, transaction ID, etc.) */
+  referenceNumber?: string | null;
+  /** Additional notes about the payment */
+  notes?: string | null;
+}
+
+/**
  * Represents a log entry for a job
  */
 export interface LogEntry {
@@ -104,7 +119,7 @@ export interface LogEntry {
   /** Type of log entry */
   type: LogEntryType;
   /** Content of the log entry, varies by type */
-  content: string | MoistureReadingData | EquipmentPlacementData | EquipmentLogData | PhotoData | SignatureData | ExpenseData | Record<string, any>;
+  content: string | MoistureReadingData | EquipmentPlacementData | EquipmentLogData | PhotoData | SignatureData | ExpenseData | PaymentData | Record<string, any>;
   /** Geolocation where the log entry was created */
   location?: {
     latitude: number;

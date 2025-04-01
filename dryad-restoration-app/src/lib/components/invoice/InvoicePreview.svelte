@@ -9,6 +9,7 @@
   import Logo from '$lib/components/common/Logo.svelte';
   import { currentUser } from '$lib/stores/authStore';
   import { Role } from '$lib/types/User';
+  import { format } from 'date-fns';
   
   // Re-define CustomLineItem type since we can't import it directly from JobFinalizeForm
   interface CustomLineItem {
@@ -160,6 +161,30 @@
       <p class="text-red-700">{error}</p>
     </div>
   {:else}
+    {#if job && job.payment}
+      <div class="bg-green-50 border-2 border-green-500 rounded-lg p-4 mb-8 flex items-center">
+        <div class="mr-4 text-green-600">
+          <svg class="w-12 h-12" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold text-green-800">PAID</h3>
+          <p class="text-green-700">
+            Payment of <span class="font-semibold">${job.payment.amount.toFixed(2)}</span> 
+            received via <span class="font-medium">{job.payment.method}</span>
+            on <span class="font-medium">{new Date(job.payment.date).toLocaleDateString()}</span>
+            {#if job.payment.referenceNumber}
+              (Ref: {job.payment.referenceNumber})
+            {/if}
+          </p>
+          {#if job.payment.notes}
+            <p class="text-green-600 text-sm mt-1">{job.payment.notes}</p>
+          {/if}
+        </div>
+      </div>
+    {/if}
+
     <!-- Internal Cost Toggle (Admin/Office Only) -->
     {#if canViewInternalCosts}
       <div class="mb-4 flex justify-end">
@@ -245,19 +270,18 @@
           <div>{job.jobNumber}</div>
           
           <div class="font-medium text-gray-700">Job Type:</div>
-          <div class="capitalize">{job.jobType.toLowerCase()} Damage</div>
+          <div class="capitalize">{job.type.toLowerCase()} Damage</div>
           
           <div class="font-medium text-gray-700">Job Location:</div>
           <div>
-            {job.siteAddress.street}, 
-            {job.siteAddress.city}, {job.siteAddress.state} {job.siteAddress.zip}
+            {job.location ? `${job.location.street}, ${job.location.city}, ${job.location.state} ${job.location.zip}` : 'Job Site Address'}
           </div>
           
           <div class="font-medium text-gray-700">Start Date:</div>
-          <div>{formatDate(job.scheduledStartDate)}</div>
+          <div>{job.scheduledStartDate ? format(new Date(job.scheduledStartDate), 'MMM d, yyyy') : 'Not specified'}</div>
           
           <div class="font-medium text-gray-700">Completion Date:</div>
-          <div>{formatDate(job.completedDate || job.estimatedCompletionDate)}</div>
+          <div>{job.completedDate ? format(new Date(job.completedDate), 'MMM d, yyyy') : 'Not specified'}</div>
         </div>
       </div>
     </div>

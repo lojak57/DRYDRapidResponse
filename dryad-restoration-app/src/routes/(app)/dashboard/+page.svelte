@@ -16,6 +16,9 @@
   
   // Filter jobs that are pending completion
   $: pendingCompletionJobs = $dashboardJobs.filter(job => job.status === JobStatus.PENDING_COMPLETION);
+  
+  // Filter jobs that are paid and closed
+  $: paidJobs = $dashboardJobs.filter(job => job.status === JobStatus.PAID);
 </script>
 
 <div class="max-w-6xl mx-auto">
@@ -74,15 +77,13 @@
     {#if isAuthorized && pendingCompletionJobs.length > 0}
       <div class="mb-6">
         <div class="bg-white rounded-lg shadow-lg border border-blue-300 overflow-hidden">
-          <div class="p-4 bg-blue-100 text-blue-800 border-b-4 border-blue-400">
+          <div class="p-4 bg-blue-100 text-blue-800 border-b border-blue-300">
             <div class="flex justify-between items-center">
               <h2 class="font-bold text-xl flex items-center">
-                <div class="bg-blue-200 p-2 rounded-md mr-3">
-                  <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                  </svg>
-                </div>
-                <span class="text-2xl">Jobs Awaiting Final Completion</span>
+                <svg class="w-6 h-6 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                Jobs Awaiting Final Completion
               </h2>
             </div>
           </div>
@@ -101,6 +102,49 @@
                       Ready for Review
                     </div>
                   </div>
+                </a>
+              {/each}
+            </div>
+          </div>
+        </div>
+      </div>
+    {/if}
+
+    <!-- Paid & Closed Jobs Section -->
+    {#if isAuthorized && paidJobs.length > 0}
+      <div class="mb-6">
+        <div class="bg-white rounded-lg shadow-lg border border-green-300 overflow-hidden">
+          <div class="p-4 bg-green-100 text-green-800 border-b border-green-300">
+            <div class="flex justify-between items-center">
+              <h2 class="font-bold text-xl flex items-center">
+                <svg class="w-6 h-6 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 8l3 5m0 0l3-5m-3 5v4m-3-5h6m-6 3h6m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Paid & Closed Jobs
+              </h2>
+            </div>
+          </div>
+
+          <div class="p-6 bg-white">
+            <p class="text-gray-700 mb-4">These jobs have been completed, invoiced, and payment has been received:</p>
+            <div class="space-y-3">
+              {#each paidJobs as job}
+                <a href="/jobs/{job.id}" class="block p-4 bg-green-50 hover:bg-green-100 border border-green-200 rounded-lg transition-colors duration-150">
+                  <div class="flex justify-between items-center">
+                    <div>
+                      <h3 class="font-semibold text-green-800">{job.title}</h3>
+                      <p class="text-sm text-green-600">#{job.jobNumber}</p>
+                    </div>
+                    <div class="bg-green-200 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
+                      Paid
+                    </div>
+                  </div>
+                  {#if job.payment}
+                    <div class="mt-2 text-sm text-green-700">
+                      <span class="font-medium">Paid:</span> ${job.payment.amount.toFixed(2)} via {job.payment.method} 
+                      on {new Date(job.payment.date).toLocaleDateString()}
+                    </div>
+                  {/if}
                 </a>
               {/each}
             </div>

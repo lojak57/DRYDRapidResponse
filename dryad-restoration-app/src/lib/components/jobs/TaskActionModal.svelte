@@ -26,6 +26,10 @@
   import { currentUser } from '$lib/stores/authStore';
   import { updateJob, getJobById } from '$lib/services/jobs';
   import type { CustomLineItem } from '$lib/types/Job';
+  import { type CompletionTasks } from '$lib/types/Job';
+  import type { InvoicePayment } from '$lib/types/Invoice';
+  import { updateJobStatus } from '$lib/services/jobs';
+  import PaymentForm from '../invoice/PaymentForm.svelte';
   
   // Define field types
   interface TextField {
@@ -243,6 +247,13 @@
           title: 'Review & Approve Invoice',
           description: 'Review the invoice before sending it to the customer',
           component: 'InvoicePreview'
+        };
+        
+      case 'record_payment':
+        return {
+          title: 'Record Payment',
+          description: 'Record payment information for this invoice',
+          component: 'PaymentForm'
         };
         
       case 'add_reading':
@@ -909,6 +920,52 @@
     
     return addressStr;
   }
+  
+  // Handle payment submission
+  function handlePaymentSubmit(event: CustomEvent<InvoicePayment>) {
+    console.log('Payment recorded with data:', event.detail);
+    
+    // Create a completion data object
+    const data = {
+      taskType: 'record_payment',
+      payment: event.detail,
+      notes: `Payment of $${event.detail.amount.toFixed(2)} received via ${event.detail.method}`,
+      timestamp: new Date()
+    };
+    
+    // Add a log entry for payment
+    addLogEntry({
+      jobId: job.id,
+      userId: userInfo?.id || 'unknown-user',
+      timestamp: new Date(),
+      type: LogEntryType.PAYMENT,
+      content: {
+        amount: event.detail.amount,
+        method: event.detail.method,
+        referenceNumber: event.detail.referenceNumber,
+        notes: event.detail.notes
+      }
+    }).catch(err => {
+      console.error('Error logging payment:', err);
+    });
+    
+    // Update the job with payment data and status
+    updateJob(job.id, {
+      payment: event.detail,
+      status: JobStatus.PAID
+    }).then((updatedJob) => {
+      if (updatedJob) {
+        console.log('Job updated with payment data:', updatedJob);
+        job = updatedJob;
+      }
+      
+      // Complete the task
+      completeTask(data);
+    }).catch(error => {
+      console.error('Error updating job with payment data:', error);
+      alert('Failed to save payment data. Please try again.');
+    });
+  }
 </script>
 
 {#if isOpen}
@@ -1077,6 +1134,12 @@
               job={job}
               mode="create"
               on:approve={handleInvoiceCreation}
+              on:cancel={closeModal}
+            />
+          {:else if task.id === 'record_payment'}
+            <PaymentForm
+              job={job}
+              on:submit={handlePaymentSubmit}
               on:cancel={closeModal}
             />
           {:else}

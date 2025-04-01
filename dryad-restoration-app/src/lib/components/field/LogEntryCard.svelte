@@ -2,6 +2,7 @@
   import { formatDateDistance, formatDateTime } from '$lib/utils/dateUtils';
   import type { LogEntry } from '$lib/types/LogEntry';
   import { LogEntryType } from '$lib/types/LogEntry';
+  import type { PaymentData } from '$lib/types/LogEntry';
   import type { EquipmentLogData } from '$lib/types/Equipment';
   
   export let logEntry: LogEntry;
@@ -21,6 +22,8 @@
         return 'bg-green-100 text-green-800';
       case LogEntryType.EQUIPMENT_REMOVAL:
         return 'bg-amber-100 text-amber-800';
+      case LogEntryType.PAYMENT:
+        return 'bg-teal-100 text-teal-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
@@ -41,6 +44,8 @@
         return '<path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7M9 11l-4 4M15 8l-2 2M12 16l-3-3M8 15l-1.5 1.5M14 14l1 1"/>';
       case LogEntryType.EQUIPMENT_REMOVAL:
         return '<path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M10 4v4m4-4v4M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8M9 14l2 2m0 0l2-2m-2 2V12"/>';
+      case LogEntryType.PAYMENT:
+        return '<path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 20 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2z"/>';
       default:
         return '<path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>';
     }
@@ -63,6 +68,8 @@
         return 'Equipment Placed';
       case LogEntryType.EQUIPMENT_REMOVAL:
         return 'Equipment Removed';
+      case LogEntryType.PAYMENT:
+        return 'Payment Received';
       default:
         return 'Entry';
     }
@@ -135,6 +142,22 @@
     // Show a more friendly name format
     return logEntry.userId.startsWith('u') ? `Technician ${logEntry.userId.substring(1)}` : logEntry.userId;
   }
+
+  // Helper function to get payment details
+  function getPaymentDetails(logEntry: LogEntry): string {
+    if (logEntry.type !== LogEntryType.PAYMENT || typeof logEntry.content !== 'object') {
+      return '';
+    }
+    
+    const paymentData = logEntry.content as PaymentData;
+    if (!paymentData) return '';
+    
+    const amount = paymentData.amount ? `$${paymentData.amount.toFixed(2)}` : '';
+    const method = paymentData.method || '';
+    const reference = paymentData.referenceNumber ? `(Ref: ${paymentData.referenceNumber})` : '';
+    
+    return `${amount} received via ${method} ${reference}`.trim();
+  }
 </script>
 
 {#if logEntry}
@@ -202,6 +225,10 @@
           {#if typeof logEntry.content === 'object' && logEntry.content && 'notes' in logEntry.content}
             <p class="text-gray-700 text-sm mt-2">{logEntry.content.notes}</p>
           {/if}
+        </div>
+      {:else if logEntry.type === LogEntryType.PAYMENT}
+        <div class="space-y-1">
+          <p class="text-gray-800 text-sm font-medium">{getPaymentDetails(logEntry)}</p>
         </div>
       {/if}
     </div>
