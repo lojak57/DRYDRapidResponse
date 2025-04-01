@@ -322,7 +322,7 @@
                   
                   <a 
                     href="/jobs?status={category.status}" 
-                    class="action-link btn-light-blue text-sm mt-auto self-start"
+                    class="action-link btn-burgundy text-sm mt-auto self-start"
                   >
                     View all {category.title.toLowerCase()}
                     <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
