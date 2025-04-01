@@ -22,11 +22,9 @@
   import JobFinalizeForm from './JobFinalizeForm.svelte';
   import InvoicePreview from '../invoice/InvoicePreview.svelte';
   import type { Task } from '$lib/types/Task';
-  import type { LogEntry } from '$lib/types/LogEntry';
   import AssignTechnicianForm from '../field/AssignTechnicianForm.svelte';
   import { currentUser } from '$lib/stores/authStore';
-  import { getTaskInfo } from '$lib/config/workflowConfig';
-  import { addCompletionTaskToJob, updateJob, addLog, getJobById } from '$lib/services/jobs';
+  import { updateJob, getJobById } from '$lib/services/jobs';
   import type { CustomLineItem } from '$lib/types/Job';
   
   // Define field types
