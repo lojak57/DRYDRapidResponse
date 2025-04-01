@@ -81,7 +81,7 @@
     <button 
       type="button" 
       on:click={toggleDropdown}
-      class="flex items-center gap-2 bg-blue-600 border-2 border-blue-700 hover:bg-blue-700 text-white px-3 py-2 rounded-md font-medium text-sm transition-colors duration-150"
+      class="flex items-center gap-2 btn-light-blue border-2 border-blue-400 text-white px-3 py-2 rounded-md font-medium text-sm transition-colors duration-150"
       aria-haspopup="true"
       aria-expanded={isDropdownOpen}
       aria-label="Change user view"

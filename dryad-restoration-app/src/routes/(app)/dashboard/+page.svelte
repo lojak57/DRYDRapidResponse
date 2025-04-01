@@ -73,15 +73,6 @@
   $: totalActiveJobs = (inProgressJobs?.length || 0) + (pendingCompletionJobs?.length || 0) + (scheduledJobs?.length || 0);
   $: totalCompletedJobs = (completedJobs?.length || 0) + (invoiceApprovalJobs?.length || 0) + (invoicedJobs?.length || 0) + (paidJobs?.length || 0);
   
-  // Get current date for welcome message
-  const today = new Date();
-  const formattedDate = today.toLocaleDateString('en-US', { 
-    weekday: 'long', 
-    year: 'numeric', 
-    month: 'long', 
-    day: 'numeric' 
-  });
-
   // Job category configurations for the cards
   const jobCategories = [
     {
@@ -299,17 +290,6 @@
       <div class="flex flex-col md:flex-row items-center justify-between mb-6">
         <div class="mb-4 md:mb-0">
           <Logo size="xxl" linkToDashboard={false} showText={false} logoSrc="/dryd-logo-secondary.PNG" />
-        </div>
-        <div class="card-glass p-4 rounded-lg card-shadow max-w-md w-full">
-          <p class="text-gray-500 text-sm">{formattedDate}</p>
-          <h2 class="text-xl font-bold text-gray-800">Welcome, {$currentUser.firstName}!</h2>
-          <p class="text-gray-600 mt-1">
-            {#if isTechnician}
-              You have {inProgressJobs?.length || 0 + scheduledJobs?.length || 0} active jobs.
-            {:else}
-              There are {totalActiveJobs} active jobs requiring attention.
-            {/if}
-          </p>
         </div>
       </div>
       
