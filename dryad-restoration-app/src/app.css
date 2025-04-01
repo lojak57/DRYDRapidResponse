@@ -198,6 +198,14 @@
   }
   
   /* Button styles with contrasting colors */
+  .btn-light-blue {
+    background-color: #61C3E2;
+    color: white;
+  }
+  .btn-light-blue:hover {
+    background-color: #4AB0D2;
+  }
+  
   .btn-teal {
     background-color: #4FD1C5;
     color: white;

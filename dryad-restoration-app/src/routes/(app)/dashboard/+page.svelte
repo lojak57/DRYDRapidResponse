@@ -322,7 +322,7 @@
                   
                   <a 
                     href="/jobs?status={category.status}" 
-                    class="action-link btn-burgundy text-sm mt-auto self-start"
+                    class="action-link btn-light-blue text-sm mt-auto self-start"
                   >
                     View all {category.title.toLowerCase()}
                     <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -352,7 +352,7 @@
               </div>
               <span>Quotes</span>
             </h2>
-            <a href="/quotes" class="btn-teal text-sm px-4 py-2 rounded-lg font-medium shadow-sm transition-all duration-200 hover:shadow hover:scale-105">View All</a>
+            <a href="/quotes" class="btn-light-blue text-sm px-4 py-2 rounded-lg font-medium shadow-sm transition-all duration-200 hover:shadow hover:scale-105">View All</a>
           </div>
         </div>
 
@@ -498,7 +498,7 @@
             </div>
             <span>{#if $currentUser && $currentUser.role === Role.TECH}My Assigned Jobs{:else}Active Jobs{/if}</span>
           </h2>
-          <a href="/jobs" class="btn-teal text-sm px-4 py-2 rounded-lg font-medium shadow-sm transition-all duration-200 hover:shadow hover:scale-105">View All</a>
+          <a href="/jobs" class="btn-light-blue text-sm px-4 py-2 rounded-lg font-medium shadow-sm transition-all duration-200 hover:shadow hover:scale-105">View All</a>
         </div>
       </div>
 
