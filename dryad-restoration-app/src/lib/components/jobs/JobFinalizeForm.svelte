@@ -145,6 +145,22 @@
     selectedQuoteItems = [];
   }
   
+  function addAllQuoteItems() {
+    if (quoteLineItems.length === 0) return;
+    
+    // Convert all quote items to custom line items
+    const newCustomItems = quoteLineItems.map(quoteItem => ({
+      id: nanoid(6),
+      description: quoteItem.description,
+      quantity: quoteItem.quantity,
+      unitPrice: quoteItem.unitPrice,
+      total: quoteItem.total,
+      category: quoteItem.category || 'MISC'
+    }));
+    
+    lineItems = [...lineItems, ...newCustomItems];
+  }
+  
   // Handle form submission
   function handleSubmit() {
     dispatch('submit', {
@@ -201,14 +217,24 @@
                   </div>
                 {/each}
               </div>
-              <button 
-                type="button"
-                class="mt-2 px-2 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                on:click={addSelectedQuoteItems}
-                disabled={selectedQuoteItems.length === 0}
-              >
-                Add Selected Items
-              </button>
+              <div class="mt-2 flex space-x-2">
+                <button 
+                  type="button"
+                  class="px-2 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  on:click={addSelectedQuoteItems}
+                  disabled={selectedQuoteItems.length === 0}
+                >
+                  Add Selected Items
+                </button>
+                <button 
+                  type="button"
+                  class="px-2 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  on:click={addAllQuoteItems}
+                  disabled={quoteLineItems.length === 0}
+                >
+                  Add ALL Items
+                </button>
+              </div>
             </div>
           {/if}
         {/if}
