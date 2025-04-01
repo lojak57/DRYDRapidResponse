@@ -6,12 +6,7 @@ export async function load() {
   console.log('Dashboard loading at', new Date().toISOString());
   
   // Reload jobs data whenever the dashboard is loaded
-  try {
-    await loadJobs();
-    console.log('Dashboard jobs loaded successfully');
-  } catch (error) {
-    console.error('Error loading dashboard jobs:', error);
-  }
+  await loadJobs();
   
   // Force a reload of data every 30 seconds when in browser
   // This ensures the data stays fresh even if the user leaves the tab open

@@ -172,8 +172,9 @@
                   prompt.remove();
                 }
                 
-                // Reload the page to refresh the UI
-                setTimeout(() => window.location.reload(), 500);
+                // FIXED: Use refreshJobData instead of reloading the page
+                // This prevents redirection issues
+                setTimeout(() => refreshJobData(), 500);
               }
             })
             .catch(err => {
@@ -232,18 +233,6 @@
     addCompletedStatusPrompt(status);
   }
   
-  // Function to handle status advancement prompt removal after update
-  function handleStatusPromptRemoval() {
-    // Remove the prompt
-    const prompt = document.getElementById('advance-status-prompt');
-    if (prompt) {
-      prompt.remove();
-    }
-    
-    // Reload the page to refresh the UI
-    setTimeout(() => window.location.reload(), 500);
-  }
-
   // Add state for schedule date updates
   let scheduleDateError = '';
   let scheduleDateSuccess = false;
@@ -1378,90 +1367,8 @@
       </div>
     </PageHeader>
 
-    <!-- EMERGENCY FIX BUTTON - Always visible -->
-    <div class="my-4 px-4 py-3 bg-red-100 border-2 border-red-500 rounded-lg shadow-lg animate-pulse">
-      <div class="flex flex-col items-center text-center">
-        <h2 class="text-xl font-bold text-red-800 mb-2">⚠️ DEBUG: FIX DATA INCONSISTENCY ⚠️</h2>
-        <p class="text-red-700 mb-3">
-          This button will fix data inconsistencies where tasks appear complete but aren't marked as complete in the data.
-        </p>
-        <button
-          type="button"
-          class="w-full max-w-md py-3 px-6 bg-red-600 hover:bg-red-700 text-white text-xl font-bold rounded-lg shadow-lg focus:outline-none focus:ring-4 focus:ring-red-300 transition-colors"
-          on:click={() => {
-            if (!$currentJob) return;
-            
-            // Force update completion tasks to match visual state
-            console.log("EMERGENCY FIX: Forcing completion task update");
-            const completionTasks = {
-              finalReadingsLogged: true,
-              afterPhotosTaken: true,
-              mark_ready_for_review: false
-            };
-            
-            updateJobCompletionTask($currentJob.id, completionTasks)
-              .then(updatedJob => {
-                if (updatedJob) {
-                  currentJob.set(updatedJob);
-                  console.log("EMERGENCY FIX: Updated completion tasks:", updatedJob.completionTasks);
-                  
-                  // After fixing the data, directly invoke the mark_ready_for_review handler
-                  setTimeout(() => {
-                    console.log("EMERGENCY FIX: Directly triggering handleMarkReadyForReview");
-                    handleMarkReadyForReview('mark_ready_for_review', {
-                      submissionNotes: "Job automatically submitted for review via emergency fix button."
-                    });
-                    alert("Data fix applied AND job submitted for office review!\n\nJob status should be updated to PENDING_COMPLETION.\n\nPlease reload the page to see the updated status.");
-                  }, 500);
-                }
-              })
-              .catch(err => {
-                console.error("EMERGENCY FIX: Error updating completion tasks:", err);
-                alert("Error fixing data! See console for details.");
-              });
-          }}
-        >
-          EMERGENCY FIX: Force Task Completion
-        </button>
-      </div>
-    </div>
-
     <!-- Main Job/Customer/Address Details Grid -->
     <div class="bg-white rounded-lg shadow-lg border border-gray-300 overflow-hidden">
-      <!-- DEBUG BUTTON -->
-      <div class="p-2 bg-red-100 border-b border-red-300 flex justify-center">
-        <button
-          type="button"
-          class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-md shadow"
-          on:click={() => {
-            if (!$currentJob) return;
-            
-            // Force update completion tasks to match visual state
-            console.log("EMERGENCY FIX: Forcing completion task update");
-            const completionTasks = {
-              finalReadingsLogged: true,
-              afterPhotosTaken: true,
-              mark_ready_for_review: false
-            };
-            
-            updateJobCompletionTask($currentJob.id, completionTasks)
-              .then(updatedJob => {
-                if (updatedJob) {
-                  currentJob.set(updatedJob);
-                  console.log("EMERGENCY FIX: Updated completion tasks:", updatedJob.completionTasks);
-                  alert("Data fix applied! The Submit button should now appear.\nIf not, please reload the page.");
-                }
-              })
-              .catch(err => {
-                console.error("EMERGENCY FIX: Error updating completion tasks:", err);
-                alert("Error fixing data! See console for details.");
-              });
-          }}
-        >
-          EMERGENCY FIX: Force Task Completion
-        </button>
-      </div>
-      
       <div class="p-4 bg-dryd-gradient text-white">
         <div class="flex justify-between items-center">
           <div>
@@ -1649,73 +1556,8 @@
               >
                 Start Job Work
               </button>
-            </div>
-          {/if}
-          
-          <!-- DEBUG OUTPUT -->
-          <div class="mt-2 p-2 bg-gray-100 border border-gray-300 rounded text-xs overflow-auto">
-            <h4 class="font-bold">Debug: Task Completion Status</h4>
-            <pre>Current Status: {$currentJob.status}</pre>
-            <pre>All Completed Statuses: {JSON.stringify(allCompletedStatuses, null, 2)}</pre>
-            <div class="flex space-x-2 mt-2">
-              <button
-                class="px-2 py-1 bg-purple-500 text-white text-xs rounded"
-                on:click={() => {
-                  allCompletedStatuses[JobStatus.COMPLETED] = true;
-                  console.log("Manually set COMPLETED tasks to complete:", allCompletedStatuses);
-                }}
-              >
-                Force COMPLETED Tasks Complete
-              </button>
-              <button
-                class="px-2 py-1 bg-blue-500 text-white text-xs rounded"
-                on:click={() => {
-                  allCompletedStatuses[JobStatus.PENDING_COMPLETION] = true;
-                  console.log("Manually set PENDING_COMPLETION tasks to complete:", allCompletedStatuses);
-                }}
-              >
-                Force PENDING Tasks Complete
-              </button>
-              {#if $currentJob.status === JobStatus.PENDING_COMPLETION}
-                <button
-                  class="px-2 py-1 bg-green-500 text-white text-xs rounded"
-                  on:click={() => {
-                    if (!$currentJob) return;
-                    
-                    // Update job status to COMPLETED
-                    updateJobStatus($currentJob.id, JobStatus.COMPLETED)
-                      .then(updatedJob => {
-                        if (updatedJob) {
-                          // Update the store
-                          currentJob.set(updatedJob);
-                          
-                          // Add a log entry for the status change
-                          addLogEntry({
-                            jobId: updatedJob.id,
-                            userId: $currentUser?.id || 'unknown-user',
-                            timestamp: new Date(),
-                            type: LogEntryType.NOTE,
-                            content: `Job status changed from ${JobStatus.PENDING_COMPLETION} to ${JobStatus.COMPLETED}: All review tasks completed, job is now marked as complete`
-                          });
-                          
-                          showSuccessToast('Job marked as completed');
-                          
-                          // Force refresh to update UI
-                          setTimeout(() => window.location.reload(), 1000);
-                        }
-                      })
-                      .catch(err => {
-                        console.error('Error updating job status:', err);
-                        showErrorToast('Failed to update job status. Please try again.');
-                      });
-                  }}
-                >
-                  Force Status → COMPLETED
-                </button>
-              {/if}
-            </div>
-          </div>
         </div>
+          {/if}
         
         <!-- Job Details -->
         <div class="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -1762,41 +1604,6 @@
               <p class="text-gray-900 font-medium">Incident Date: <span class="font-normal">{$currentJob.incidentDate ? formatDate(new Date($currentJob.incidentDate)) : 'Not set'}</span></p>
               <p class="text-gray-900 font-medium mt-2">Scheduled: <span class="font-normal">{$currentJob.scheduledStartDate ? formatDate(new Date($currentJob.scheduledStartDate)) : 'Not scheduled'}</span></p>
               <p class="text-gray-900 font-medium mt-2">Estimated Completion: <span class="font-normal">{$currentJob.estimatedCompletionDate ? formatDate(new Date($currentJob.estimatedCompletionDate)) : 'Not set'}</span></p>
-              
-              <!-- DEVELOPER EMERGENCY FIX BUTTON -->
-              {#if $currentJob.status === JobStatus.IN_PROGRESS && $currentUser?.role === Role.TECH}
-                <div class="mt-4 pt-4 border-t border-red-300">
-                  <button
-                    type="button"
-                    class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded text-sm w-full flex items-center justify-center"
-                    on:click={() => {
-                      if (!$currentJob) return;
-                      
-                      // Log the current state 
-                      console.log("Current completion tasks:", $currentJob.completionTasks);
-                      
-                      // Force update all tasks to be complete
-                      const completionTasks = {
-                        finalReadingsLogged: true,
-                        afterPhotosTaken: true,
-                        mark_ready_for_review: false
-                      };
-                      
-                      // Update the tasks
-                      updateJobCompletionTask($currentJob.id, completionTasks)
-                        .then(updatedJob => {
-                          if (updatedJob) {
-                            currentJob.set(updatedJob);
-                            console.log("Updated tasks:", updatedJob.completionTasks);
-                            alert("Job tasks forced to COMPLETE state. Check if Submit for Review button appears.");
-                          }
-                        });
-                    }}
-                  >
-                    🛠️ DEVELOPER: Force Tasks Complete
-                  </button>
-                </div>
-              {/if}
             </div>
           </div>
           
@@ -1824,21 +1631,21 @@
               <p class="text-gray-800 whitespace-pre-wrap">
                 {$currentJob.description || 'No scope of work provided'}
               </p>
-              
-              <!-- Add link to originating quote -->
-              {#if $currentJob.originatingQuoteId}
-                <div class="mt-4 pt-3 border-t border-gray-200">
-                  <a 
-                    href="/quotes/{$currentJob.originatingQuoteId}" 
-                    class="inline-flex items-center text-blue-600 hover:text-blue-800 transition-colors"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                    </svg>
-                    View Original Quote
-                  </a>
-                </div>
-              {/if}
+                
+                <!-- Add link to originating quote -->
+                {#if $currentJob.originatingQuoteId}
+                  <div class="mt-4 pt-3 border-t border-gray-200">
+                    <a 
+                      href="/quotes/{$currentJob.originatingQuoteId}" 
+                      class="inline-flex items-center text-blue-600 hover:text-blue-800 transition-colors"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                      </svg>
+                      View Original Quote
+                    </a>
+                  </div>
+                {/if}
             </div>
           </div>
           
@@ -1859,17 +1666,17 @@
             <!-- Quick action buttons -->
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <button 
-                on:click={(e) => {
-                  e.preventDefault();
-                  // First close the modal
-                  showTaskModal = false;
-                  // Then set the form after a small delay
-                  setTimeout(() => {
-                    showForm = 'note';
-                    console.log('Quick action: showing note form, showForm =', showForm, 'showTaskModal =', showTaskModal);
-                  }, 0);
-                }}
-                class="flex flex-col items-center justify-center px-4 py-3 bg-gray-100 border border-gray-300 rounded-lg shadow-sm hover:bg-blue-50 hover:border-blue-300 hover:shadow active:bg-blue-100 active:shadow-inner active:transform active:scale-[0.98] transition-all duration-150"
+                  on:click={(e) => {
+                    e.preventDefault();
+                    // First close the modal
+                    showTaskModal = false;
+                    // Then set the form after a small delay
+                    setTimeout(() => {
+                      showForm = 'note';
+                      console.log('Quick action: showing note form, showForm =', showForm, 'showTaskModal =', showTaskModal);
+                    }, 0);
+                  }}
+                  class="flex flex-col items-center justify-center px-4 py-3 bg-gray-100 border border-gray-300 rounded-lg shadow-sm hover:bg-blue-50 hover:border-blue-300 hover:shadow active:bg-blue-100 active:shadow-inner active:transform active:scale-[0.98] transition-all duration-150"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -1878,12 +1685,12 @@
               </button>
               
               <button 
-                on:click={(e) => {
-                  e.preventDefault();
-                  showForm = 'photo';
-                  showTaskModal = false;
-                }}
-                class="flex flex-col items-center justify-center px-4 py-3 bg-gray-100 border border-gray-300 rounded-lg shadow-sm hover:bg-purple-50 hover:border-purple-300 hover:shadow active:bg-purple-100 active:shadow-inner active:transform active:scale-[0.98] transition-all duration-150"
+                  on:click={(e) => {
+                    e.preventDefault();
+                    showForm = 'photo';
+                    showTaskModal = false;
+                  }}
+                  class="flex flex-col items-center justify-center px-4 py-3 bg-gray-100 border border-gray-300 rounded-lg shadow-sm hover:bg-purple-50 hover:border-purple-300 hover:shadow active:bg-purple-100 active:shadow-inner active:transform active:scale-[0.98] transition-all duration-150"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
@@ -1893,12 +1700,12 @@
               </button>
               
               <button 
-                on:click={(e) => {
-                  e.preventDefault();
-                  showForm = 'reading';
-                  showTaskModal = false;
-                }}
-                class="flex flex-col items-center justify-center px-4 py-3 bg-gray-100 border border-gray-300 rounded-lg shadow-sm hover:bg-indigo-50 hover:border-indigo-300 hover:shadow active:bg-indigo-100 active:shadow-inner active:transform active:scale-[0.98] transition-all duration-150"
+                  on:click={(e) => {
+                    e.preventDefault();
+                    showForm = 'reading';
+                    showTaskModal = false;
+                  }}
+                  class="flex flex-col items-center justify-center px-4 py-3 bg-gray-100 border border-gray-300 rounded-lg shadow-sm hover:bg-indigo-50 hover:border-indigo-300 hover:shadow active:bg-indigo-100 active:shadow-inner active:transform active:scale-[0.98] transition-all duration-150"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
@@ -1907,12 +1714,12 @@
               </button>
               
               <button
-                on:click={(e) => {
-                  e.preventDefault();
-                  showForm = 'equipment';
-                  showTaskModal = false;
-                }}
-                class="flex flex-col items-center justify-center px-4 py-3 bg-gray-100 border border-gray-300 rounded-lg shadow-sm hover:bg-green-50 hover:border-green-300 hover:shadow active:bg-green-100 active:shadow-inner active:transform active:scale-[0.98] transition-all duration-150"
+                  on:click={(e) => {
+                    e.preventDefault();
+                    showForm = 'equipment';
+                    showTaskModal = false;
+                  }}
+                  class="flex flex-col items-center justify-center px-4 py-3 bg-gray-100 border border-gray-300 rounded-lg shadow-sm hover:bg-green-50 hover:border-green-300 hover:shadow active:bg-green-100 active:shadow-inner active:transform active:scale-[0.98] transition-all duration-150"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
@@ -1920,32 +1727,32 @@
                 </svg>
                 <span class="font-medium text-gray-700 hover:text-green-700 transition-colors duration-150">Equipment Log</span>
               </button>
-              
-              <button
-                on:click={(e) => {
-                  e.preventDefault();
-                  showForm = 'expense';
-                  showTaskModal = false;
-                }}
-                class="flex flex-col items-center justify-center px-4 py-3 bg-gray-100 border border-gray-300 rounded-lg shadow-sm hover:bg-yellow-50 hover:border-yellow-300 hover:shadow active:bg-yellow-100 active:shadow-inner active:transform active:scale-[0.98] transition-all duration-150"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-                <span class="font-medium text-gray-700 hover:text-yellow-600 transition-colors duration-150">Add Expense</span>
+                
+                <button
+                  on:click={(e) => {
+                    e.preventDefault();
+                    showForm = 'expense';
+                    showTaskModal = false;
+                  }}
+                  class="flex flex-col items-center justify-center px-4 py-3 bg-gray-100 border border-gray-300 rounded-lg shadow-sm hover:bg-yellow-50 hover:border-yellow-300 hover:shadow active:bg-yellow-100 active:shadow-inner active:transform active:scale-[0.98] transition-all duration-150"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                  <span class="font-medium text-gray-700 hover:text-yellow-600 transition-colors duration-150">Add Expense</span>
               </button>
             </div>
           </div>
         {/if}
 
-        <!-- Conditionally Rendered Forms - Keep these for direct form access, but they're no longer the primary way to complete tasks -->
+          <!-- Conditionally Rendered Forms - Keep these for direct form access, but they're no longer the primary way to complete tasks -->
         {#if showForm === 'note'}
           <div class="mb-6 p-4 bg-blue-50 border border-blue-100 rounded-lg">
             <h3 class="text-lg font-semibold text-blue-800 mb-4">Add a Note</h3>
             <AddNoteForm 
               jobId={$currentJob?.id || ''} 
               userId={$currentUser?.id || 'tech-1'} 
-              on:submit={handleFormSubmit}
+                on:submit={handleFormSubmit}
             />
           </div>
         {:else if showForm === 'photo'}
@@ -1954,7 +1761,7 @@
             <AddPhotoForm 
               jobId={$currentJob?.id || ''} 
               userId={$currentUser?.id || 'tech-1'} 
-              on:submit={handleFormSubmit}
+                on:submit={handleFormSubmit}
             />
           </div>
         {:else if showForm === 'reading'}
@@ -1963,7 +1770,7 @@
             <AddReadingForm 
               jobId={$currentJob?.id || ''} 
               userId={$currentUser?.id || 'tech-1'} 
-              on:submit={handleFormSubmit}
+                on:submit={handleFormSubmit}
             />
           </div>
         {:else if showForm === 'equipment'}
@@ -1972,16 +1779,16 @@
             <AddEquipmentLogForm 
               jobId={$currentJob?.id || ''} 
               userId={$currentUser?.id || 'tech-1'} 
-              on:submit={handleFormSubmit}
-            />
-          </div>
-        {:else if showForm === 'expense'}
-          <div class="mb-6 p-4 bg-yellow-50 border border-yellow-100 rounded-lg">
-            <h3 class="text-lg font-semibold text-yellow-700 mb-4">Add Expense</h3>
-            <AddExpenseForm 
-              jobId={$currentJob?.id || ''} 
-              userId={$currentUser?.id || 'tech-1'} 
-              on:submit={handleFormSubmit}
+                on:submit={handleFormSubmit}
+              />
+            </div>
+          {:else if showForm === 'expense'}
+            <div class="mb-6 p-4 bg-yellow-50 border border-yellow-100 rounded-lg">
+              <h3 class="text-lg font-semibold text-yellow-700 mb-4">Add Expense</h3>
+              <AddExpenseForm 
+                jobId={$currentJob?.id || ''} 
+                userId={$currentUser?.id || 'tech-1'} 
+                on:submit={handleFormSubmit}
             />
           </div>
         {/if}
@@ -1998,7 +1805,7 @@
             />
           {:else}
             <!-- Render Activity Log Feed -->
-            <div class="bg-gray-100 rounded-lg shadow-md border border-gray-200 overflow-hidden">
+              <div class="bg-gray-100 rounded-lg shadow-md border border-gray-200 overflow-hidden">
               <div class="p-5 bg-gray-50 border-b border-gray-200">
                 <h3 class="text-xl font-bold text-gray-800">Activity Log</h3>
               </div>
@@ -2008,106 +1815,106 @@
                 <ActivityLogFeed 
                   logEntries={filteredLogEntries} 
                   isLoading={$isLoading} 
-                  jobId={currentJobId}
-                  userId={$currentUser?.id || ''}
+                    jobId={currentJobId}
+                    userId={$currentUser?.id || ''}
                 />
               </div>
             </div>
 
             <!-- TECHNICIAN COMPLETION CHECKLIST AREA -->
-            {#if $currentUser?.role === Role.TECH && $currentJob && $currentJob.status === JobStatus.IN_PROGRESS}
+              {#if $currentUser?.role === Role.TECH && $currentJob && $currentJob.status === JobStatus.IN_PROGRESS}
               <div class="mt-8 border-t pt-6">
-                <!-- Debug output -->
-                <pre class="bg-gray-100 p-4 text-xs overflow-auto mb-4">
-                  Tech Role: {$currentUser?.role === Role.TECH}
-                  Status: {$currentJob?.status}
-                  Status is IN_PROGRESS: {$currentJob?.status === JobStatus.IN_PROGRESS}
-                  finalReadingsLogged: {$currentJob?.completionTasks?.finalReadingsLogged}
-                  afterPhotosTaken: {$currentJob?.completionTasks?.afterPhotosTaken} 
-                  mark_ready_for_review: {$currentJob?.completionTasks?.mark_ready_for_review}
-                  Should show button: {$currentUser?.role === Role.TECH && 
-                    $currentJob?.status === JobStatus.IN_PROGRESS && 
-                    $currentJob?.completionTasks?.finalReadingsLogged === true && 
-                    $currentJob?.completionTasks?.afterPhotosTaken === true &&
-                    !$currentJob?.completionTasks?.mark_ready_for_review}
-                </pre>
-                
-                <!-- Fix missing completionTasks data -->
-                {#if $currentJob && $currentJob.status === JobStatus.IN_PROGRESS}
-                  <div class="mb-4">
-                    <button
-                      type="button"
-                      class="w-full py-2 px-4 bg-red-600 hover:bg-red-700 text-white font-medium rounded focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors"
-                      on:click={() => {
-                        if (!$currentJob) return;
-                        
-                        // Force update completion tasks to match visual state
-                        // This fixes cases where the UI shows tasks completed but data hasn't updated
-                        console.log("Forcing completion task update");
-                        const completionTasks = {
-                          finalReadingsLogged: true,
-                          afterPhotosTaken: true,
-                          mark_ready_for_review: false
-                        };
-                        
-                        updateJobCompletionTask($currentJob.id, completionTasks)
-                          .then(updatedJob => {
-                            if (updatedJob) {
-                              currentJob.set(updatedJob);
-                              console.log("Updated completion tasks:", updatedJob.completionTasks);
-                            }
-                          })
-                          .catch(err => console.error("Error updating completion tasks:", err));
-                      }}
-                    >
-                      Fix Task Completion Data
-                    </button>
-                    <p class="text-xs text-gray-500 mt-1 text-center">Click this button if tasks appear complete but the Submit button doesn't show</p>
-                  </div>
-                {/if}
-                
-                <div id="completionChecklist" class="mt-6">
+                  <!-- Debug output -->
+                  <pre class="bg-gray-100 p-4 text-xs overflow-auto mb-4">
+                    Tech Role: {$currentUser?.role === Role.TECH}
+                    Status: {$currentJob?.status}
+                    Status is IN_PROGRESS: {$currentJob?.status === JobStatus.IN_PROGRESS}
+                    finalReadingsLogged: {$currentJob?.completionTasks?.finalReadingsLogged}
+                    afterPhotosTaken: {$currentJob?.completionTasks?.afterPhotosTaken} 
+                    mark_ready_for_review: {$currentJob?.completionTasks?.mark_ready_for_review}
+                    Should show button: {$currentUser?.role === Role.TECH && 
+                      $currentJob?.status === JobStatus.IN_PROGRESS && 
+                      $currentJob?.completionTasks?.finalReadingsLogged === true && 
+                      $currentJob?.completionTasks?.afterPhotosTaken === true &&
+                      !$currentJob?.completionTasks?.mark_ready_for_review}
+                  </pre>
+                  
+                  <!-- Fix missing completionTasks data -->
+                  {#if $currentJob && $currentJob.status === JobStatus.IN_PROGRESS}
+                    <div class="mb-4">
+                      <button
+                        type="button"
+                        class="w-full py-2 px-4 bg-red-600 hover:bg-red-700 text-white font-medium rounded focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors"
+                        on:click={() => {
+                          if (!$currentJob) return;
+                          
+                          // Force update completion tasks to match visual state
+                          // This fixes cases where the UI shows tasks completed but data hasn't updated
+                          console.log("Forcing completion task update");
+                          const completionTasks = {
+                            finalReadingsLogged: true,
+                            afterPhotosTaken: true,
+                            mark_ready_for_review: false
+                          };
+                          
+                          updateJobCompletionTask($currentJob.id, completionTasks)
+                            .then(updatedJob => {
+                              if (updatedJob) {
+                                currentJob.set(updatedJob);
+                                console.log("Updated completion tasks:", updatedJob.completionTasks);
+                              }
+                            })
+                            .catch(err => console.error("Error updating completion tasks:", err));
+                        }}
+                      >
+                        Fix Task Completion Data
+                      </button>
+                      <p class="text-xs text-gray-500 mt-1 text-center">Click this button if tasks appear complete but the Submit button doesn't show</p>
+                    </div>
+                  {/if}
+                  
+                  <div id="completionChecklist" class="mt-6">
                 <TechCompletionChecklist 
                   tasks={$currentJob.completionTasks} 
                   jobId={$currentJob.id} 
-                  on:taskClicked={handleTechTask}
-                />
+                    on:taskClicked={handleTechTask}
+                  />
 
-                <!-- Add Submit for Office Review button when all tasks are completed -->
-                {#if $currentJob?.completionTasks?.finalReadingsLogged === true && 
-                    $currentJob?.completionTasks?.afterPhotosTaken === true && 
-                    $currentJob?.status === JobStatus.IN_PROGRESS &&
-                    !$currentJob?.completionTasks?.mark_ready_for_review}
-                  <div class="mt-4 p-4 border-2 border-green-300 bg-green-50 rounded-lg">
-                    <div class="flex items-center justify-between">
-                      <div>
-                        <h3 class="font-medium text-green-800">All tasks completed!</h3>
-                        <p class="text-sm text-green-700">You've completed all required tasks for this job.</p>
+                  <!-- Add Submit for Office Review button when all tasks are completed -->
+                  {#if $currentJob?.completionTasks?.finalReadingsLogged === true && 
+                      $currentJob?.completionTasks?.afterPhotosTaken === true && 
+                      $currentJob?.status === JobStatus.IN_PROGRESS &&
+                      !$currentJob?.completionTasks?.mark_ready_for_review}
+                    <div class="mt-4 p-4 border-2 border-green-300 bg-green-50 rounded-lg">
+                      <div class="flex items-center justify-between">
+                        <div>
+                          <h3 class="font-medium text-green-800">All tasks completed!</h3>
+                          <p class="text-sm text-green-700">You've completed all required tasks for this job.</p>
+                        </div>
+                        <button
+                          type="button"
+                          class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+                          on:click={handleSubmitForOfficeReview}
+                        >
+                          Submit for Office Review
+                        </button>
                       </div>
-                      <button
-                        type="button"
-                        class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
-                        on:click={handleSubmitForOfficeReview}
-                      >
-                        Submit for Office Review
-                      </button>
                     </div>
+                  {/if}
                   </div>
-                {/if}
-                </div>
 
                 <button
                   on:click={markReadyForCompletion}
-                  disabled={!canAdvanceStatus}
+                    disabled={!canAdvanceStatus}
                   class="mt-4 w-full font-bold py-2 px-4 rounded transition-all duration-150 ease-in-out"
-                  class:bg-green-600={canAdvanceStatus}
-                  class:hover:bg-green-700={canAdvanceStatus}
-                  class:text-white={canAdvanceStatus}
-                  class:bg-gray-300={!canAdvanceStatus}
-                  class:text-gray-500={!canAdvanceStatus}
-                  class:cursor-not-allowed={!canAdvanceStatus}
-                >
-                  {canAdvanceStatus ? 'Mark Ready for Completion' : 'Complete All Required Tasks First'}
+                    class:bg-green-600={canAdvanceStatus}
+                    class:hover:bg-green-700={canAdvanceStatus}
+                    class:text-white={canAdvanceStatus}
+                    class:bg-gray-300={!canAdvanceStatus}
+                    class:text-gray-500={!canAdvanceStatus}
+                    class:cursor-not-allowed={!canAdvanceStatus}
+                  >
+                    {canAdvanceStatus ? 'Mark Ready for Completion' : 'Complete All Required Tasks First'}
                 </button>
               </div>
             {/if}
@@ -2116,19 +1923,19 @@
         </div>
 
         <!-- Office/Admin Only - Final Completion Button -->
-        {#if $currentUser && ($currentUser.role === Role.ADMIN || $currentUser.role === Role.OFFICE) && $currentJob.status === JobStatus.PENDING_COMPLETION}
+          {#if $currentUser && ($currentUser.role === Role.ADMIN || $currentUser.role === Role.OFFICE) && $currentJob.status === JobStatus.PENDING_COMPLETION}
           <div class="mt-4">
             <button
               on:click={openCompleteJobModal}
-              disabled={isCompletingJob || !canAdvanceStatus}
-              class="w-full py-3 px-4 rounded-md shadow-sm transition-all duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 font-bold"
-              class:bg-green-600={canAdvanceStatus}
-              class:hover:bg-green-700={canAdvanceStatus}
-              class:text-white={canAdvanceStatus}
-              class:bg-gray-300={!canAdvanceStatus}
-              class:text-gray-500={!canAdvanceStatus}
-              class:disabled:opacity-50={canAdvanceStatus}
-              class:disabled:cursor-not-allowed={canAdvanceStatus}
+                disabled={isCompletingJob || !canAdvanceStatus}
+                class="w-full py-3 px-4 rounded-md shadow-sm transition-all duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 font-bold"
+                class:bg-green-600={canAdvanceStatus}
+                class:hover:bg-green-700={canAdvanceStatus}
+                class:text-white={canAdvanceStatus}
+                class:bg-gray-300={!canAdvanceStatus}
+                class:text-gray-500={!canAdvanceStatus}
+                class:disabled:opacity-50={canAdvanceStatus}
+                class:disabled:cursor-not-allowed={canAdvanceStatus}
             >
               {#if isCompletingJob}
                 <span class="inline-flex items-center justify-center">
@@ -2143,66 +1950,66 @@
                   <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                   </svg>
-                  Finalize Job & Enter Labor
+                    Finalize Job & Enter Labor
                 </span>
               {/if}
             </button>
-            {#if !canAdvanceStatus && $currentJob.status === JobStatus.PENDING_COMPLETION}
-              <p class="mt-2 text-amber-600 text-sm text-center">Please review the workflow steps. Some required tasks are not complete.</p>
-            {/if}
+              {#if !canAdvanceStatus && $currentJob.status === JobStatus.PENDING_COMPLETION}
+                <p class="mt-2 text-amber-600 text-sm text-center">Please review the workflow steps. Some required tasks are not complete.</p>
+              {/if}
             {#if completionError}
               <p class="mt-2 text-red-600 text-sm text-center">{completionError}</p>
             {/if}
           </div>
         {/if}
-        
-        <!-- Auto-complete button for completed tasks in PENDING_COMPLETION -->
-        {#if $currentUser && ($currentUser.role === Role.ADMIN || $currentUser.role === Role.OFFICE) && 
-              $currentJob.status === JobStatus.PENDING_COMPLETION &&
-              allCompletedStatuses[JobStatus.PENDING_COMPLETION]}
-          <div class="mt-6 pt-4 border-t border-gray-200">
-            <div class="bg-green-100 p-4 rounded-lg border-2 border-green-300 animate-pulse">
-              <h3 class="text-xl font-bold text-green-800 text-center mb-2">✅ All Review Tasks Completed!</h3>
-              <p class="text-green-700 text-center mb-4">All required review tasks are finished. You can now mark this job as complete.</p>
-              <button
-                type="button"
-                class="w-full py-3 px-4 bg-green-600 hover:bg-green-700 text-white text-lg font-bold rounded-lg shadow-lg focus:outline-none"
-                on:click={() => {
-                  if (!$currentJob) return;
-                  
-                  // Update job status to COMPLETED
-                  updateJobStatus($currentJob.id, JobStatus.COMPLETED)
-                    .then(updatedJob => {
-                      if (updatedJob) {
-                        // Update the store
-                        currentJob.set(updatedJob);
-                        
-                        // Add a log entry for the status change
-                        addLogEntry({
-                          jobId: updatedJob.id,
-                          userId: $currentUser?.id || 'unknown-user',
-                          timestamp: new Date(),
-                          type: LogEntryType.NOTE,
-                          content: `Job status changed from ${JobStatus.PENDING_COMPLETION} to ${JobStatus.COMPLETED}: All review tasks completed, job is now marked as complete`
-                        });
-                        
-                        showSuccessToast('Job marked as completed');
-                      }
-                    })
-                    .catch(err => {
-                      console.error('Error updating job status:', err);
-                      showErrorToast('Failed to update job status. Please try again.');
-                    });
-                }}
-              >
-                <span class="inline-flex items-center justify-center">
-                  <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  MARK JOB AS COMPLETED
-                </span>
-              </button>
-            </div>
+          
+          <!-- Auto-complete button for completed tasks in PENDING_COMPLETION -->
+          {#if $currentUser && ($currentUser.role === Role.ADMIN || $currentUser.role === Role.OFFICE) && 
+                $currentJob.status === JobStatus.PENDING_COMPLETION &&
+                allCompletedStatuses[JobStatus.PENDING_COMPLETION]}
+            <div class="mt-6 pt-4 border-t border-gray-200">
+              <div class="bg-green-100 p-4 rounded-lg border-2 border-green-300 animate-pulse">
+                <h3 class="text-xl font-bold text-green-800 text-center mb-2">✅ All Review Tasks Completed!</h3>
+                <p class="text-green-700 text-center mb-4">All required review tasks are finished. You can now mark this job as complete.</p>
+                <button
+                  type="button"
+                  class="w-full py-3 px-4 bg-green-600 hover:bg-green-700 text-white text-lg font-bold rounded-lg shadow-lg focus:outline-none"
+                  on:click={() => {
+                    if (!$currentJob) return;
+                    
+                    // Update job status to COMPLETED
+                    updateJobStatus($currentJob.id, JobStatus.COMPLETED)
+                      .then(updatedJob => {
+                        if (updatedJob) {
+                          // Update the store
+                          currentJob.set(updatedJob);
+                          
+                          // Add a log entry for the status change
+                          addLogEntry({
+                            jobId: updatedJob.id,
+                            userId: $currentUser?.id || 'unknown-user',
+                            timestamp: new Date(),
+                            type: LogEntryType.NOTE,
+                            content: `Job status changed from ${JobStatus.PENDING_COMPLETION} to ${JobStatus.COMPLETED}: All review tasks completed, job is now marked as complete`
+                          });
+                          
+                          showSuccessToast('Job marked as completed');
+                        }
+                      })
+                      .catch(err => {
+                        console.error('Error updating job status:', err);
+                        showErrorToast('Failed to update job status. Please try again.');
+                      });
+                  }}
+                >
+                  <span class="inline-flex items-center justify-center">
+                    <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    MARK JOB AS COMPLETED
+                  </span>
+                </button>
+              </div>
           </div>
         {/if}
 
@@ -2215,94 +2022,95 @@
           />
         {/if}
 
-        <!-- Task Modal -->
-        {#if showTaskModal && selectedTask && $currentJob}
-          <div transition:fade={{ duration: 200 }}>
-            <TaskActionModal
-              bind:isOpen={showTaskModal}
-              task={selectedTask}
-              job={$currentJob}
-              logEntries={filteredLogEntries}
-              on:close={() => {
-                console.log("Parent handling close event");
-                showTaskModal = false;
-                selectedTask = null;
-              }}
-              on:taskCompleted={handleTaskCompletedFromModal}
-            />
-          </div>
-        {/if}
-
-        <!-- Technician Assignment Section (only visible to office/admin users) -->
-        {#if $currentUser && isOffice($currentUser)}
-          <div id="techAssignmentSection" class="mt-6">
-            <TechnicianAssignment 
-              job={$currentJob} 
-              on:save={handleTechnicianAssignment} 
-            />
-            
-            {#if isUpdatingAssignments}
-              <div class="text-sm text-gray-500 flex items-center mb-4">
-                <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-dryd-blue" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Updating assignments...
+          <!-- Task Modal -->
+          {#if showTaskModal && selectedTask && $currentJob}
+            <div transition:fade={{ duration: 200 }}>
+              <TaskActionModal
+                bind:isOpen={showTaskModal}
+                task={selectedTask}
+                job={$currentJob}
+                logEntries={filteredLogEntries}
+                on:close={() => {
+                  console.log("Parent handling close event");
+                  showTaskModal = false;
+                  selectedTask = null;
+                }}
+                on:taskCompleted={handleTaskCompletedFromModal}
+              />
       </div>
-            {:else if assignmentError}
-              <div class="text-sm text-red-500 mb-4">{assignmentError}</div>
-            {:else if assignmentSuccess}
-              <div class="text-sm text-green-500 mb-4">Technician assignments updated successfully!</div>
-            {/if}
-          </div>
-        {/if}
+          {/if}
 
-        <!-- Add a job scheduling section after technician assignment section -->
-        {#if $currentUser && isOffice($currentUser)}
-          <div class="mt-6">
-            <h3 class="text-lg font-medium text-gray-900 mb-3">Job Scheduling</h3>
-            <div class="bg-white shadow rounded-md p-4">
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label for="scheduledStartDate" class="block text-sm font-medium text-gray-700">Scheduled Start Date</label>
-                  <input 
-                    type="date" 
-                    id="scheduledStartDate"
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                    value={$currentJob.scheduledStartDate ? new Date($currentJob.scheduledStartDate).toISOString().split('T')[0] : ''}
-                    on:change={(event) => {
-                      const target = event.target as HTMLInputElement;
-                      if (target && target.value) {
-                        handleScheduleDateChange('scheduledStartDate', target.value);
-                      }
-                    }}
-                  />
-                </div>
-                <div>
-                  <label for="estimatedCompletionDate" class="block text-sm font-medium text-gray-700">Estimated Completion</label>
-                  <input 
-                    type="date" 
-                    id="estimatedCompletionDate"
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                    value={$currentJob.estimatedCompletionDate ? new Date($currentJob.estimatedCompletionDate).toISOString().split('T')[0] : ''}
-                    on:change={(event) => {
-                      const target = event.target as HTMLInputElement;
-                      if (target && target.value) {
-                        handleScheduleDateChange('estimatedCompletionDate', target.value);
-                      }
-                    }}
-                  />
-                </div>
-              </div>
-              {#if scheduleDateError}
-                <p class="mt-2 text-sm text-red-600">{scheduleDateError}</p>
-              {/if}
-              {#if scheduleDateSuccess}
-                <p class="mt-2 text-sm text-green-600">Job scheduling updated successfully</p>
+          <!-- Technician Assignment Section (only visible to office/admin users) -->
+          {#if $currentUser && isOffice($currentUser)}
+            <div id="techAssignmentSection" class="mt-6">
+              <TechnicianAssignment 
+                job={$currentJob} 
+                on:save={handleTechnicianAssignment} 
+              />
+              
+              {#if isUpdatingAssignments}
+                <div class="text-sm text-gray-500 flex items-center mb-4">
+                  <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-dryd-blue" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Updating assignments...
+        </div>
+              {:else if assignmentError}
+                <div class="text-sm text-red-500 mb-4">{assignmentError}</div>
+              {:else if assignmentSuccess}
+                <div class="text-sm text-green-500 mb-4">Technician assignments updated successfully!</div>
               {/if}
             </div>
-          </div>
-        {/if}
+          {/if}
+
+          <!-- Add a job scheduling section after technician assignment section -->
+          {#if $currentUser && isOffice($currentUser)}
+            <div class="mt-6">
+              <h3 class="text-lg font-medium text-gray-900 mb-3">Job Scheduling</h3>
+              <div class="bg-white shadow rounded-md p-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label for="scheduledStartDate" class="block text-sm font-medium text-gray-700">Scheduled Start Date</label>
+                    <input 
+                      type="date" 
+                      id="scheduledStartDate"
+                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                      value={$currentJob.scheduledStartDate ? new Date($currentJob.scheduledStartDate).toISOString().split('T')[0] : ''}
+                      on:change={(event) => {
+                        const target = event.target as HTMLInputElement;
+                        if (target && target.value) {
+                          handleScheduleDateChange('scheduledStartDate', target.value);
+                        }
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label for="estimatedCompletionDate" class="block text-sm font-medium text-gray-700">Estimated Completion</label>
+                    <input 
+                      type="date" 
+                      id="estimatedCompletionDate"
+                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                      value={$currentJob.estimatedCompletionDate ? new Date($currentJob.estimatedCompletionDate).toISOString().split('T')[0] : ''}
+                      on:change={(event) => {
+                        const target = event.target as HTMLInputElement;
+                        if (target && target.value) {
+                          handleScheduleDateChange('estimatedCompletionDate', target.value);
+                        }
+                      }}
+                    />
+                  </div>
+                </div>
+                {#if scheduleDateError}
+                  <p class="mt-2 text-sm text-red-600">{scheduleDateError}</p>
+                {/if}
+                {#if scheduleDateSuccess}
+                  <p class="mt-2 text-sm text-green-600">Job scheduling updated successfully</p>
+                {/if}
+              </div>
+            </div>
+          {/if}
+        </div>
       </div>
     </div>
 

@@ -15,35 +15,21 @@
     import { jobs, loadJobs } from '$lib/stores/jobStore';
     
     let loaded = false;
+    let scrollY = 0;
+    let innerHeight = 0;
     
-    // Single professional background image - using static folder path
-    const backgroundImage = '/images/professional-restoration.jpg';
-    let backgroundLoaded = false;
-    let absoluteBackgroundUrl = '';
+    // Images for parallax effect
+    const backgroundImages = [
+        '/images/construction-site.jpg',
+        '/images/restoration-work.jpg',
+        '/images/flood-damage.jpg'
+    ];
+    
+    let currentBgIndex = 0;
     
     // Load data when the component mounts
     onMount(async () => {
         if (browser) {
-            console.log('Layout mounted, checking background image...');
-            
-            // Fix the URL construction - make sure to use the full pathname
-            absoluteBackgroundUrl = window.location.origin + backgroundImage;
-            console.log('Using background image URL:', absoluteBackgroundUrl);
-            
-            // Test if the image loads
-            const testImg = new Image();
-            testImg.onload = () => {
-                console.log('Background image loaded successfully');
-                backgroundLoaded = true;
-            };
-            testImg.onerror = (e) => {
-                console.error('Failed to load background image', e);
-                // Log the full URL to help debug
-                console.error('Attempted to load:', absoluteBackgroundUrl);
-                console.error('Current port:', window.location.port);
-            };
-            testImg.src = absoluteBackgroundUrl;
-            
             // Load jobs if not already loaded
             if ($jobs.length === 0) {
                 await loadJobs();
@@ -68,24 +54,35 @@
             }
         }
     });
+    
+    // Update background image based on scroll position
+    $: {
+        if (scrollY && innerHeight) {
+            const scrollPercentage = scrollY / (document.body.scrollHeight - innerHeight);
+            currentBgIndex = Math.min(
+                backgroundImages.length - 1,
+                Math.floor(scrollPercentage * backgroundImages.length)
+            );
+        }
+    }
 </script>
 
-<svelte:window />
+<svelte:window bind:scrollY bind:innerHeight />
 
 <!-- Notification toasts -->
 <ToastContainer />
 
 <div class="app">
     {#if loaded}
-        <!-- Directly use an img element to ensure the background image shows up -->
-        <img 
-            src={backgroundImage} 
-            alt="" 
-            class="background-image" 
-        />
+        <div 
+            class="background-container fixed inset-0 z-[-1] transition-opacity duration-1000"
+            style="background-image: url('{backgroundImages[currentBgIndex]}'); 
+                   background-size: cover; 
+                   background-position: center; 
+                   background-attachment: fixed;"
+        ></div>
         
-        <!-- Overlay with reduced opacity for better visibility -->
-        <div class="overlay"></div>
+        <div class="overlay fixed inset-0 z-[-1] bg-white/75 backdrop-blur-sm"></div>
         
         <div in:fade={{ duration: 500 }} class="flex flex-col h-full">
             {#if $currentUser}
@@ -103,31 +100,14 @@
         min-height: 100vh;
         display: flex;
         flex-direction: column;
-        position: relative;
     }
     
-    .background-image {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        z-index: -2;
-    }
-    
-    .overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: rgba(255, 255, 255, 0.3);
-        z-index: -1;
+    .background-container {
+        transition: opacity 1s ease;
     }
     
     :global(body) {
-        background-color: transparent !important;
+        background-color: #f7f9fc;
         margin: 0;
         padding: 0;
     }

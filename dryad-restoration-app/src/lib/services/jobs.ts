@@ -48,42 +48,7 @@ export async function getJobs(): Promise<Job[]> {
   
   // Dynamically import the jobs.json to avoid caching
   const jobsModule = await import('$lib/mock/jobs.json');
-  console.log('Raw job data first item:', jobsModule.default[0]);
-  
-  const parsedJobs = (jobsModule.default as any[]).map(job => {
-    // Make sure job status is a valid enum value
-    if (job.status && !Object.values(JobStatus).includes(job.status)) {
-      console.warn(`Invalid job status found: ${job.status}, converting to NEW`);
-      job.status = JobStatus.NEW;
-    }
-    
-    // Map jobType to type if needed
-    if (job.jobType && !job.type) {
-      console.log('Converting jobType to type:', job.jobType);
-      job.type = job.jobType;
-    }
-    
-    // Map siteAddress to location if needed
-    if (job.siteAddress && !job.location) {
-      console.log('Converting siteAddress to location');
-      job.location = job.siteAddress;
-    }
-    
-    const parsed = parseJobDates(job);
-    return parsed;
-  });
-  
-  console.log(`Loaded and parsed ${parsedJobs.length} jobs`);
-  if (parsedJobs.length > 0) {
-    console.log('First parsed job:', {
-      id: parsedJobs[0].id,
-      title: parsedJobs[0].title,
-      status: parsedJobs[0].status,
-      type: parsedJobs[0].type
-    });
-  }
-  
-  return parsedJobs;
+  return (jobsModule.default as any[]).map(job => parseJobDates(job));
 }
 
 /**

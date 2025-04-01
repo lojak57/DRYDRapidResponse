@@ -1,164 +1,99 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { jobs, loadJobs, isLoading, error } from '$lib/stores/jobStore';
-  import { JobStatus } from '$lib/types/Job';
-  import type { Job } from '$lib/types/Job';
-  import { page } from '$app/stores';
+  import { jobStore } from '$lib/stores/jobStore';
+  import JobList from '$lib/components/jobs/JobList.svelte';
+  import Button from '$lib/components/ui/Button.svelte';
+  import PageHeader from '$lib/components/ui/PageHeader.svelte';
   import { goto } from '$app/navigation';
   
-  let loading = true;
+  let searchQuery = '';
+  let statusFilter = 'ALL';
+  let searchTimeout: ReturnType<typeof setTimeout>;
   
-  // Get status from URL if available
-  $: statusFilter = $page.url.searchParams.get('status') as JobStatus | null;
+  $: filteredJobs = filterJobs($jobStore.jobs, searchQuery);
   
-  // Filter jobs based on status parameter
-  $: filteredJobs = statusFilter 
-    ? $jobs.filter(job => job && job.status === statusFilter)
-    : [...$jobs];
-  
-  // Status mapping for display
-  const statusLabels: Record<JobStatus, string> = {
-    [JobStatus.NEW]: 'New',
-    [JobStatus.SCHEDULED]: 'Scheduled',
-    [JobStatus.IN_PROGRESS]: 'In Progress',
-    [JobStatus.ON_HOLD]: 'On Hold',
-    [JobStatus.PENDING_COMPLETION]: 'Pending Completion',
-    [JobStatus.COMPLETED]: 'Completed',
-    [JobStatus.INVOICE_APPROVAL]: 'Invoice Approval',
-    [JobStatus.INVOICED]: 'Invoiced',
-    [JobStatus.PAID]: 'Paid',
-    [JobStatus.CANCELLED]: 'Cancelled'
-  };
-  
-  // Status colors for display
-  const statusColors: Record<JobStatus, string> = {
-    [JobStatus.NEW]: 'blue',
-    [JobStatus.SCHEDULED]: 'cyan',
-    [JobStatus.IN_PROGRESS]: 'green',
-    [JobStatus.ON_HOLD]: 'orange',
-    [JobStatus.PENDING_COMPLETION]: 'lime',
-    [JobStatus.COMPLETED]: 'purple',
-    [JobStatus.INVOICE_APPROVAL]: 'pink',
-    [JobStatus.INVOICED]: 'amber',
-    [JobStatus.PAID]: 'emerald',
-    [JobStatus.CANCELLED]: 'red'
-  };
-
-  // Track current status counts
-  $: statusCounts = Object.values(JobStatus).reduce((acc, status) => {
-    acc[status] = $jobs.filter(job => job && job.status === status).length;
-    return acc;
-  }, {} as Record<JobStatus, number>);
-  
-  onMount(async () => {
-    console.log('Jobs page loading...');
-    await loadJobs();
-    loading = false;
-    console.log('Jobs loaded:', $jobs?.length || 0, 'jobs');
-  });
-
-  // Change status filter
-  function setStatusFilter(status: JobStatus | null) {
-    if (status) {
-      goto(`/jobs?status=${status}`);
-    } else {
-      goto('/jobs');
-    }
+  function filterJobs(jobs: any[], query: string) {
+    if (!query.trim()) return jobs;
+    
+    const searchTerms = query.toLowerCase().split(' ');
+    return jobs.filter(job => {
+      const searchableText = [
+        job.jobNumber,
+        job.description || '',
+        job.status,
+        job.jobType || ''
+      ].join(' ').toLowerCase();
+      
+      // Check if all search terms are found in the searchable text
+      return searchTerms.every(term => searchableText.includes(term));
+    });
   }
+  
+  function handleSearch(e: Event) {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+      const target = e.target as HTMLInputElement;
+      searchQuery = target.value;
+    }, 300);
+  }
+  
+  function createNewQuote() {
+    goto('/quotes/new');
+  }
+  
+  onMount(() => {
+    jobStore.fetchJobs();
+  });
 </script>
 
-<div class="max-w-6xl mx-auto p-6">
-  <h1 class="text-3xl font-bold mb-6">Jobs</h1>
-  
-  <!-- Status Filter Pills -->
-  <div class="bg-white rounded-lg shadow-md p-4 mb-6 flex flex-wrap gap-2 overflow-x-auto">
-    <button 
-      on:click={() => setStatusFilter(null)}
-      class="px-4 py-2 rounded-full text-sm font-medium transition-colors {!statusFilter ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}"
-    >
-      All Jobs <span class="ml-1 opacity-75">({$jobs?.length || 0})</span>
-    </button>
+<PageHeader title="Jobs">
+  <svelte:fragment slot="actions">
+    <Button color="primary" on:click={createNewQuote}>
+      Create Quote
+    </Button>
+  </svelte:fragment>
+</PageHeader>
+
+<div class="container mx-auto p-4">
+  <div class="mb-6 flex flex-col sm:flex-row gap-4">
+    <!-- Search -->
+    <div class="relative flex-1">
+      <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+        </svg>
+      </div>
+      <input 
+        type="search" 
+        class="block w-full p-2.5 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-white focus:ring-primary-500 focus:border-primary-500"
+        placeholder="Search jobs..."
+        on:input={handleSearch}
+      />
+    </div>
     
-    {#each Object.entries(statusLabels) as [status, label]}
-      <button 
-        on:click={() => setStatusFilter(status as JobStatus)}
-        class="px-4 py-2 rounded-full text-sm font-medium transition-colors {statusFilter === status ? `bg-${statusColors[status as JobStatus]}-500 text-white` : `bg-${statusColors[status as JobStatus]}-100 text-${statusColors[status as JobStatus]}-800 hover:bg-${statusColors[status as JobStatus]}-200`}"
+    <!-- Status Filter -->
+    <div class="w-full sm:w-auto">
+      <select 
+        bind:value={statusFilter}
+        class="block w-full p-2.5 text-sm text-gray-900 border border-gray-300 rounded-lg bg-white focus:ring-primary-500 focus:border-primary-500"
       >
-        {label} <span class="ml-1 opacity-75">({statusCounts[status as JobStatus] || 0})</span>
-      </button>
-    {/each}
+        <option value="ALL">All Statuses</option>
+        <option value="NEW">New</option>
+        <option value="SCHEDULED">Scheduled</option>
+        <option value="IN_PROGRESS">In Progress</option>
+        <option value="PENDING_COMPLETION">Pending Completion</option>
+        <option value="ON_HOLD">On Hold</option>
+        <option value="COMPLETED">Completed</option>
+        <option value="CANCELLED">Cancelled</option>
+      </select>
+    </div>
   </div>
   
-  <!-- Loading State -->
-  {#if $isLoading || loading}
-    <div class="flex justify-center items-center h-64 bg-white rounded-lg shadow-md">
-      <div class="text-center">
-        <div class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500 mb-2"></div>
-        <p class="text-gray-500">Loading jobs...</p>
-      </div>
-    </div>
-  
-  <!-- Error State -->
-  {:else if $error}
-    <div class="bg-red-50 p-8 text-center rounded-lg border border-red-200 shadow-md">
-      <p class="text-red-600 font-medium">{$error}</p>
-      <button 
-        on:click={() => loadJobs()}
-        class="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
-      >
-        Try Again
-      </button>
-    </div>
-  
-  <!-- No Jobs Found -->
-  {:else if !filteredJobs || filteredJobs.length === 0}
-    <div class="bg-white p-8 text-center rounded-lg border border-gray-200 shadow-md">
-      <p class="text-gray-600">No jobs found {statusFilter ? `with status "${statusLabels[statusFilter]}"` : ''}.</p>
-      {#if statusFilter}
-        <button 
-          on:click={() => setStatusFilter(null)} 
-          class="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
-        >
-          Show All Jobs
-        </button>
-      {/if}
-    </div>
-  
-  <!-- Jobs List -->
-  {:else}
-    <div class="grid grid-cols-1 gap-4">
-      {#each filteredJobs as job}
-        {#if job}
-          <a href="/jobs/{job.id}" class="block p-4 bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-            <div class="flex justify-between items-center">
-              <div>
-                <h2 class="text-lg font-semibold">{job.title}</h2>
-                <p class="text-sm text-gray-500">#{job.jobNumber}</p>
-              </div>
-              <div class="bg-{statusColors[job.status]}-100 text-{statusColors[job.status]}-800 px-3 py-1 rounded-full text-sm font-medium">
-                {statusLabels[job.status]}
-              </div>
-            </div>
-            
-            <div class="mt-2 grid grid-cols-2 gap-4">
-              <div>
-                <p class="text-sm text-gray-500">Customer:</p>
-                <p class="text-sm">ID: {job.customerId || 'Not specified'}</p>
-              </div>
-              <div>
-                <p class="text-sm text-gray-500">Created:</p>
-                <p class="text-sm">{new Date(job.createdAt).toLocaleDateString()}</p>
-              </div>
-            </div>
-            
-            {#if job.description}
-              <div class="mt-2">
-                <p class="text-sm text-gray-700 line-clamp-2">{job.description}</p>
-              </div>
-            {/if}
-          </a>
-        {/if}
-      {/each}
-    </div>
-  {/if}
+  <JobList 
+    jobs={filteredJobs} 
+    loading={$jobStore.loading} 
+    error={$jobStore.error}
+    filterStatus={statusFilter}
+    emptyStateMessage={searchQuery ? "No jobs match your search" : "No jobs found"}
+  />
 </div>

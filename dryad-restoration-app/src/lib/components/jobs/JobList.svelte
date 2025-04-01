@@ -26,7 +26,7 @@
   });
 </script>
 
-<div class="space-y-12">
+<div class="space-y-6">
   {#if loading}
     <div class="p-4 bg-gray-50 rounded-lg border border-gray-200 animate-pulse">
       <div class="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
@@ -39,7 +39,7 @@
       <p class="text-red-800">{error}</p>
     </div>
   {:else if filteredJobs.length === 0}
-    <div class="card-float p-6 text-center">
+    <div class="bg-gray-50 p-6 rounded-lg border border-gray-200 text-center">
       <p class="text-gray-500">{emptyStateMessage}</p>
     </div>
   {:else}
