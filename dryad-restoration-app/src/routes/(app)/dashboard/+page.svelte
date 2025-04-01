@@ -544,7 +544,7 @@
               <button 
                 class="whitespace-nowrap px-4 py-2 rounded-lg text-sm font-medium border-2 transition-colors duration-150
                 {selectedStatusFilter === status 
-                  ? 'bg-white/20 border-white text-white' 
+                  ? 'bg-teal-gradient border-white text-white' 
                   : 'bg-white/5 border-white/20 text-white/70 hover:bg-white/10 hover:border-white/40'}"
                 on:click={() => setStatusFilter(status)}
               >
