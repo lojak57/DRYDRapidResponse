@@ -25,7 +25,7 @@
       .filter(user => user.isActive)
       .sort((a, b) => {
         // Sort by role (ADMIN first, then OFFICE, then TECH)
-        const roleOrder = { 'ADMIN': 1, 'OFFICE': 2, 'TECH': 3, 'TECHNICIAN': 3, 'CUSTOMER': 4 };
+        const roleOrder: Record<string, number> = { 'ADMIN': 1, 'OFFICE': 2, 'TECH': 3, 'TECHNICIAN': 3, 'CUSTOMER': 4 };
         const roleA = roleOrder[a.role] || 999;
         const roleB = roleOrder[b.role] || 999;
         
@@ -147,44 +147,4 @@
 {/if}
 
 <!-- Add bottom padding for mobile viewport to prevent content from being hidden by navigation -->
-<div class="block md:hidden h-16"></div>
-
-<!-- Add a user switcher dropdown to the navigation component -->
-<nav class="bg-dryd-blue text-white p-4">
-  <div class="container mx-auto flex justify-between items-center">
-    <a href="/" class="text-xl font-bold">DRYAD Restoration</a>
-    
-    {#if $currentUser}
-      <div class="flex items-center">
-        <!-- User switcher -->
-        <div class="mr-4">
-          <select 
-            class="bg-dryd-blue text-white border border-blue-700 rounded px-2 py-1"
-            value={$currentUser.id}
-            on:change={(e) => handleUserChange(e.target.value)}
-          >
-            {#each availableUsers as user}
-              <option value={user.id}>
-                {user.firstName} {user.lastName} ({user.role})
-              </option>
-            {/each}
-          </select>
-        </div>
-        
-        <!-- User info and logout -->
-        <div class="flex items-center">
-          <span class="mr-4">
-            {#if $currentUser}
-              {getFullName($currentUser)} ({$currentUser.role})
-            {:else}
-              Guest
-            {/if}
-          </span>
-          <a href="/login" class="bg-dryd-orange hover:bg-orange-600 text-white px-4 py-2 rounded">
-            {$currentUser ? 'Logout' : 'Login'}
-          </a>
-        </div>
-      </div>
-    {/if}
-  </div>
-</nav> 
+<div class="block md:hidden h-16"></div> 
