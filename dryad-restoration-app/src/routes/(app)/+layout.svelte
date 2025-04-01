@@ -88,7 +88,7 @@
             {#if $currentUser}
                 <Nav />
             {/if}
-            <main class="flex-grow container mx-auto px-4 py-2 relative z-10" style="padding-bottom: 1rem;">
+            <main class="flex-grow container mx-auto px-4 py-2 relative z-10">
                 <slot />
             </main>
         </div>
