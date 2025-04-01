@@ -15,40 +15,20 @@
     import { jobs, loadJobs } from '$lib/stores/jobStore';
     
     let loaded = false;
-    let scrollY = 0;
-    let innerHeight = 0;
     
-    // Images for parallax effect - updated with more restoration-focused images
-    const backgroundImages = [
-        '/images/restoration-jobsite.jpg',
-        '/images/water-damage-restoration.jpg',
-        '/images/flood-damage.jpg'
-    ];
-    
-    let currentBgIndex = 0;
-    
-    // For debugging
-    let backgroundImageUrl = '';
+    // Single professional background image
+    const backgroundImage = '/images/professional-restoration.jpg';
     
     // Load data when the component mounts
     onMount(async () => {
         if (browser) {
-            console.log('Layout mounted, checking background images...');
+            console.log('Layout mounted, checking background image...');
             
-            // Check if images exist and log their URLs
-            backgroundImages.forEach((img, index) => {
-                const fullUrl = window.location.origin + img;
-                console.log(`Background image ${index}: ${fullUrl}`);
-                
-                // Test if the image loads
-                const testImg = new Image();
-                testImg.onload = () => console.log(`Image ${index} loaded successfully`);
-                testImg.onerror = () => console.error(`Failed to load image ${index}: ${fullUrl}`);
-                testImg.src = fullUrl;
-            });
-            
-            // Set initial background
-            updateBackgroundImage();
+            // Test if the image loads
+            const testImg = new Image();
+            testImg.onload = () => console.log('Background image loaded successfully');
+            testImg.onerror = () => console.error('Failed to load background image');
+            testImg.src = window.location.origin + backgroundImage;
             
             // Load jobs if not already loaded
             if ($jobs.length === 0) {
@@ -74,36 +54,9 @@
             }
         }
     });
-    
-    // Update background image based on scroll position
-    function updateBackgroundImage() {
-        if (scrollY && innerHeight && document.body) {
-            const scrollPercentage = scrollY / (document.body.scrollHeight - innerHeight);
-            const newIndex = Math.min(
-                backgroundImages.length - 1,
-                Math.floor(scrollPercentage * backgroundImages.length)
-            );
-            
-            if (newIndex !== currentBgIndex) {
-                console.log(`Changing background to image ${newIndex}: ${backgroundImages[newIndex]}`);
-                currentBgIndex = newIndex;
-            }
-            
-            backgroundImageUrl = `url('${backgroundImages[currentBgIndex]}')`;
-        } else {
-            backgroundImageUrl = `url('${backgroundImages[0]}')`;
-        }
-    }
-    
-    // Watch for scroll position changes
-    $: {
-        if (browser && loaded) {
-            updateBackgroundImage();
-        }
-    }
 </script>
 
-<svelte:window bind:scrollY bind:innerHeight on:scroll={() => updateBackgroundImage()} />
+<svelte:window />
 
 <!-- Notification toasts -->
 <ToastContainer />
@@ -111,16 +64,14 @@
 <div class="app">
     {#if loaded}
         <div 
-            class="background-container fixed inset-0 z-[-1] transition-opacity duration-1000"
-            style="background-image: {backgroundImageUrl}; 
+            class="background-container fixed inset-0 z-[-1]"
+            style="background-image: url('{backgroundImage}'); 
                    background-size: cover; 
-                   background-position: center; 
-                   background-attachment: fixed;
-                   background-repeat: no-repeat;"
+                   background-position: center;"
         ></div>
         
-        <!-- Modified overlay with no blur and less opacity -->
-        <div class="overlay fixed inset-0 z-[-1] bg-white/40"></div>
+        <!-- Modified overlay with adjusted opacity for readability -->
+        <div class="overlay fixed inset-0 z-[-1] bg-white/35"></div>
         
         <div in:fade={{ duration: 500 }} class="flex flex-col h-full">
             {#if $currentUser}
@@ -141,7 +92,7 @@
     }
     
     .background-container {
-        transition: opacity 1s ease;
+        transition: opacity 0.5s ease;
     }
     
     :global(body) {
