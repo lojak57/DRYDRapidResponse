@@ -171,15 +171,48 @@
     }
   ];
 
+  function getCountForStatus(status: JobStatus): number {
+    switch (status) {
+      case JobStatus.NEW: return newJobs?.length || 0;
+      case JobStatus.SCHEDULED: return scheduledJobs?.length || 0;
+      case JobStatus.IN_PROGRESS: return inProgressJobs?.length || 0;
+      case JobStatus.ON_HOLD: return onHoldJobs?.length || 0;
+      case JobStatus.PENDING_COMPLETION: return pendingCompletionJobs?.length || 0;
+      case JobStatus.COMPLETED: return completedJobs?.length || 0;
+      case JobStatus.INVOICE_APPROVAL: return invoiceApprovalJobs?.length || 0;
+      case JobStatus.INVOICED: return invoicedJobs?.length || 0;
+      case JobStatus.PAID: return paidJobs?.length || 0;
+      case JobStatus.CANCELLED: return cancelledJobs?.length || 0;
+      default: return 0;
+    }
+  }
+
   // Filter job categories based on user role and what to show with safety checks
   $: visibleCategories = !$jobs ? [] : isTechnician 
     ? jobCategories.filter(cat => ['In Progress', 'Scheduled', 'Pending Completion'].includes(cat.title))
     : isAuthorized 
-      ? jobCategories.filter(cat => cat.count > 0 || ['New Jobs', 'In Progress', 'Pending Completion', 'Invoiced'].includes(cat.title))
+      ? jobCategories.map(cat => {
+          const freshCount = getCountForStatus(cat.status);
+          console.log(`Category ${cat.title}, status ${cat.status}: count = ${freshCount}`);
+          
+          return {
+            ...cat,
+            count: freshCount
+          };
+        }).filter(cat => cat.count > 0 || ['New Jobs', 'In Progress', 'Pending Completion', 'Invoiced'].includes(cat.title))
       : [];
       
   // Sort categories by priority
   $: sortedCategories = visibleCategories?.length ? [...visibleCategories].sort((a, b) => a.priority - b.priority) : [];
+
+  // Debug output of what's actually being displayed
+  $: {
+    if (sortedCategories.length > 0) {
+      console.log('Sorted categories with counts that will be displayed:', 
+        sortedCategories.map(c => ({ title: c.title, count: c.count }))
+      );
+    }
+  }
 </script>
 
 <style>

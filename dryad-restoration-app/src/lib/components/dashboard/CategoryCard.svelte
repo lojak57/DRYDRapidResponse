@@ -1,5 +1,6 @@
 <script lang="ts">
   import { JobStatus } from '$lib/types/Job';
+  import { onMount, afterUpdate } from 'svelte';
 
   // Props
   export let title: string;
@@ -9,6 +10,11 @@
   export let textColor: string = 'blue';
   export let animated: boolean = false;
   export let transitionDelay: number = 0;
+
+  // Log when count changes for debugging
+  afterUpdate(() => {
+    console.log(`CategoryCard ${title}: count = ${count}`);
+  });
 
   // Badge colors based on count
   function getBadgeClasses(count: number): string {
