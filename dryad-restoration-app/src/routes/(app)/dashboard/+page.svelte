@@ -9,6 +9,7 @@
   import TechJobFocusWidget from '$lib/components/dashboard/TechJobFocusWidget.svelte';
   import AdminControlsWidget from '$lib/components/dashboard/AdminControlsWidget.svelte';
   import { onMount } from 'svelte';
+  import { goto } from '$app/navigation';
   
   // Animation variables
   let animated = false;
@@ -488,17 +489,36 @@
 
     <!-- Jobs Section -->
     <div class="card-glass rounded-lg card-shadow overflow-hidden mb-6">
-      <div class="p-5 bg-slate-gradient text-white">
-        <div class="flex justify-between items-center">
-          <h2 class="font-bold text-xl flex items-center">
+      <div class="p-5 bg-dryd-gradient text-white">
+        <div class="flex flex-col space-y-4 sm:flex-row sm:justify-between sm:items-center sm:space-y-0">
+          <div class="flex items-center">
             <div class="bg-white/20 text-white p-2 rounded-lg mr-3 shadow-sm">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
               </svg>
             </div>
-            <span>{#if $currentUser && $currentUser.role === Role.TECH}My Assigned Jobs{:else}Active Jobs{/if}</span>
-          </h2>
+            <span class="font-bold text-xl">Job Filter</span>
+          </div>
           <a href="/jobs" class="btn-light-blue text-sm px-4 py-2 rounded-lg font-medium shadow-sm transition-all duration-200 hover:shadow hover:scale-105">View All</a>
+        </div>
+        
+        <!-- Job Status Filter -->
+        <div class="mt-4 flex overflow-x-auto pb-2 scrollbar-hide">
+          <div class="flex space-x-2">
+            {#each Object.values(JobStatus) as status}
+              {#if status !== JobStatus.CANCELLED}
+                <button 
+                  class="whitespace-nowrap px-4 py-2 rounded-lg text-sm font-medium border-2 transition-colors duration-150
+                  {$dashboardJobs && $dashboardJobs.some(job => job.status === status) 
+                    ? 'bg-white/10 border-white text-white hover:bg-white/20' 
+                    : 'bg-white/5 border-white/20 text-white/70 hover:bg-white/10 hover:border-white/40'}"
+                  on:click={() => goto(`/jobs?status=${status}`)}
+                >
+                  {status.replace(/_/g, ' ')}
+                </button>
+              {/if}
+            {/each}
+          </div>
         </div>
       </div>
 
