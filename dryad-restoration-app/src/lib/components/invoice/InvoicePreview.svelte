@@ -146,7 +146,9 @@
     <div class="flex justify-between items-start">
       <div class="flex-1">
         <div class="mb-2">
-          <Logo size="lg" linkToDashboard={false} />
+          <div class="w-48 h-48 flex items-center justify-center">
+            <Logo size="xl" linkToDashboard={false} />
+          </div>
         </div>
         <p class="text-gray-600 text-sm">Professional Water & Fire Restoration Services</p>
         <p class="text-gray-600 text-sm">123 Main Street, Suite 101</p>
