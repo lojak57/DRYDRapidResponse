@@ -5,9 +5,11 @@
   import { currentUser } from '$lib/stores/authStore';
   import { Role } from '$lib/types/User';
   import { JobStatus } from '$lib/types/Job';
+  import type { Job } from '$lib/types/Job';
   import Logo from '$lib/components/common/Logo.svelte';
   import TechJobFocusWidget from '$lib/components/dashboard/TechJobFocusWidget.svelte';
   import AdminControlsWidget from '$lib/components/dashboard/AdminControlsWidget.svelte';
+  import CategoryCard from '$lib/components/dashboard/CategoryCard.svelte';
   import { onMount } from 'svelte';
   
   // Animation variables
@@ -18,6 +20,12 @@
     setTimeout(() => {
       animated = true;
     }, 100);
+    
+    // Log loaded jobs
+    console.log('Dashboard mounted, jobs length:', $jobs?.length);
+    if ($jobs?.length) {
+      console.log('Job statuses:', $jobs.map(j => j.status));
+    }
   });
   
   // Check if user is authorized to create jobs
@@ -26,7 +34,7 @@
   $: isAdmin = $currentUser?.role === Role.ADMIN;
   
   // Safely filter jobs by checking for nulls/undefined
-  function safeFilter(jobArray, statusCheck) {
+  function safeFilter(jobArray: Job[] | null | undefined, statusCheck: JobStatus): Job[] {
     if (!jobArray || !Array.isArray(jobArray)) return [];
     return jobArray.filter(job => job && job.status === statusCheck);
   }
@@ -62,9 +70,7 @@
       title: "New Jobs",
       count: newJobs?.length || 0,
       icon: "M12 4v16m8-8H4",
-      bgColors: "from-blue-50/90 to-indigo-50/90",
       textColor: "blue",
-      iconBg: "blue-100",
       status: JobStatus.NEW,
       priority: 1
     },
@@ -72,9 +78,7 @@
       title: "Scheduled",
       count: scheduledJobs?.length || 0,
       icon: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z",
-      bgColors: "from-cyan-50/90 to-sky-50/90",
       textColor: "cyan",
-      iconBg: "cyan-100",
       status: JobStatus.SCHEDULED,
       priority: 2
     },
@@ -82,9 +86,7 @@
       title: "In Progress",
       count: inProgressJobs?.length || 0,
       icon: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z",
-      bgColors: "from-green-50/90 to-teal-50/90",
       textColor: "green",
-      iconBg: "green-100",
       status: JobStatus.IN_PROGRESS,
       priority: 3
     },
@@ -92,9 +94,7 @@
       title: "On Hold",
       count: onHoldJobs?.length || 0,
       icon: "M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z",
-      bgColors: "from-orange-50/90 to-amber-50/90",
       textColor: "orange",
-      iconBg: "orange-100",
       status: JobStatus.ON_HOLD,
       priority: 4
     },
@@ -102,9 +102,7 @@
       title: "Pending Completion",
       count: pendingCompletionJobs?.length || 0,
       icon: "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z",
-      bgColors: "from-lime-50/90 to-green-50/90",
       textColor: "lime",
-      iconBg: "lime-100",
       status: JobStatus.PENDING_COMPLETION,
       priority: 5
     },
@@ -112,9 +110,7 @@
       title: "Completed",
       count: completedJobs?.length || 0,
       icon: "M5 13l4 4L19 7",
-      bgColors: "from-purple-50/90 to-indigo-50/90",
       textColor: "purple",
-      iconBg: "purple-100",
       status: JobStatus.COMPLETED,
       priority: 6
     },
@@ -122,9 +118,7 @@
       title: "Invoice Approval",
       count: invoiceApprovalJobs?.length || 0,
       icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4",
-      bgColors: "from-pink-50/90 to-rose-50/90",
       textColor: "pink",
-      iconBg: "pink-100",
       status: JobStatus.INVOICE_APPROVAL,
       priority: 7
     },
@@ -132,9 +126,7 @@
       title: "Invoiced",
       count: invoicedJobs?.length || 0,
       icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01",
-      bgColors: "from-amber-50/90 to-yellow-50/90",
       textColor: "amber",
-      iconBg: "amber-100",
       status: JobStatus.INVOICED,
       priority: 8
     },
@@ -142,9 +134,7 @@
       title: "Paid",
       count: paidJobs?.length || 0,
       icon: "M9 8l3 5m0 0l3-5m-3 5v4m-3-5h6m-6 3h6m6-3a9 9 0 11-18 0 9 9 0 0118 0z",
-      bgColors: "from-emerald-50/90 to-green-50/90",
       textColor: "emerald",
-      iconBg: "emerald-100",
       status: JobStatus.PAID,
       priority: 9
     }
@@ -159,14 +149,6 @@
       
   // Sort categories by priority
   $: sortedCategories = visibleCategories?.length ? [...visibleCategories].sort((a, b) => a.priority - b.priority) : [];
-  
-  // Get badge classes based on count
-  function getBadgeClasses(count: number): string {
-    if (!count || count === 0) return 'bg-gray-200 text-gray-600';
-    if (count > 5) return 'bg-red-500 text-white animate-pulse';
-    if (count > 3) return 'bg-orange-400 text-white';
-    return 'bg-blue-500 text-white';
-  }
 </script>
 
 <style>
@@ -248,39 +230,15 @@
         <!-- Key Performance Metrics -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {#each sortedCategories as category, i}
-            <div class="card-enter {animated ? 'animated' : ''}" style="transition-delay: {i * 75}ms">
-              <div class="card-glass bg-gradient-to-br {category.bgColors} rounded-xl card-shadow p-5 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 relative">
-                <div class="flex items-center justify-between">
-                  <div>
-                    <div class="flex items-center">
-                      <p class="text-sm font-medium text-{category.textColor}-700">{category.title}</p>
-                      {#if category.count > 0}
-                        <span class="ml-2 px-2 py-0.5 text-xs font-medium rounded-full count-badge {getBadgeClasses(category.count)} {category.count > 5 ? 'count-pulse' : ''}">
-                          {category.count}
-                        </span>
-                      {/if}
-                    </div>
-                    <p class="text-3xl font-bold text-{category.textColor}-800">{category.count}</p>
-                  </div>
-                  <div class="bg-{category.iconBg} p-3 rounded-full {category.count > 0 ? 'animate-bounce' : ''}">
-                    <svg class="w-6 h-6 text-{category.textColor}-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={category.icon}/>
-                    </svg>
-                  </div>
-                </div>
-                <div class="mt-2">
-                  <a href="/jobs?status={category.status}" class="text-xs text-{category.textColor}-700 hover:underline inline-flex items-center group">
-                    View all {category.title.toLowerCase()}
-                    <svg class="w-3 h-3 ml-1 transform group-hover:translate-x-1 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                    </svg>
-                  </a>
-                </div>
-                {#if category.count > 3}
-                  <div class="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full -mt-1 -mr-1"></div>
-                {/if}
-              </div>
-            </div>
+            <CategoryCard 
+              title={category.title} 
+              count={category.count} 
+              icon={category.icon} 
+              status={category.status} 
+              textColor={category.textColor}
+              animated={animated}
+              transitionDelay={i * 75}
+            />
           {/each}
         </div>
       {:else}
