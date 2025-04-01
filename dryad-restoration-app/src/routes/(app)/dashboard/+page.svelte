@@ -35,7 +35,7 @@
   });
 </script>
 
-<div class="max-w-6xl mx-auto">
+<div class="dashboard-container">
   {#if $currentUser}
     <!-- Dashboard Header with Prominent Logo -->
     <div class="mb-8 text-center md:text-left">
@@ -341,4 +341,29 @@
       <p class="text-gray-500">Loading dashboard...</p>
     </div>
   {/if}
-</div> 
+</div>
+
+<style>
+  .dashboard-container {
+    max-width: 6xl;
+    margin: 0 auto;
+    position: relative;
+    padding: 1.5rem;
+    min-height: calc(100vh - 4rem);
+    background-image: 
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.92)),
+      linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 25%, #eff6ff 50%, #f8fafc 75%, #f9fafb 100%);
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+  }
+  
+  @media (min-width: 768px) {
+    .dashboard-container {
+      background-image: 
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.95)),
+        linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 25%, #eff6ff 50%, #f8fafc 75%, #f9fafb 100%);
+    }
+  }
+</style> 
