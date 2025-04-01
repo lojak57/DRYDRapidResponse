@@ -527,6 +527,11 @@
         
         // Complete the task
         completeTask(data);
+        
+        // Reload the page after a short delay to refresh UI
+        setTimeout(() => {
+          window.location.reload();
+        }, 800);
       })
       .catch(error => {
         console.error('Error updating job status to INVOICED:', error);
@@ -986,6 +991,11 @@
       
       // Complete the task
       completeTask(data);
+      
+      // Reload the page after a short delay to refresh UI
+      setTimeout(() => {
+        window.location.reload();
+      }, 800);
     }).catch(error => {
       console.error('Error updating job with payment data:', error);
       alert('Failed to save payment data. Please try again.');

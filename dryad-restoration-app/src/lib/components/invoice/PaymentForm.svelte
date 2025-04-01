@@ -3,7 +3,7 @@
   import type { Job } from '$lib/types/Job';
   import { JobStatus } from '$lib/types/Job';
   import type { InvoicePayment } from '$lib/types/Invoice';
-  import { updateJob } from '$lib/services/jobService';
+  import { updateJob } from '$lib/services/jobs';
   import { format } from 'date-fns';
   
   export let job: Job;
