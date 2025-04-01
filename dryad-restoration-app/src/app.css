@@ -63,6 +63,27 @@
   .bg-teal-gradient-5 {
     background: linear-gradient(135deg, #319795, #285E61);
   }
+  
+  /* Burgundy gradient scale */
+  .bg-burgundy-gradient {
+    background: linear-gradient(135deg, #9A3667, #751D44);
+  }
+  .bg-burgundy-gradient-1 {
+    background: linear-gradient(135deg, #D53F8C, #9A3667);
+  }
+  .bg-burgundy-gradient-2 {
+    background: linear-gradient(135deg, #B83280, #97266D);
+  }
+  .bg-burgundy-gradient-3 {
+    background: linear-gradient(135deg, #9A3667, #862E59);
+  }
+  .bg-burgundy-gradient-4 {
+    background: linear-gradient(135deg, #862E59, #702459);
+  }
+  .bg-burgundy-gradient-5 {
+    background: linear-gradient(135deg, #702459, #621B54);
+  }
+  
   .bg-purple-gradient {
     background: linear-gradient(135deg, #9F7AEA, #6B46C1);
   }
@@ -119,6 +140,33 @@
     background-color: rgba(49, 151, 149, 0.15);
     border-bottom: 1px solid rgba(49, 151, 149, 0.3);
   }
+  
+  /* Burgundy card headers */
+  .card-header-burgundy {
+    background-color: rgba(154, 54, 103, 0.15);
+    border-bottom: 1px solid rgba(154, 54, 103, 0.3);
+  }
+  .card-header-burgundy-1 {
+    background-color: rgba(213, 63, 140, 0.15);
+    border-bottom: 1px solid rgba(213, 63, 140, 0.3);
+  }
+  .card-header-burgundy-2 {
+    background-color: rgba(184, 50, 128, 0.15);
+    border-bottom: 1px solid rgba(184, 50, 128, 0.3);
+  }
+  .card-header-burgundy-3 {
+    background-color: rgba(154, 54, 103, 0.15);
+    border-bottom: 1px solid rgba(154, 54, 103, 0.3);
+  }
+  .card-header-burgundy-4 {
+    background-color: rgba(134, 46, 89, 0.15);
+    border-bottom: 1px solid rgba(134, 46, 89, 0.3);
+  }
+  .card-header-burgundy-5 {
+    background-color: rgba(112, 36, 89, 0.15);
+    border-bottom: 1px solid rgba(112, 36, 89, 0.3);
+  }
+  
   .card-header-purple {
     background-color: rgba(159, 122, 234, 0.15);
     border-bottom: 1px solid rgba(159, 122, 234, 0.3);
@@ -192,6 +240,51 @@
   .btn-teal-5:hover {
     background-color: #2C7A7B;
   }
+  
+  /* Burgundy button styles */
+  .btn-burgundy {
+    background-color: #9A3667;
+    color: white;
+  }
+  .btn-burgundy:hover {
+    background-color: #862E59;
+  }
+  .btn-burgundy-1 {
+    background-color: #D53F8C;
+    color: white;
+  }
+  .btn-burgundy-1:hover {
+    background-color: #B83280;
+  }
+  .btn-burgundy-2 {
+    background-color: #B83280;
+    color: white;
+  }
+  .btn-burgundy-2:hover {
+    background-color: #9A3667;
+  }
+  .btn-burgundy-3 {
+    background-color: #9A3667;
+    color: white;
+  }
+  .btn-burgundy-3:hover {
+    background-color: #862E59;
+  }
+  .btn-burgundy-4 {
+    background-color: #862E59;
+    color: white;
+  }
+  .btn-burgundy-4:hover {
+    background-color: #702459;
+  }
+  .btn-burgundy-5 {
+    background-color: #702459;
+    color: white;
+  }
+  .btn-burgundy-5:hover {
+    background-color: #621B54;
+  }
+  
   .btn-purple {
     background-color: #9F7AEA;
     color: white;

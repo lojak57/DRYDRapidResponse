@@ -62,10 +62,10 @@
       title: "New Jobs",
       count: newJobs?.length || 0,
       icon: "M12 4v16m8-8H4",
-      bgColors: "bg-teal-gradient-1",
-      textColor: "teal",
-      headerClass: "card-header-teal-1",
-      buttonClass: "btn-teal-1",
+      bgColors: "bg-burgundy-gradient-1",
+      textColor: "pink",
+      headerClass: "card-header-burgundy-1",
+      buttonClass: "btn-burgundy-1",
       status: JobStatus.NEW,
       priority: 1
     },
@@ -73,10 +73,10 @@
       title: "Scheduled",
       count: scheduledJobs?.length || 0,
       icon: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z",
-      bgColors: "bg-teal-gradient-2",
-      textColor: "teal",
-      headerClass: "card-header-teal-2",
-      buttonClass: "btn-teal-2",
+      bgColors: "bg-burgundy-gradient-2",
+      textColor: "pink",
+      headerClass: "card-header-burgundy-2",
+      buttonClass: "btn-burgundy-2",
       status: JobStatus.SCHEDULED,
       priority: 2
     },
@@ -84,10 +84,10 @@
       title: "In Progress",
       count: inProgressJobs?.length || 0,
       icon: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z",
-      bgColors: "bg-teal-gradient-3",
-      textColor: "teal",
-      headerClass: "card-header-teal-3",
-      buttonClass: "btn-teal-3",
+      bgColors: "bg-burgundy-gradient-3",
+      textColor: "pink",
+      headerClass: "card-header-burgundy-3",
+      buttonClass: "btn-burgundy-3",
       status: JobStatus.IN_PROGRESS,
       priority: 3
     },
@@ -106,10 +106,10 @@
       title: "Pending Completion",
       count: pendingCompletionJobs?.length || 0,
       icon: "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z",
-      bgColors: "bg-teal-gradient-4",
-      textColor: "teal",
-      headerClass: "card-header-teal-4",
-      buttonClass: "btn-teal-4",
+      bgColors: "bg-burgundy-gradient-4",
+      textColor: "pink",
+      headerClass: "card-header-burgundy-4",
+      buttonClass: "btn-burgundy-4",
       status: JobStatus.PENDING_COMPLETION,
       priority: 5
     },
@@ -128,10 +128,10 @@
       title: "Invoice Approval",
       count: invoiceApprovalJobs?.length || 0,
       icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4",
-      bgColors: "bg-teal-gradient-5",
-      textColor: "teal",
-      headerClass: "card-header-teal-5",
-      buttonClass: "btn-teal-5",
+      bgColors: "bg-burgundy-gradient-5",
+      textColor: "pink",
+      headerClass: "card-header-burgundy-5",
+      buttonClass: "btn-burgundy-5",
       status: JobStatus.INVOICE_APPROVAL,
       priority: 7
     },
@@ -139,10 +139,10 @@
       title: "Invoiced",
       count: invoicedJobs?.length || 0,
       icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01",
-      bgColors: "bg-teal-gradient-5",
-      textColor: "teal",
-      headerClass: "card-header-teal-5",
-      buttonClass: "btn-teal-5",
+      bgColors: "bg-burgundy-gradient-5",
+      textColor: "pink",
+      headerClass: "card-header-burgundy-5",
+      buttonClass: "btn-burgundy-5",
       status: JobStatus.INVOICED,
       priority: 8
     },
@@ -322,7 +322,7 @@
                   
                   <a 
                     href="/jobs?status={category.status}" 
-                    class="action-link btn-teal text-sm mt-auto self-start"
+                    class="action-link btn-burgundy text-sm mt-auto self-start"
                   >
                     View all {category.title.toLowerCase()}
                     <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -402,10 +402,10 @@
     {#if isAuthorized && pendingCompletionJobs && pendingCompletionJobs.length > 0}
       <div class="mb-6">
         <div class="card-glass rounded-lg card-shadow overflow-hidden">
-          <div class="p-4 card-header-teal">
+          <div class="p-4 card-header-burgundy">
             <div class="flex justify-between items-center">
-              <h2 class="font-bold text-xl flex items-center text-teal-800">
-                <div class="bg-teal-gradient text-white p-2 rounded-lg mr-3 shadow-sm">
+              <h2 class="font-bold text-xl flex items-center text-pink-800">
+                <div class="bg-burgundy-gradient text-white p-2 rounded-lg mr-3 shadow-sm">
                   <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                   </svg>
@@ -420,13 +420,13 @@
             <div class="space-y-3">
               {#each pendingCompletionJobs as job}
                 {#if job && job.id}
-                  <a href="/jobs/{job.id}" class="block p-4 bg-white border border-teal-200 rounded-lg transition-colors duration-150 hover:bg-teal-50/50">
+                  <a href="/jobs/{job.id}" class="block p-4 bg-white border border-pink-200 rounded-lg transition-colors duration-150 hover:bg-pink-50/50">
                     <div class="flex justify-between items-center">
                       <div>
-                        <h3 class="font-semibold text-teal-800">{job.title}</h3>
-                        <p class="text-sm text-teal-600">#{job.jobNumber}</p>
+                        <h3 class="font-semibold text-pink-800">{job.title}</h3>
+                        <p class="text-sm text-pink-600">#{job.jobNumber}</p>
                       </div>
-                      <div class="bg-teal-100 text-teal-800 px-3 py-1 rounded-full text-sm font-medium">
+                      <div class="bg-pink-100 text-pink-800 px-3 py-1 rounded-full text-sm font-medium">
                         Ready for Review
                       </div>
                     </div>
