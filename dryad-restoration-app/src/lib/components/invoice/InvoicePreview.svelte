@@ -18,10 +18,10 @@
   }
   
   export let job: Job;
-  export let lineItems: CustomLineItem[] = [];
-  export let laborCost: number = 0;
-  export let materialsCost: number = 0;
-  export let equipmentCost: number = 0;
+  export let lineItems: CustomLineItem[] = job.lineItems || [];
+  export let laborCost: number = job.laborCost || 0;
+  export let materialsCost: number = job.materialsCost || 0;
+  export let equipmentCost: number = job.equipmentCost || 0;
   export let mode: 'create' | 'review' = 'review';
   
   // Create event dispatcher

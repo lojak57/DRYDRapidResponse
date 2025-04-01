@@ -23,6 +23,9 @@
   import InvoicePreview from '../invoice/InvoicePreview.svelte';
   import AssignTechnicianForm from '../field/AssignTechnicianForm.svelte';
   import { currentUser } from '$lib/stores/authStore';
+  import { getTaskInfo } from '$lib/config/workflowConfig';
+  import { addCompletionTaskToJob, updateJob, addLog } from '$lib/services/jobs';
+  import type { CustomLineItem } from '$lib/types/Job';
   
   // Define field types
   interface TextField {
@@ -814,8 +817,16 @@
       taskType: 'finalize_job'
     };
     
-    // Store the job finalization data also in a job property so InvoicePreview can access it
-    // This will make it available for the invoice creation and review steps
+    // Update the job object with the finalization data
+    const updatedJobData = {
+      laborCost: event.detail.laborCost || 0,
+      materialsCost: event.detail.materialsCost || 0,
+      equipmentCost: event.detail.equipmentCost || 0,
+      lineItems: event.detail.lineItems || [],
+      finalNotes: event.detail.finalNotes || ''
+    };
+    
+    // Store costs in local variable for invoice preview
     jobCosts = {
       laborCost: event.detail.laborCost || 0,
       materialsCost: event.detail.materialsCost || 0,
@@ -823,7 +834,22 @@
       lineItems: event.detail.lineItems || []
     };
     
-    completeTask(data);
+    // Save the updated job to the database
+    updateJob(job.id, updatedJobData)
+      .then((updatedJob) => {
+        if (updatedJob) {
+          // Update the local job object
+          job = updatedJob;
+          console.log('Job updated with cost data:', job);
+        }
+        
+        // Complete the task
+        completeTask(data);
+      })
+      .catch(error => {
+        console.error('Error updating job with cost data:', error);
+        alert('Failed to save job cost data. Please try again.');
+      });
   }
   
   // Store job costs for invoice preview
@@ -991,10 +1017,6 @@
             <InvoicePreview
               job={job}
               mode="review"
-              laborCost={jobCosts.laborCost}
-              materialsCost={jobCosts.materialsCost}
-              equipmentCost={jobCosts.equipmentCost}
-              lineItems={jobCosts.lineItems}
               on:approve={handleInvoiceApproval}
               on:cancel={closeModal}
             />
@@ -1002,10 +1024,6 @@
             <InvoicePreview
               job={job}
               mode="create"
-              laborCost={jobCosts.laborCost}
-              materialsCost={jobCosts.materialsCost}
-              equipmentCost={jobCosts.equipmentCost}
-              lineItems={jobCosts.lineItems}
               on:approve={handleInvoiceCreation}
               on:cancel={closeModal}
             />

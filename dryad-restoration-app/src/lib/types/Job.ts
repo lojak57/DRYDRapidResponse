@@ -114,4 +114,30 @@ export interface Job {
   completionTasks?: CompletionTasks;
   /** Flag indicating that "before" photos have been taken for the job */
   hasBeforePhotos?: boolean;
+  /** Final labor cost for the job */
+  laborCost?: number;
+  /** Final materials cost for the job */
+  materialsCost?: number;
+  /** Final equipment cost for the job */
+  equipmentCost?: number;
+  /** Final line items for the job */
+  lineItems?: CustomLineItem[];
+  /** Final notes added during job finalization */
+  finalNotes?: string;
+}
+
+/** Represents a custom line item for a job invoice */
+export interface CustomLineItem {
+  /** Unique identifier for the line item */
+  id: string;
+  /** Description of the line item */
+  description: string;
+  /** Quantity of the item */
+  quantity: number;
+  /** Unit price of the item */
+  unitPrice: number;
+  /** Total price of the line item (quantity * unitPrice) */
+  total: number;
+  /** Category of the line item (e.g., LABOR, MATERIALS, EQUIPMENT) */
+  category: string;
 } 
