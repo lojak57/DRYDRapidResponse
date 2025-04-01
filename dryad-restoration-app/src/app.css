@@ -48,6 +48,21 @@
   .bg-teal-gradient {
     background: linear-gradient(135deg, #4FD1C5, #2C7A7B);
   }
+  .bg-teal-gradient-1 {
+    background: linear-gradient(135deg, #B2F5EA, #4FD1C5);
+  }
+  .bg-teal-gradient-2 {
+    background: linear-gradient(135deg, #81E6D9, #38B2AC);
+  }
+  .bg-teal-gradient-3 {
+    background: linear-gradient(135deg, #4FD1C5, #319795);
+  }
+  .bg-teal-gradient-4 {
+    background: linear-gradient(135deg, #38B2AC, #2C7A7B);
+  }
+  .bg-teal-gradient-5 {
+    background: linear-gradient(135deg, #319795, #285E61);
+  }
   .bg-purple-gradient {
     background: linear-gradient(135deg, #9F7AEA, #6B46C1);
   }
@@ -83,6 +98,26 @@
   .card-header-teal {
     background-color: rgba(79, 209, 197, 0.15);
     border-bottom: 1px solid rgba(79, 209, 197, 0.3);
+  }
+  .card-header-teal-1 {
+    background-color: rgba(178, 245, 234, 0.15);
+    border-bottom: 1px solid rgba(178, 245, 234, 0.3);
+  }
+  .card-header-teal-2 {
+    background-color: rgba(129, 230, 217, 0.15);
+    border-bottom: 1px solid rgba(129, 230, 217, 0.3);
+  }
+  .card-header-teal-3 {
+    background-color: rgba(79, 209, 197, 0.15);
+    border-bottom: 1px solid rgba(79, 209, 197, 0.3);
+  }
+  .card-header-teal-4 {
+    background-color: rgba(56, 178, 172, 0.15);
+    border-bottom: 1px solid rgba(56, 178, 172, 0.3);
+  }
+  .card-header-teal-5 {
+    background-color: rgba(49, 151, 149, 0.15);
+    border-bottom: 1px solid rgba(49, 151, 149, 0.3);
   }
   .card-header-purple {
     background-color: rgba(159, 122, 234, 0.15);
@@ -121,6 +156,41 @@
   }
   .btn-teal:hover {
     background-color: #38B2AC;
+  }
+  .btn-teal-1 {
+    background-color: #B2F5EA;
+    color: #234E52;
+  }
+  .btn-teal-1:hover {
+    background-color: #81E6D9;
+  }
+  .btn-teal-2 {
+    background-color: #81E6D9;
+    color: #234E52;
+  }
+  .btn-teal-2:hover {
+    background-color: #4FD1C5;
+  }
+  .btn-teal-3 {
+    background-color: #4FD1C5;
+    color: white;
+  }
+  .btn-teal-3:hover {
+    background-color: #38B2AC;
+  }
+  .btn-teal-4 {
+    background-color: #38B2AC;
+    color: white;
+  }
+  .btn-teal-4:hover {
+    background-color: #319795;
+  }
+  .btn-teal-5 {
+    background-color: #319795;
+    color: white;
+  }
+  .btn-teal-5:hover {
+    background-color: #2C7A7B;
   }
   .btn-purple {
     background-color: #9F7AEA;

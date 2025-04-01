@@ -26,7 +26,7 @@
   $: isAdmin = $currentUser?.role === Role.ADMIN;
   
   // Safely filter jobs by checking for nulls/undefined
-  function safeFilter(jobArray, statusCheck) {
+  function safeFilter(jobArray: Job[] | undefined | null, statusCheck: JobStatus): Job[] {
     if (!jobArray || !Array.isArray(jobArray)) return [];
     return jobArray.filter(job => job && job.status === statusCheck);
   }
@@ -62,10 +62,10 @@
       title: "New Jobs",
       count: newJobs?.length || 0,
       icon: "M12 4v16m8-8H4",
-      bgColors: "bg-teal-gradient",
+      bgColors: "bg-teal-gradient-1",
       textColor: "teal",
-      headerClass: "card-header-teal",
-      buttonClass: "btn-teal",
+      headerClass: "card-header-teal-1",
+      buttonClass: "btn-teal-1",
       status: JobStatus.NEW,
       priority: 1
     },
@@ -73,10 +73,10 @@
       title: "Scheduled",
       count: scheduledJobs?.length || 0,
       icon: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z",
-      bgColors: "bg-purple-gradient",
-      textColor: "purple",
-      headerClass: "card-header-purple",
-      buttonClass: "btn-purple",
+      bgColors: "bg-teal-gradient-2",
+      textColor: "teal",
+      headerClass: "card-header-teal-2",
+      buttonClass: "btn-teal-2",
       status: JobStatus.SCHEDULED,
       priority: 2
     },
@@ -84,10 +84,10 @@
       title: "In Progress",
       count: inProgressJobs?.length || 0,
       icon: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z",
-      bgColors: "bg-emerald-gradient",
-      textColor: "emerald",
-      headerClass: "card-header-emerald",
-      buttonClass: "btn-emerald",
+      bgColors: "bg-teal-gradient-3",
+      textColor: "teal",
+      headerClass: "card-header-teal-3",
+      buttonClass: "btn-teal-3",
       status: JobStatus.IN_PROGRESS,
       priority: 3
     },
@@ -106,10 +106,10 @@
       title: "Pending Completion",
       count: pendingCompletionJobs?.length || 0,
       icon: "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z",
-      bgColors: "bg-teal-gradient",
+      bgColors: "bg-teal-gradient-4",
       textColor: "teal",
-      headerClass: "card-header-teal",
-      buttonClass: "btn-teal",
+      headerClass: "card-header-teal-4",
+      buttonClass: "btn-teal-4",
       status: JobStatus.PENDING_COMPLETION,
       priority: 5
     },
@@ -128,10 +128,10 @@
       title: "Invoice Approval",
       count: invoiceApprovalJobs?.length || 0,
       icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4",
-      bgColors: "bg-rose-gradient",
-      textColor: "rose",
-      headerClass: "card-header-rose",
-      buttonClass: "btn-rose",
+      bgColors: "bg-teal-gradient-5",
+      textColor: "teal",
+      headerClass: "card-header-teal-5",
+      buttonClass: "btn-teal-5",
       status: JobStatus.INVOICE_APPROVAL,
       priority: 7
     },
@@ -139,10 +139,10 @@
       title: "Invoiced",
       count: invoicedJobs?.length || 0,
       icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01",
-      bgColors: "bg-amber-gradient",
-      textColor: "amber",
-      headerClass: "card-header-amber",
-      buttonClass: "btn-amber",
+      bgColors: "bg-teal-gradient-5",
+      textColor: "teal",
+      headerClass: "card-header-teal-5",
+      buttonClass: "btn-teal-5",
       status: JobStatus.INVOICED,
       priority: 8
     },
