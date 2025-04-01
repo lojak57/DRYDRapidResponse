@@ -18,6 +18,7 @@
     
     // Single professional background image
     const backgroundImage = '/images/professional-restoration.jpg';
+    let backgroundLoaded = false;
     
     // Load data when the component mounts
     onMount(async () => {
@@ -26,9 +27,16 @@
             
             // Test if the image loads
             const testImg = new Image();
-            testImg.onload = () => console.log('Background image loaded successfully');
-            testImg.onerror = () => console.error('Failed to load background image');
-            testImg.src = window.location.origin + backgroundImage;
+            testImg.onload = () => {
+                console.log('Background image loaded successfully');
+                backgroundLoaded = true;
+            };
+            testImg.onerror = (e) => {
+                console.error('Failed to load background image', e);
+                // Log the full URL to help debug
+                console.error('Attempted to load:', window.location.origin + backgroundImage);
+            };
+            testImg.src = backgroundImage;
             
             // Load jobs if not already loaded
             if ($jobs.length === 0) {
@@ -64,14 +72,12 @@
 <div class="app">
     {#if loaded}
         <div 
-            class="background-container fixed inset-0 z-[-1]"
-            style="background-image: url('{backgroundImage}'); 
-                   background-size: cover; 
-                   background-position: center;"
+            class="background-container"
+            style="background-image: url('{backgroundImage}');"
         ></div>
         
-        <!-- Modified overlay with adjusted opacity for readability -->
-        <div class="overlay fixed inset-0 z-[-1] bg-white/35"></div>
+        <!-- Overlay with reduced opacity for better visibility -->
+        <div class="overlay"></div>
         
         <div in:fade={{ duration: 500 }} class="flex flex-col h-full">
             {#if $currentUser}
@@ -89,14 +95,33 @@
         min-height: 100vh;
         display: flex;
         flex-direction: column;
+        position: relative;
     }
     
     .background-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-size: cover;
+        background-position: center;
+        z-index: -2;
         transition: opacity 0.5s ease;
     }
     
+    .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(255, 255, 255, 0.3);
+        z-index: -1;
+    }
+    
     :global(body) {
-        background-color: #f7f9fc;
+        background-color: transparent !important;
         margin: 0;
         padding: 0;
     }
