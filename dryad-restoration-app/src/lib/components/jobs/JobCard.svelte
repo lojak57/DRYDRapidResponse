@@ -184,7 +184,7 @@
       </div>
       <a 
         href="/jobs/{job.id}" 
-        class="action-link {buttonClass}"
+        class="inline-flex items-center px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 {buttonClass}"
       >
         View Details
         <svg class="w-3 h-3 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
