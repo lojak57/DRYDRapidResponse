@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Job } from '$lib/types/Job';
+  import { JobStatus } from '$lib/types/Job';
   import { onMount } from 'svelte';
   import { writable } from 'svelte/store';
   import JobStatusBadge from './JobStatusBadge.svelte';
@@ -25,6 +26,92 @@
     });
   }
   
+  // Determine styling classes based on job status
+  $: headerClass = getHeaderClass(job.status);
+  $: bgColorClass = getBgColorClass(job.status);
+  $: buttonClass = getButtonClass(job.status);
+  
+  // Get header class based on job status
+  function getHeaderClass(status: JobStatus): string {
+    switch (status) {
+      case JobStatus.NEW:
+        return 'card-header-burgundy-1';
+      case JobStatus.SCHEDULED:
+        return 'card-header-burgundy-2';
+      case JobStatus.IN_PROGRESS:
+        return 'card-header-burgundy-3';
+      case JobStatus.PENDING_COMPLETION:
+        return 'card-header-burgundy-4';
+      case JobStatus.INVOICE_APPROVAL:
+      case JobStatus.INVOICED:
+        return 'card-header-burgundy-5';
+      case JobStatus.ON_HOLD:
+        return 'card-header-amber';
+      case JobStatus.COMPLETED:
+        return 'card-header-purple';
+      case JobStatus.PAID:
+        return 'card-header-emerald';
+      case JobStatus.CANCELLED:
+        return 'card-header-slate';
+      default:
+        return 'card-header-teal';
+    }
+  }
+  
+  // Get background color class based on job status
+  function getBgColorClass(status: JobStatus): string {
+    switch (status) {
+      case JobStatus.NEW:
+        return 'bg-burgundy-gradient-1';
+      case JobStatus.SCHEDULED:
+        return 'bg-burgundy-gradient-2';
+      case JobStatus.IN_PROGRESS:
+        return 'bg-burgundy-gradient-3';
+      case JobStatus.PENDING_COMPLETION:
+        return 'bg-burgundy-gradient-4';
+      case JobStatus.INVOICE_APPROVAL:
+      case JobStatus.INVOICED:
+        return 'bg-burgundy-gradient-5';
+      case JobStatus.ON_HOLD:
+        return 'bg-amber-gradient';
+      case JobStatus.COMPLETED:
+        return 'bg-purple-gradient';
+      case JobStatus.PAID:
+        return 'bg-emerald-gradient';
+      case JobStatus.CANCELLED:
+        return 'bg-slate-gradient';
+      default:
+        return 'bg-teal-gradient';
+    }
+  }
+  
+  // Get button class based on job status
+  function getButtonClass(status: JobStatus): string {
+    switch (status) {
+      case JobStatus.NEW:
+        return 'btn-burgundy-1';
+      case JobStatus.SCHEDULED:
+        return 'btn-burgundy-2';
+      case JobStatus.IN_PROGRESS:
+        return 'btn-burgundy-3';
+      case JobStatus.PENDING_COMPLETION:
+        return 'btn-burgundy-4';
+      case JobStatus.INVOICE_APPROVAL:
+      case JobStatus.INVOICED:
+        return 'btn-burgundy-5';
+      case JobStatus.ON_HOLD:
+        return 'btn-amber';
+      case JobStatus.COMPLETED:
+        return 'btn-purple';
+      case JobStatus.PAID:
+        return 'btn-emerald';
+      case JobStatus.CANCELLED:
+        return 'btn-slate';
+      default:
+        return 'btn-teal';
+    }
+  }
+  
   // Load customer data
   onMount(async () => {
     try {
@@ -38,30 +125,24 @@
   });
 </script>
 
-<div class="border border-gray-200 rounded-lg overflow-hidden shadow-md hover:shadow-lg hover:border-gray-300 transition-all duration-200 ease-in-out bg-gray-100">
-  <div class="border-l-4 {
-    job.status === 'NEW' ? 'border-blue-500' : 
-    job.status === 'SCHEDULED' ? 'border-purple-500' : 
-    job.status === 'IN_PROGRESS' ? 'border-amber-500' : 
-    job.status === 'COMPLETED' ? 'border-green-500' : 
-    job.status === 'ON_HOLD' ? 'border-red-500' : 
-    job.status === 'CANCELLED' ? 'border-gray-500' : 
-    'border-dryd-blue'
-  } p-5">
-    <div class="flex justify-between items-start mb-3">
-      <div>
-        <h3 class="text-xl font-bold text-gray-800 mb-1">{job.title}</h3>
-        <p class="text-sm text-gray-600 flex items-center">
-          <svg class="w-4 h-4 mr-1 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
-          </svg>
-          Job #{job.jobNumber}
-        </p>
+<div class="card-glass rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-all duration-200 ease-in-out card-shadow">
+  <div class="flex items-center justify-between p-4 {headerClass}">
+    <div class="flex items-center">
+      <div class="p-2 rounded-full {bgColorClass} text-white mr-3">
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+        </svg>
       </div>
-      <JobStatusBadge status={job.status} />
+      <div>
+        <h3 class="text-lg font-bold text-gray-800">{job.title}</h3>
+        <p class="text-sm text-gray-600">Job #{job.jobNumber}</p>
+      </div>
     </div>
-    
-    <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
+    <JobStatusBadge status={job.status} />
+  </div>
+  
+  <div class="p-5 bg-white">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
       <div class="flex items-start">
         <svg class="h-5 w-5 text-gray-500 flex-shrink-0 mt-0.5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
@@ -103,10 +184,10 @@
       </div>
       <a 
         href="/jobs/{job.id}" 
-        class="inline-flex items-center bg-gray-100 hover:bg-dryd-blue hover:text-white text-dryd-blue-dark py-2 px-4 rounded-md text-sm font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-dryd-blue"
+        class="action-link {buttonClass}"
       >
         View Details
-        <svg class="ml-1 w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg class="w-3 h-3 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
         </svg>
       </a>
