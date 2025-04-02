@@ -35,11 +35,11 @@
   function getHeaderClass(status: JobStatus): string {
     switch (status) {
       case JobStatus.NEW:
-        return 'card-header-burgundy-1';
-      case JobStatus.SCHEDULED:
-        return 'card-header-burgundy-2';
-      case JobStatus.IN_PROGRESS:
         return 'card-header-burgundy-3';
+      case JobStatus.SCHEDULED:
+        return 'card-header-burgundy-3';
+      case JobStatus.IN_PROGRESS:
+        return 'card-header-burgundy-4';
       case JobStatus.PENDING_COMPLETION:
         return 'card-header-burgundy-4';
       case JobStatus.INVOICE_APPROVAL:
@@ -62,11 +62,11 @@
   function getBgColorClass(status: JobStatus): string {
     switch (status) {
       case JobStatus.NEW:
-        return 'bg-burgundy-gradient-1';
-      case JobStatus.SCHEDULED:
-        return 'bg-burgundy-gradient-2';
-      case JobStatus.IN_PROGRESS:
         return 'bg-burgundy-gradient-3';
+      case JobStatus.SCHEDULED:
+        return 'bg-burgundy-gradient-3';
+      case JobStatus.IN_PROGRESS:
+        return 'bg-burgundy-gradient-4';
       case JobStatus.PENDING_COMPLETION:
         return 'bg-burgundy-gradient-4';
       case JobStatus.INVOICE_APPROVAL:
