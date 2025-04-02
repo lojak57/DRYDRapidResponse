@@ -4,10 +4,12 @@
   import { derived, writable } from 'svelte/store';
   import { currentUser } from '$lib/stores/authStore';
   import { techJobCategorization } from '$lib/stores/jobStore';
-  import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '$lib/components/ui/card';
-  import { Button } from '$lib/components/ui/button';
-  import { Badge } from '$lib/components/ui/badge';
-  import JobStatus from '$lib/components/jobs/JobStatus.svelte';
+  import type { Job } from '$lib/types/Job';
+  
+  // Custom UI component imports
+  import Button from '$lib/components/ui/Button.svelte';
+  import Badge from '$lib/components/ui/Badge.svelte';
+  import Card from '$lib/components/ui/Card.svelte';
   import { formatDate } from '$lib/utils/formatters';
 
   // Constants for filter types instead of enum for Svelte compatibility
@@ -77,36 +79,36 @@
 <div class="mt-4">
   <div class="grid grid-cols-3 gap-2 mb-4">
     <Button 
-      variant={$selectedFilter === 'UNSCHEDULED' ? 'default' : 'outline'}
+      color={$selectedFilter === 'UNSCHEDULED' ? 'primary' : 'default'}
       on:click={() => setFilter('UNSCHEDULED')}
-      class="flex justify-between items-center"
+      fullWidth={true}
     >
       <span>Unscheduled</span>
-      <Badge variant="secondary" class="ml-2">{$unscheduledCount}</Badge>
+      <Badge color="blue" className="ml-2">{$unscheduledCount}</Badge>
     </Button>
     
     <Button 
-      variant={$selectedFilter === 'SCHEDULED' ? 'default' : 'outline'}
+      color={$selectedFilter === 'SCHEDULED' ? 'primary' : 'default'}
       on:click={() => setFilter('SCHEDULED')}
-      class="flex justify-between items-center"
+      fullWidth={true}
     >
       <span>Scheduled</span>
-      <Badge variant="secondary" class="ml-2">{$scheduledCount}</Badge>
+      <Badge color="blue" className="ml-2">{$scheduledCount}</Badge>
     </Button>
     
     <Button 
-      variant={$selectedFilter === 'COMPLETED' ? 'default' : 'outline'}
+      color={$selectedFilter === 'COMPLETED' ? 'primary' : 'default'}
       on:click={() => setFilter('COMPLETED')}
-      class="flex justify-between items-center"
+      fullWidth={true}
     >
       <span>Completed</span>
-      <Badge variant="secondary" class="ml-2">{$completedCount}</Badge>
+      <Badge color="blue" className="ml-2">{$completedCount}</Badge>
     </Button>
   </div>
 
-  <Card class="w-full">
-    <CardHeader>
-      <CardTitle>
+  <Card>
+    <div class="p-4">
+      <h3 class="text-lg font-semibold mb-2">
         {#if $selectedFilter === 'UNSCHEDULED'}
           Assigned Jobs (Unscheduled)
         {:else if $selectedFilter === 'SCHEDULED'}
@@ -116,8 +118,8 @@
         {:else}
           All Assigned Jobs
         {/if}
-      </CardTitle>
-      <CardDescription>
+      </h3>
+      <p class="text-sm text-gray-600 mb-4">
         {#if $selectedFilter === 'UNSCHEDULED'}
           Jobs assigned to you that need to be scheduled
         {:else if $selectedFilter === 'SCHEDULED'}
@@ -127,18 +129,17 @@
         {:else}
           All jobs assigned to you
         {/if}
-      </CardDescription>
-    </CardHeader>
-    <CardContent>
+      </p>
+      
       {#if $filteredJobs.length === 0}
-        <div class="text-center py-6 text-muted-foreground">
+        <div class="text-center py-6 text-gray-500">
           No jobs in this category
         </div>
       {:else}
         <div class="space-y-4">
           {#each $filteredJobs as job}
             <div 
-              class="border rounded-md p-3 hover:bg-muted/50 transition-colors cursor-pointer"
+              class="border rounded-md p-3 hover:bg-gray-100 transition-colors cursor-pointer"
               on:click={() => navigateToJob(job.id)}
               on:keydown={(e) => e.key === 'Enter' && navigateToJob(job.id)}
               tabindex="0"
@@ -146,19 +147,21 @@
               <div class="flex justify-between items-start">
                 <div>
                   <h4 class="font-semibold">{job.title}</h4>
-                  <p class="text-sm text-muted-foreground">Job #{job.jobNumber}</p>
+                  <p class="text-sm text-gray-600">Job #{job.jobNumber}</p>
                 </div>
-                <JobStatus status={job.status} />
+                <span class="inline-block px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
+                  {job.status.replace(/_/g, ' ')}
+                </span>
               </div>
-              {#if job.scheduledDate}
+              {#if job.scheduledStartDate}
                 <div class="mt-2 text-sm">
-                  <span class="font-medium">Scheduled:</span> {formatDate(job.scheduledDate)}
+                  <span class="font-medium">Scheduled:</span> {formatDate(job.scheduledStartDate)}
                 </div>
               {/if}
             </div>
           {/each}
         </div>
       {/if}
-    </CardContent>
+    </div>
   </Card>
 </div> 
