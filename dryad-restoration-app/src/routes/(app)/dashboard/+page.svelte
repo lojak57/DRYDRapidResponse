@@ -316,7 +316,7 @@
                     <h3 class="text-lg font-semibold">{category.title}</h3>
                     <p class="text-3xl font-bold mt-1">{category.count}</p>
                   </div>
-                  <div class="p-3 bg-white/20 rounded-full {category.count > 0 ? 'animate-bounce' : ''}">
+                  <div class="p-3 bg-white/20 rounded-full">
                     <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={category.icon}/>
                     </svg>
