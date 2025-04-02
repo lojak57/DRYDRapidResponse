@@ -1,9 +1,19 @@
-import { writable, derived, get } from 'svelte/store';
+import { writable, derived } from 'svelte/store';
 import type { Job } from '$lib/types/Job';
 import { JobStatus } from '$lib/types/Job';
 import * as jobService from '$lib/services/jobs';
 import { currentUser } from '$lib/stores/authStore';
 import { Role } from '$lib/types/User';
+import { TASKS_BY_STATUS } from '$lib/config/workflowConfig';
+import type { WorkflowTask } from '$lib/config/workflowConfig';
+import { isJobCompletedByTechnician } from '$lib/utils/workflowUtils';
+
+// Define technician-specific filter categories
+export enum TechnicianJobFilter {
+  ASSIGNED_UNSCHEDULED = 'ASSIGNED_UNSCHEDULED',
+  ASSIGNED_SCHEDULED_IN_PROGRESS = 'ASSIGNED_SCHEDULED_IN_PROGRESS',
+  COMPLETED_BY_TECH = 'COMPLETED_BY_TECH'
+}
 
 // Create the internal stores
 const _jobs = writable<Job[]>([]);
@@ -13,6 +23,7 @@ const _statusFilter = writable<JobStatus | null>(null);
 const _customerFilter = writable<string | null>(null);
 const _technicianFilter = writable<string | null>(null);
 const _searchQuery = writable<string>('');
+const _technicianJobFilter = writable<TechnicianJobFilter>(TechnicianJobFilter.ASSIGNED_SCHEDULED_IN_PROGRESS); // Default view
 
 // Export the internal writable stores for direct updates from services
 export { _jobs, _isLoading, _error };
@@ -54,18 +65,55 @@ const _filteredJobs = derived(
 
 // Dashboard jobs with role-specific filtering
 const _dashboardJobs = derived(
-  [_jobs, currentUser],
-  ([$jobs, $currentUser]) => {
+  [_jobs, currentUser, _technicianJobFilter],
+  ([$jobs, $currentUser, $technicianJobFilter]) => {
     if (!$currentUser) return []; // No user, no jobs
     
     let result = [...$jobs];
     
     // Role-specific filtering
     if ($currentUser.role === Role.TECH) {
-      // Technicians see only jobs assigned to them
-      result = result.filter(job => 
-        job.assignedUserIds?.includes($currentUser.id)
-      );
+      // Filter jobs based on technician's selected filter type
+      switch ($technicianJobFilter) {
+        case TechnicianJobFilter.ASSIGNED_UNSCHEDULED:
+          // Show only new/unscheduled jobs assigned to this technician
+          result = result.filter(job => 
+            job.assignedUserIds?.includes($currentUser.id) &&
+            job.status === JobStatus.NEW
+          );
+          break;
+          
+        case TechnicianJobFilter.ASSIGNED_SCHEDULED_IN_PROGRESS:
+          // Show only scheduled/in-progress jobs that are not completed by tech
+          result = result.filter(job => 
+            job.assignedUserIds?.includes($currentUser.id) &&
+            (job.status === JobStatus.SCHEDULED || job.status === JobStatus.IN_PROGRESS) &&
+            !isJobCompletedByTechnician(
+              job, 
+              $currentUser.id, 
+              TASKS_BY_STATUS as Record<JobStatus, WorkflowTask[]>
+            )
+          );
+          break;
+          
+        case TechnicianJobFilter.COMPLETED_BY_TECH:
+          // Show jobs that are completed from the technician's perspective
+          result = result.filter(job => 
+            job.assignedUserIds?.includes($currentUser.id) &&
+            isJobCompletedByTechnician(
+              job, 
+              $currentUser.id, 
+              TASKS_BY_STATUS as Record<JobStatus, WorkflowTask[]>
+            )
+          );
+          break;
+          
+        default:
+          // Fallback to showing all jobs assigned to this technician
+          result = result.filter(job => 
+            job.assignedUserIds?.includes($currentUser.id)
+          );
+      }
     } else {
       // Office/Admin users see non-completed jobs (more actionable view)
       result = result.filter(job => 
@@ -80,54 +128,6 @@ const _dashboardJobs = derived(
     );
     
     return result;
-  }
-);
-
-// New store for technician job categorization
-const _techJobCategorization = derived(
-  [_jobs, currentUser],
-  ([$jobs, $currentUser]) => {
-    if (!$currentUser || $currentUser.role !== Role.TECH) {
-      return {
-        unscheduledJobs: [],
-        scheduledJobs: [],
-        completedJobs: [],
-        allAssignedJobs: []
-      };
-    }
-    
-    // Filter for jobs assigned to this technician
-    const techJobs = $jobs.filter(job => 
-      job.assignedUserIds?.includes($currentUser.id)
-    );
-    
-    // Unscheduled jobs (NEW status)
-    const unscheduledJobs = techJobs.filter(job => 
-      job.status === JobStatus.NEW
-    );
-    
-    // Scheduled jobs (SCHEDULED or IN_PROGRESS)
-    const scheduledJobs = techJobs.filter(job => 
-      job.status === JobStatus.SCHEDULED || 
-      job.status === JobStatus.IN_PROGRESS
-    );
-    
-    // Completed jobs from technician perspective
-    // (PENDING_COMPLETION and beyond - technician has done their part)
-    const completedJobs = techJobs.filter(job => 
-      job.status === JobStatus.PENDING_COMPLETION || 
-      job.status === JobStatus.COMPLETED ||
-      job.status === JobStatus.INVOICE_APPROVAL ||
-      job.status === JobStatus.INVOICED ||
-      job.status === JobStatus.PAID
-    );
-    
-    return {
-      unscheduledJobs,
-      scheduledJobs,
-      completedJobs,
-      allAssignedJobs: techJobs
-    };
   }
 );
 
@@ -163,9 +163,6 @@ const _userJobCounts = derived(
     const counts = {
       assigned: 0,
       active: 0,
-      unscheduled: 0,
-      scheduled: 0,
-      completed: 0,
       total: 0
     };
     
@@ -182,25 +179,6 @@ const _userJobCounts = derived(
         job.status === JobStatus.IN_PROGRESS || 
         job.status === JobStatus.SCHEDULED
       ).length;
-      
-      // New counts for technician categories
-      counts.unscheduled = userJobs.filter(job => 
-        job.status === JobStatus.NEW
-      ).length;
-      
-      counts.scheduled = userJobs.filter(job => 
-        job.status === JobStatus.SCHEDULED || 
-        job.status === JobStatus.IN_PROGRESS
-      ).length;
-      
-      counts.completed = userJobs.filter(job => 
-        job.status === JobStatus.PENDING_COMPLETION || 
-        job.status === JobStatus.COMPLETED ||
-        job.status === JobStatus.INVOICE_APPROVAL ||
-        job.status === JobStatus.INVOICED ||
-        job.status === JobStatus.PAID
-      ).length;
-      
       counts.total = userJobs.length;
     } else {
       // For admin/office: all jobs
@@ -269,8 +247,8 @@ async function loadJobById(id: string): Promise<Job | undefined> {
     
     return job;
   } catch (err) {
-    console.error('Error loading job by ID:', err);
-    _error.set(err instanceof Error ? err.message : 'An error occurred loading the job');
+    console.error(`Error loading job ${id}:`, err);
+    _error.set(err instanceof Error ? err.message : `An error occurred loading job ${id}`);
     return undefined;
   } finally {
     _isLoading.set(false);
@@ -278,53 +256,77 @@ async function loadJobById(id: string): Promise<Job | undefined> {
 }
 
 /**
- * Load jobs for a specific customer
+ * Reset all filters to their default state
  */
-async function loadJobsByCustomerId(customerId: string): Promise<Job[]> {
-  _isLoading.set(true);
-  _error.set(null);
-  
-  try {
-    const customerJobs = await jobService.getJobsByCustomer(customerId);
-    
-    // Update the jobs store with these jobs
-    _jobs.update(currentJobs => {
-      // Create a copy of current jobs
-      const updatedJobs = [...currentJobs];
-      
-      // For each customer job, either replace existing or add new
-      customerJobs.forEach((job: Job) => {
-        const existingJobIndex = updatedJobs.findIndex(j => j.id === job.id);
-        
-        if (existingJobIndex >= 0) {
-          updatedJobs[existingJobIndex] = job;
-        } else {
-          updatedJobs.push(job);
-        }
-      });
-      
-      return updatedJobs;
-    });
-    
-    return customerJobs;
-  } catch (err) {
-    console.error('Error loading jobs by customer ID:', err);
-    _error.set(err instanceof Error ? err.message : 'An error occurred loading customer jobs');
-    return [];
-  } finally {
-    _isLoading.set(false);
-  }
+function resetFilters(): void {
+  _statusFilter.set(null);
+  _customerFilter.set(null);
+  _technicianFilter.set(null);
+  _searchQuery.set('');
+  _technicianJobFilter.set(TechnicianJobFilter.ASSIGNED_SCHEDULED_IN_PROGRESS);
 }
 
-// Export public stores
-export const jobs = _jobs;
-export const filteredJobs = _filteredJobs;
-export const dashboardJobs = _dashboardJobs;
-export const jobStatusCounts = _jobStatusCounts;
-export const userJobCounts = _userJobCounts;
-export const techJobCategorization = _techJobCategorization;
-export const isLoading = _isLoading;
-export const error = _error;
+/**
+ * Set the current technician job filter
+ */
+export function setTechnicianJobFilter(filter: TechnicianJobFilter): void {
+  _technicianJobFilter.set(filter);
+}
 
-// Export functions
-export { loadJobs, loadJobById, loadJobsByCustomerId }; 
+// Expose the jobs store directly for more flexibility
+export const jobs = {
+  subscribe: _jobs.subscribe
+};
+
+// Create a derived store for the technician job filter
+export const technicianJobFilter = derived(_technicianJobFilter, $filter => $filter);
+
+// Export the jobStore with a subscribe method and all its properties
+export const jobStore = {
+  // Expose the stores with their subscribe methods
+  subscribe: _jobs.subscribe,
+  isLoading: { subscribe: _isLoading.subscribe },
+  error: { subscribe: _error.subscribe },
+  statusFilter: { 
+    subscribe: _statusFilter.subscribe,
+    set: _statusFilter.set 
+  },
+  customerFilter: { 
+    subscribe: _customerFilter.subscribe,
+    set: _customerFilter.set 
+  },
+  technicianFilter: { 
+    subscribe: _technicianFilter.subscribe,
+    set: _technicianFilter.set 
+  },
+  searchQuery: { 
+    subscribe: _searchQuery.subscribe,
+    set: _searchQuery.set 
+  },
+  technicianJobFilter: {
+    subscribe: _technicianJobFilter.subscribe,
+    set: _technicianJobFilter.set
+  },
+  
+  // Derived stores
+  filteredJobs: { subscribe: _filteredJobs.subscribe },
+  dashboardJobs: { subscribe: _dashboardJobs.subscribe },
+  jobStatusCounts: { subscribe: _jobStatusCounts.subscribe },
+  userJobCounts: { subscribe: _userJobCounts.subscribe },
+  
+  // Methods
+  loadJobs,
+  loadJobById,
+  resetFilters,
+  setTechnicianJobFilter
+};
+
+// Export individual stores and functions for direct import
+export const isLoading = { subscribe: _isLoading.subscribe };
+export const error = { subscribe: _error.subscribe };
+export const filteredJobs = { subscribe: _filteredJobs.subscribe };
+export const dashboardJobs = { subscribe: _dashboardJobs.subscribe };
+export const jobStatusCounts = { subscribe: _jobStatusCounts.subscribe };
+export const userJobCounts = { subscribe: _userJobCounts.subscribe };
+
+export { loadJobs, loadJobById, resetFilters }; 
