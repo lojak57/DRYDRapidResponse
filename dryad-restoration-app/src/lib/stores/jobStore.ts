@@ -73,21 +73,36 @@ const _dashboardJobs = derived(
     
     // Role-specific filtering
     if ($currentUser.role === Role.TECH) {
-      // Filter jobs based on technician's selected filter type
+      // First, filter to only include jobs assigned to this technician
+      const technicianJobs = result.filter(job => 
+        job.assignedUserIds?.includes($currentUser.id)
+      );
+      
+      // Then filter based on the selected category
       switch ($technicianJobFilter) {
         case TechnicianJobFilter.ASSIGNED_UNSCHEDULED:
-          // Show only new/unscheduled jobs assigned to this technician
-          result = result.filter(job => 
-            job.assignedUserIds?.includes($currentUser.id) &&
-            job.status === JobStatus.NEW
+          // Show only unscheduled jobs (NEW or SCHEDULED without start date)
+          // that are assigned to this technician and not completed by them
+          result = technicianJobs.filter(job => 
+            (job.status === JobStatus.NEW || 
+             (job.status === JobStatus.SCHEDULED && !job.scheduledStartDate)) &&
+            !isJobCompletedByTechnician(
+              job, 
+              $currentUser.id, 
+              TASKS_BY_STATUS as Record<JobStatus, WorkflowTask[]>
+            )
           );
           break;
           
         case TechnicianJobFilter.ASSIGNED_SCHEDULED_IN_PROGRESS:
-          // Show only scheduled/in-progress jobs that are not completed by tech
-          result = result.filter(job => 
-            job.assignedUserIds?.includes($currentUser.id) &&
-            (job.status === JobStatus.SCHEDULED || job.status === JobStatus.IN_PROGRESS) &&
+          // Show active jobs that need technician attention
+          // SCHEDULED (with start date), IN_PROGRESS, ON_HOLD, or PENDING_COMPLETION
+          // where the technician hasn't completed their tasks
+          result = technicianJobs.filter(job => 
+            ((job.status === JobStatus.SCHEDULED && job.scheduledStartDate) || 
+             job.status === JobStatus.IN_PROGRESS || 
+             job.status === JobStatus.ON_HOLD || 
+             job.status === JobStatus.PENDING_COMPLETION) &&
             !isJobCompletedByTechnician(
               job, 
               $currentUser.id, 
@@ -97,9 +112,9 @@ const _dashboardJobs = derived(
           break;
           
         case TechnicianJobFilter.COMPLETED_BY_TECH:
-          // Show jobs that are completed from the technician's perspective
-          result = result.filter(job => 
-            job.assignedUserIds?.includes($currentUser.id) &&
+          // Show all jobs that the technician has completed their part on,
+          // regardless of the job's overall status
+          result = technicianJobs.filter(job => 
             isJobCompletedByTechnician(
               job, 
               $currentUser.id, 
@@ -109,10 +124,9 @@ const _dashboardJobs = derived(
           break;
           
         default:
-          // Fallback to showing all jobs assigned to this technician
-          result = result.filter(job => 
-            job.assignedUserIds?.includes($currentUser.id)
-          );
+          // If no specific filter is selected or it's invalid,
+          // show all jobs assigned to this technician
+          result = technicianJobs;
       }
     } else {
       // Office/Admin users see non-completed jobs (more actionable view)
