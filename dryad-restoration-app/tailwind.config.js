@@ -1,17 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ['./src/**/*.{html,js,svelte,ts}'],
-  safelist: [
-    'bg-white',
-    'bg-gray-50',
-    'bg-gray-100',
-    'text-gray-600',
-    'text-gray-500',
-    'text-gray-700',
-    'text-gray-800',
-    'hover:bg-gray-50',
-    'hover:bg-gray-100'
-  ],
   theme: {
     extend: {
       colors: {

@@ -14,7 +14,7 @@
     "firstName": "Taylor",
     "lastName": "Smith",
     "email": "taylor@dryadrestoration.com",
-    "role": "TECHNICIAN",
+    "role": "TECH",
     "isActive": true,
     "phoneNumber": "503-555-2222",
     "createdAt": "2023-01-20T09:30:00Z"
@@ -24,7 +24,7 @@
     "firstName": "Jordan",
     "lastName": "Chen",
     "email": "jordan@dryadrestoration.com",
-    "role": "TECHNICIAN",
+    "role": "TECH",
     "isActive": true,
     "phoneNumber": "503-555-3333",
     "createdAt": "2023-02-10T10:15:00Z"
@@ -34,7 +34,7 @@
     "firstName": "Casey",
     "lastName": "Johnson",
     "email": "casey@dryadrestoration.com",
-    "role": "TECHNICIAN",
+    "role": "TECH",
     "isActive": true,
     "phoneNumber": "503-555-4444",
     "createdAt": "2023-03-05T11:45:00Z"
@@ -44,7 +44,7 @@
     "firstName": "Maria",
     "lastName": "Garcia",
     "email": "maria@dryadrestoration.com",
-    "role": "TECHNICIAN",
+    "role": "TECH",
     "isActive": true,
     "phoneNumber": "503-555-7777",
     "createdAt": "2023-03-12T08:30:00Z"
@@ -54,7 +54,7 @@
     "firstName": "David",
     "lastName": "Lee",
     "email": "david@dryadrestoration.com",
-    "role": "TECHNICIAN",
+    "role": "TECH",
     "isActive": true,
     "phoneNumber": "503-555-8888",
     "createdAt": "2023-03-15T09:20:00Z"
@@ -64,7 +64,7 @@
     "firstName": "Miguel",
     "lastName": "Rodriguez",
     "email": "miguel@dryadrestoration.com",
-    "role": "TECHNICIAN",
+    "role": "TECH",
     "isActive": true,
     "phoneNumber": "503-555-9999",
     "createdAt": "2023-04-01T10:10:00Z"
@@ -74,7 +74,7 @@
     "firstName": "Sarah",
     "lastName": "Wilson",
     "email": "sarah@dryadrestoration.com",
-    "role": "TECHNICIAN",
+    "role": "TECH",
     "isActive": true,
     "phoneNumber": "503-555-1010",
     "createdAt": "2023-04-05T11:05:00Z"
@@ -84,7 +84,7 @@
     "firstName": "James",
     "lastName": "Thompson",
     "email": "james@dryadrestoration.com",
-    "role": "TECHNICIAN",
+    "role": "TECH",
     "isActive": true,
     "phoneNumber": "503-555-1212",
     "createdAt": "2023-04-10T13:15:00Z"
@@ -94,7 +94,7 @@
     "firstName": "Lisa",
     "lastName": "Patel",
     "email": "lisa@dryadrestoration.com",
-    "role": "TECHNICIAN",
+    "role": "TECH",
     "isActive": true,
     "phoneNumber": "503-555-1313",
     "createdAt": "2023-04-15T14:30:00Z"
@@ -104,7 +104,7 @@
     "firstName": "Robert",
     "lastName": "Nguyen",
     "email": "robert@dryadrestoration.com",
-    "role": "TECHNICIAN",
+    "role": "TECH",
     "isActive": true,
     "phoneNumber": "503-555-1414",
     "createdAt": "2023-04-20T15:45:00Z"
