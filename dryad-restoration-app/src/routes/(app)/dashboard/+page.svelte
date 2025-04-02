@@ -511,34 +511,38 @@
             <span class="font-bold text-xl">Job Filter</span>
           </div>
           <div class="flex items-center space-x-2">
-            {#if selectedStatusFilter}
-              <button 
-                on:click={resetFilter}
-                class="bg-white/10 border-white text-white text-sm px-3 py-1 rounded-lg font-medium transition-all duration-200 hover:bg-white/20"
-              >
-                Show All
-              </button>
+            {#if $currentUser && ($currentUser.role === Role.ADMIN || $currentUser.role === Role.OFFICE)}
+              {#if selectedStatusFilter}
+                <button 
+                  on:click={resetFilter}
+                  class="bg-white/10 border-white text-white text-sm px-3 py-1 rounded-lg font-medium transition-all duration-200 hover:bg-white/20"
+                >
+                  Show All
+                </button>
+              {/if}
             {/if}
             <a href="/jobs" class="btn-light-blue text-sm px-4 py-2 rounded-lg font-medium shadow-sm transition-all duration-200 hover:shadow hover:scale-105">View All Jobs</a>
           </div>
         </div>
         
-        <!-- Job Status Filter -->
-        <div class="mt-4 flex overflow-x-auto pb-2 scrollbar-hide">
-          <div class="flex space-x-2">
-            {#each availableStatuses as status}
-              <button 
-                class="whitespace-nowrap px-4 py-2 rounded-lg text-sm font-medium border-2 transition-colors duration-150
-                {selectedStatusFilter === status 
-                  ? 'bg-teal-gradient border-white text-white' 
-                  : 'bg-white/5 border-white/20 text-white/70 hover:bg-white/10 hover:border-white/40'}"
-                on:click={() => setStatusFilter(status)}
-              >
-                {status.replace(/_/g, ' ')}
-              </button>
-            {/each}
+        <!-- Job Status Filter - Only visible to Admin/Office -->
+        {#if $currentUser && ($currentUser.role === Role.ADMIN || $currentUser.role === Role.OFFICE)}
+          <div class="mt-4 flex overflow-x-auto pb-2 scrollbar-hide">
+            <div class="flex space-x-2">
+              {#each availableStatuses as status}
+                <button 
+                  class="whitespace-nowrap px-4 py-2 rounded-lg text-sm font-medium border-2 transition-colors duration-150
+                  {selectedStatusFilter === status 
+                    ? 'bg-teal-gradient border-white text-white' 
+                    : 'bg-white/5 border-white/20 text-white/70 hover:bg-white/10 hover:border-white/40'}"
+                  on:click={() => setStatusFilter(status)}
+                >
+                  {status.replace(/_/g, ' ')}
+                </button>
+              {/each}
+            </div>
           </div>
-        </div>
+        {/if}
       </div>
 
       <div class="p-6">
