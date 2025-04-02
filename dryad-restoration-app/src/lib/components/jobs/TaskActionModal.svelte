@@ -1027,179 +1027,34 @@
           </button>
         </div>
         
+        <!-- Role check warning if user doesn't have required role -->
+        {#if task && task.requiredRole && !task.requiredRole.includes(userInfo?.role || Role.CUSTOMER)}
+          <div class="p-6 bg-red-50 border-b border-red-100">
+            <div class="flex items-center">
+              <svg class="h-5 w-5 text-red-400 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+              </svg>
+              <p class="text-sm text-red-700">
+                You don't have permission to perform this task. This task requires {task.requiredRole.join(' or ')} permissions.
+              </p>
+            </div>
+          </div>
+        {/if}
+        
         <!-- Content -->
         <div class="p-6">
           {#if formContent.description}
             <p class="text-gray-600 mb-4">{formContent.description}</p>
           {/if}
           
-          <!-- Render appropriate content based on task.id -->
-          {#if task.id === 'schedule_job'}
-            <form on:submit|preventDefault={handleSubmit}>
-              <div class="space-y-4">
-                {#each formContent.fields || [] as field}
-                  {#if field.type === 'date'}
-                    <div>
-                      <label for={field.id} class="block mb-1 font-medium text-gray-700">{field.label}</label>
-                      {#if field.description}
-                        <p class="text-sm text-gray-500 mb-1">{field.description}</p>
-                      {/if}
-                      <input 
-                        type="date" 
-                        id={field.id} 
-                        name={field.id} 
-                        class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
-                        value={field.value || ''} 
-                        required={field.required}
-                      />
-                    </div>
-                  {:else if field.type === 'checkbox'}
-                    <div class="flex items-start mt-4">
-                      <div class="flex items-center h-5">
-                        <input 
-                          type="checkbox" 
-                          id={field.id} 
-                          name={field.id} 
-                          class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" 
-                          required={field.required}
-                        />
-                      </div>
-                      <div class="ml-3 text-sm">
-                        <label for={field.id} class="font-medium text-gray-700">{field.label}</label>
-                        {#if field.description}
-                          <p class="text-gray-500">{field.description}</p>
-                        {/if}
-                      </div>
-                    </div>
-                  {/if}
-                {/each}
-                
-                <div class="mt-6 flex justify-end space-x-3">
-                  <button
-                    type="button"
-                    on:click={closeModal}
-                    class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
-                  >
-                    Save
-                  </button>
-                </div>
-              </div>
-            </form>
-          {:else if task.id === 'assign_techs'}
-            <AssignTechnicianForm
-              jobId={job.id}
-              userId={userInfo?.id || 'unknown-user'}
-              on:submit={event => {
-                console.log('AssignTechnicianForm submit event received with data:', event.detail);
-                handleTechnicianSubmit(event);
-              }}
-            />
-          {:else if task.id === 'log_final_readings'}
-            <ReadingForm 
-              job={job}
-              on:submit={handleReadingSubmit}
-              on:cancel={closeModal}
-            />
-          {:else if task.id === 'upload_after_photos'}
-            <PhotoUpload
-              job={job}
-              on:submit={handlePhotoSubmit}
-              on:cancel={closeModal}
-            />
-          {:else if task.id === 'mark_ready_for_review'}
-            <JobSubmissionForm
-              job={job}
-              on:submit={handleJobSubmissionSubmit}
-              on:cancel={closeModal}
-            />
-          {:else if task.id === 'review_checklist'}
-            <ReviewChecklistForm
-              job={job}
-              logEntries={logEntries}
-              on:submit={handleReviewChecklistSubmit}
-              on:cancel={closeModal}
-            />
-          {:else if task.id === 'enter_labor'}
-            <LaborEntryForm
-              job={job}
-              on:submit={handleLaborEntrySubmit}
-              on:cancel={closeModal}
-            />
-          {:else if task.id === 'finalize_job'}
-            <JobFinalizeForm
-              job={job}
-              on:submit={handleJobFinalizeSubmit}
-              on:cancel={closeModal}
-            />
-          {:else if task.id === 'add_reading'}
-            <ReadingForm
-              job={job}
-              on:submit={handleReadingSubmit}
-              on:cancel={closeModal}
-            />
-          {:else if task.id === 'review_invoice'}
-            <InvoicePreview
-              job={job}
-              mode="review"
-              on:approve={handleInvoiceApproval}
-              on:cancel={closeModal}
-            />
-          {:else if task.id === 'create_invoice'}
-            {#if !job.lineItems || !job.lineItems.length}
-              <div class="bg-yellow-50 p-4 rounded-md border border-yellow-200 mb-4">
-                <p class="text-yellow-700">No line items found. You might need to refresh the job data to get the latest information.</p>
-              </div>
-              
-              <button 
-                type="button"
-                class="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md mb-4"
-                on:click={refreshJobData}
-              >
-                Refresh Job Data
-              </button>
-            {/if}
-            
-            <InvoicePreview
-              job={job}
-              mode="create"
-              on:approve={handleInvoiceCreation}
-              on:cancel={closeModal}
-            />
-          {:else if task.id === 'record_payment'}
-            <PaymentForm
-              job={job}
-              on:submit={handlePaymentSubmit}
-              on:cancel={closeModal}
-            />
-          {:else}
-            <!-- Generic form for other task types -->
-            <form on:submit|preventDefault={handleSubmit}>
-              <div class="space-y-4">
-                {#if formContent.fields && formContent.fields.length > 0}
-                  {#each formContent.fields as field}
-                    <!-- Render form fields based on type -->
-                    {#if field.type === 'text'}
-                      <div>
-                        <label for={field.id} class="block mb-1 font-medium text-gray-700">{field.label}</label>
-                        {#if field.description}
-                          <p class="text-sm text-gray-500 mb-1">{field.description}</p>
-                        {/if}
-                        <input 
-                          type="text" 
-                          id={field.id} 
-                          name={field.id} 
-                          class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
-                          value={field.value || ''} 
-                          required={field.required}
-                        />
-                      </div>
-                    {:else if field.type === 'date'}
+          <!-- Only show task content if user has required role -->
+          {#if !task.requiredRole || task.requiredRole.includes(userInfo?.role || Role.CUSTOMER)}
+            <!-- Render appropriate content based on task.id -->
+            {#if task.id === 'schedule_job'}
+              <form on:submit|preventDefault={handleSubmit}>
+                <div class="space-y-4">
+                  {#each formContent.fields || [] as field}
+                    {#if field.type === 'date'}
                       <div>
                         <label for={field.id} class="block mb-1 font-medium text-gray-700">{field.label}</label>
                         {#if field.description}
@@ -1234,29 +1089,203 @@
                       </div>
                     {/if}
                   {/each}
-                {:else}
-                  <div>
-                    <p class="text-gray-700 mb-4">Do you want to mark this task as complete?</p>
+                  
+                  <div class="mt-6 flex justify-end space-x-3">
+                    <button
+                      type="button"
+                      on:click={closeModal}
+                      class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+                    >
+                      Save
+                    </button>
                   </div>
-                {/if}
-                
-                <div class="mt-6 flex justify-end space-x-3">
-                  <button
-                    type="button"
-                    on:click={closeModal}
-                    class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
-                  >
-                    {formContent.fields && formContent.fields.length > 0 ? 'Submit' : 'Mark Complete'}
-                  </button>
                 </div>
-              </div>
-            </form>
+              </form>
+            {:else if task.id === 'assign_techs'}
+              <AssignTechnicianForm
+                jobId={job.id}
+                userId={userInfo?.id || 'unknown-user'}
+                on:submit={event => {
+                  console.log('AssignTechnicianForm submit event received with data:', event.detail);
+                  handleTechnicianSubmit(event);
+                }}
+              />
+            {:else if task.id === 'log_final_readings'}
+              <ReadingForm 
+                job={job}
+                on:submit={handleReadingSubmit}
+                on:cancel={closeModal}
+              />
+            {:else if task.id === 'upload_after_photos'}
+              <PhotoUpload
+                job={job}
+                on:submit={handlePhotoSubmit}
+                on:cancel={closeModal}
+              />
+            {:else if task.id === 'mark_ready_for_review'}
+              <JobSubmissionForm
+                job={job}
+                on:submit={handleJobSubmissionSubmit}
+                on:cancel={closeModal}
+              />
+            {:else if task.id === 'review_checklist'}
+              <ReviewChecklistForm
+                job={job}
+                logEntries={logEntries}
+                on:submit={handleReviewChecklistSubmit}
+                on:cancel={closeModal}
+              />
+            {:else if task.id === 'enter_labor'}
+              <LaborEntryForm
+                job={job}
+                on:submit={handleLaborEntrySubmit}
+                on:cancel={closeModal}
+              />
+            {:else if task.id === 'finalize_job'}
+              <JobFinalizeForm
+                job={job}
+                on:submit={handleJobFinalizeSubmit}
+                on:cancel={closeModal}
+              />
+            {:else if task.id === 'add_reading'}
+              <ReadingForm
+                job={job}
+                on:submit={handleReadingSubmit}
+                on:cancel={closeModal}
+              />
+            {:else if task.id === 'review_invoice'}
+              <InvoicePreview
+                job={job}
+                mode="review"
+                on:approve={handleInvoiceApproval}
+                on:cancel={closeModal}
+              />
+            {:else if task.id === 'create_invoice'}
+              {#if !job.lineItems || !job.lineItems.length}
+                <div class="bg-yellow-50 p-4 rounded-md border border-yellow-200 mb-4">
+                  <p class="text-yellow-700">No line items found. You might need to refresh the job data to get the latest information.</p>
+                </div>
+                
+                <button 
+                  type="button"
+                  class="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md mb-4"
+                  on:click={refreshJobData}
+                >
+                  Refresh Job Data
+                </button>
+              {/if}
+              
+              <InvoicePreview
+                job={job}
+                mode="create"
+                on:approve={handleInvoiceCreation}
+                on:cancel={closeModal}
+              />
+            {:else if task.id === 'record_payment'}
+              <PaymentForm
+                job={job}
+                on:submit={handlePaymentSubmit}
+                on:cancel={closeModal}
+              />
+            {:else}
+              <!-- Generic form for other task types -->
+              <form on:submit|preventDefault={handleSubmit}>
+                <div class="space-y-4">
+                  {#if formContent.fields && formContent.fields.length > 0}
+                    {#each formContent.fields as field}
+                      <!-- Render form fields based on type -->
+                      {#if field.type === 'text'}
+                        <div>
+                          <label for={field.id} class="block mb-1 font-medium text-gray-700">{field.label}</label>
+                          {#if field.description}
+                            <p class="text-sm text-gray-500 mb-1">{field.description}</p>
+                          {/if}
+                          <input 
+                            type="text" 
+                            id={field.id} 
+                            name={field.id} 
+                            class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                            value={field.value || ''} 
+                            required={field.required}
+                          />
+                        </div>
+                      {:else if field.type === 'date'}
+                        <div>
+                          <label for={field.id} class="block mb-1 font-medium text-gray-700">{field.label}</label>
+                          {#if field.description}
+                            <p class="text-sm text-gray-500 mb-1">{field.description}</p>
+                          {/if}
+                          <input 
+                            type="date" 
+                            id={field.id} 
+                            name={field.id} 
+                            class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                            value={field.value || ''} 
+                            required={field.required}
+                          />
+                        </div>
+                      {:else if field.type === 'checkbox'}
+                        <div class="flex items-start mt-4">
+                          <div class="flex items-center h-5">
+                            <input 
+                              type="checkbox" 
+                              id={field.id} 
+                              name={field.id} 
+                              class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" 
+                              required={field.required}
+                            />
+                          </div>
+                          <div class="ml-3 text-sm">
+                            <label for={field.id} class="font-medium text-gray-700">{field.label}</label>
+                            {#if field.description}
+                              <p class="text-gray-500">{field.description}</p>
+                            {/if}
+                          </div>
+                        </div>
+                      {/if}
+                    {/each}
+                  {:else}
+                    <div>
+                      <p class="text-gray-700 mb-4">Do you want to mark this task as complete?</p>
+                    </div>
+                  {/if}
+                  
+                  <div class="mt-6 flex justify-end space-x-3">
+                    <button
+                      type="button"
+                      on:click={closeModal}
+                      class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+                    >
+                      {formContent.fields && formContent.fields.length > 0 ? 'Submit' : 'Mark Complete'}
+                    </button>
+                  </div>
+                </div>
+              </form>
+            {/if}
+          {:else}
+            <!-- Message if user doesn't have permission -->
+            <div class="p-4 bg-gray-50 rounded-lg text-center">
+              <p class="text-gray-600">You don't have permission to perform this task.</p>
+              <button
+                type="button"
+                on:click={closeModal}
+                class="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+              >
+                Close
+              </button>
+            </div>
           {/if}
         </div>
       </div>
