@@ -78,7 +78,7 @@
   const jobCategories = [
     {
       title: "New Jobs",
-      count: newJobs?.length || 0,
+      count: $jobStatusCounts[JobStatus.NEW] || 0,
       icon: "M12 4v16m8-8H4",
       bgColors: "bg-burgundy-gradient-1",
       textColor: "pink",
@@ -89,7 +89,7 @@
     },
     {
       title: "Scheduled",
-      count: scheduledJobs?.length || 0,
+      count: $jobStatusCounts[JobStatus.SCHEDULED] || 0,
       icon: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z",
       bgColors: "bg-burgundy-gradient-2",
       textColor: "pink",
@@ -100,7 +100,7 @@
     },
     {
       title: "In Progress",
-      count: inProgressJobs?.length || 0,
+      count: $jobStatusCounts[JobStatus.IN_PROGRESS] || 0,
       icon: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z",
       bgColors: "bg-burgundy-gradient-3",
       textColor: "pink",
@@ -111,7 +111,7 @@
     },
     {
       title: "On Hold",
-      count: onHoldJobs?.length || 0,
+      count: $jobStatusCounts[JobStatus.ON_HOLD] || 0,
       icon: "M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z",
       bgColors: "bg-amber-gradient",
       textColor: "amber",
@@ -122,7 +122,7 @@
     },
     {
       title: "Pending Completion",
-      count: pendingCompletionJobs?.length || 0,
+      count: $jobStatusCounts[JobStatus.PENDING_COMPLETION] || 0,
       icon: "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z",
       bgColors: "bg-burgundy-gradient-4",
       textColor: "pink",
@@ -134,7 +134,7 @@
     },
     {
       title: "Completed",
-      count: completedJobs?.length || 0,
+      count: $jobStatusCounts[JobStatus.COMPLETED] || 0,
       icon: "M5 13l4 4L19 7",
       bgColors: "bg-purple-gradient",
       textColor: "purple",
@@ -145,7 +145,7 @@
     },
     {
       title: "Invoice Approval",
-      count: invoiceApprovalJobs?.length || 0,
+      count: $jobStatusCounts[JobStatus.INVOICE_APPROVAL] || 0,
       icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4",
       bgColors: "bg-burgundy-gradient-5",
       textColor: "pink",
@@ -157,7 +157,7 @@
     },
     {
       title: "Invoiced",
-      count: invoicedJobs?.length || 0,
+      count: $jobStatusCounts[JobStatus.INVOICED] || 0,
       icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01",
       bgColors: "bg-burgundy-gradient-5",
       textColor: "pink",
@@ -168,7 +168,7 @@
     },
     {
       title: "Paid",
-      count: paidJobs?.length || 0,
+      count: $jobStatusCounts[JobStatus.PAID] || 0,
       icon: "M9 8l3 5m0 0l3-5m-3 5v4m-3-5h6m-6 3h6m6-3a9 9 0 11-18 0 9 9 0 0118 0z",
       bgColors: "bg-emerald-gradient",
       textColor: "emerald",
@@ -411,7 +411,7 @@
     {/if}
 
     <!-- Pending Completion Jobs - Only visible to Admin/Office -->
-    {#if isAuthorized && pendingCompletionJobs && pendingCompletionJobs.length > 0}
+    {#if isAuthorized && $jobStatusCounts[JobStatus.PENDING_COMPLETION] > 0}
       <div class="mb-6">
         <div class="card-glass rounded-lg card-shadow overflow-hidden">
           <div class="p-4 card-header-burgundy">
