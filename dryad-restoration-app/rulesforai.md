@@ -6,7 +6,7 @@ Welcome, AI Assistant! This file outlines the key conventions and guidelines for
 
 *   **Framework:** SvelteKit
 *   **Language:** TypeScript (Strict Mode)
-*   **Styling:** Tailwind CSS with custom colors (`dryd-blue`, `dryd-burgundy`, `dryd-gradient`)
+*   **Styling:** Tailwind CSS with custom colors (`dryd-blue`, `dryd-burgundy`, `dryd-gradient`, and teal gradient scales)
 *   **State Management:** Svelte Stores with derived stores for filtered data
 *   **Build/Dev:** Vite
 *   **Mock Data:** JSON-based service layer mocking a real API
@@ -15,7 +15,7 @@ Welcome, AI Assistant! This file outlines the key conventions and guidelines for
 
 *   **`assets/`**: Static assets (images, fonts, etc.).
 *   **`components/`**: Reusable Svelte components.
-    *   **`common/`**: Shared UI elements like `Logo`, `RoleSwitcher`.
+    *   **`common/`**: Shared UI elements like `Logo`, `UserSwitcher`.
     *   **`field/`**: Field tech components like `ActivityLogFeed`, `AddNoteForm`, `AddReadingForm`, `AddPhotoForm`, `AddEquipmentLogForm`.
     *   **`jobs/`**: Job management components like `JobCard`, `JobList`, `MultiStepJobForm`, `JobCompletionModal`.
     *   **`ui/`**: Basic UI elements like `PageHeader`.
@@ -59,7 +59,7 @@ Welcome, AI Assistant! This file outlines the key conventions and guidelines for
 
 ### 3.1 Authentication & User Roles
 
-The app currently has a `RoleSwitcher` component to simulate different user roles:
+The app currently has a `UserSwitcher` component to simulate different user roles:
 
 * **ADMIN**: Full access to all features
 * **OFFICE**: Can manage jobs, create jobs, and complete jobs
@@ -70,6 +70,9 @@ The app currently has a `RoleSwitcher` component to simulate different user role
 * **Dashboard**: Role-specific view showing statistics and jobs
   * Technicians see only their assigned jobs
   * Office/Admin users see active jobs filtered by status
+  * Interactive job filtering with teal-gradient status buttons
+  * Auto-refresh functionality that updates job data every 5 minutes
+  * Uniform card sizing with consistent visual design
 * **Job Creation**: Multi-step form process with validation
   * Structured input with dropdowns and templates for complete data
   * Job Info step: Collects basic information with structured description fields
@@ -92,6 +95,14 @@ The app currently has a `RoleSwitcher` component to simulate different user role
 * **Job Completion Flow**: Office/Admin users can mark jobs as complete
 * **Completion Report**: Summary of all activity, labor, and equipment usage
 * **Billing Summary**: Calculation of equipment costs based on duration
+
+### 3.5 Visual Design & UI Enhancements
+
+* **Parallax Background**: Dynamic background images that change based on scroll position
+* **Teal Gradient System**: Consistent color theme for job progression cards
+* **Card Uniformity**: Fixed minimum heights and widths for consistent card sizing
+* **Visual Clarity**: Improved contrast between selected and unselected elements
+* **Responsive Layout**: Mobile-friendly design that adapts to different screen sizes
 
 ## 4. Application Patterns & Conventions
 
@@ -209,7 +220,8 @@ async function handleSubmit() {
     * Purple for photos
     * Indigo/Yellow for readings
     * Green for equipment
-*   **Card-Based Layout:** Consistent card styling for all major components
+    * Teal gradient scale for job progression
+*   **Card-Based Layout:** Consistent card styling with uniform sizes
 *   **Responsive Grid:** Mobile-first design with responsive breakpoints
 *   **Status Indicators:** Color-coded indicators for job status
 
@@ -815,12 +827,41 @@ For testing new module integrations:
 
 *   **Mock Data:** The app uses mock data instead of real API endpoints
 *   **Image Handling:** Photo uploads are simulated (URLs in mock data)
+*   **Port Management:** The application sometimes uses multiple ports due to port conflicts
 
-## 10. Project Development Journey
+## 10. Recent Updates & Current State (April 2025)
+
+### 10.1 Visual Design Upgrades
+
+* **Parallax Background System**: Implemented a dynamic background system in `(app)/+layout.svelte` that changes images based on scroll position
+* **Teal Gradient Color Scheme**: Added multiple teal gradient classes (`bg-teal-gradient-1` through `bg-teal-gradient-5`) to provide visual progression for job status cards
+* **Enhanced Logo Display**: Removed redundant text from logo component and increased logo size with new `xxxl` size option
+* **User Switcher Redesign**: Updated to match light blue color scheme for better visual consistency
+* **Dashboard Card Refinements**: 
+  * Added uniform minimum height to job category cards
+  * Standardized button sizes with minimum width
+  * Made all "View All" buttons consistently use teal color scheme
+  * Shortened long button labels for visual consistency
+
+### 10.2 Functional Improvements
+
+* **Dashboard Auto-Refresh**: Added interval-based data refresh in `dashboard/+page.ts` that updates job data every 5 minutes
+* **Refresh Management**: Implemented global interval tracking to prevent multiple refresh intervals from running simultaneously
+* **Job Filter Improvements**: Enhanced job filter buttons with improved visual feedback when selected
+* **Safer Job Filtering**: Added null/undefined checking with `safeFilter` function to prevent errors when accessing job arrays
+
+### 10.3 Performance Optimizations
+
+* **Interval Cleanup**: Implemented proper cleanup of intervals when navigating away from dashboard
+* **Component Rendering Efficiency**: Optimized conditional rendering in dashboard components
+* **Cache Management**: Added cache clearing on dashboard reload to ensure fresh data
+* **Response Handling**: Improved error handling in job loading functions
+
+## 11. Project Development Journey
 
 This section outlines the chronological development stages of the Dryad Restoration application from inception to its current state. Understanding this journey provides valuable context for future development agents and demonstrates the significant work invested in the platform.
 
-### 10.1 Initial Planning & Requirements Gathering (Phase 1)
+### 11.1 Initial Planning & Requirements Gathering (Phase 1)
 
 * **Business Analysis & Requirements**
   * Stakeholder interviews with field technicians, office staff, and management
@@ -840,7 +881,7 @@ This section outlines the chronological development stages of the Dryad Restorat
   * Role-based access patterns defined
   * Core workflow stages documented
 
-### 10.2 Core Infrastructure Development (Phase 2)
+### 11.2 Core Infrastructure Development (Phase 2)
 
 * **Project Bootstrapping**
   * SvelteKit project initialization with TypeScript configuration
@@ -860,7 +901,7 @@ This section outlines the chronological development stages of the Dryad Restorat
   * Role-switcher mechanism for testing
   * Dashboard layout foundation
 
-### 10.3 Job Management System (Phase 3)
+### 11.3 Job Management System (Phase 3)
 
 * **Dashboard Views**
   * Role-filtered job listings
@@ -880,7 +921,7 @@ This section outlines the chronological development stages of the Dryad Restorat
   * Role-specific action buttons
   * Related information tabs
 
-### 10.4 Field Technician Tools (Phase 4)
+### 11.4 Field Technician Tools (Phase 4)
 
 * **Activity Logging System**
   * Note creation with templates
@@ -900,7 +941,7 @@ This section outlines the chronological development stages of the Dryad Restorat
   * Camera integration (simulated)
   * Responsive layouts for small screens
 
-### 10.5 Workflow Engine Development (Phase 5)
+### 11.5 Workflow Engine Development (Phase 5)
 
 * **State Machine Implementation**
   * Job status transition rules
@@ -920,7 +961,7 @@ This section outlines the chronological development stages of the Dryad Restorat
   * Task completion tracking
   * Next steps guidance
 
-### 10.6 Financial Module Integration (Phase 6)
+### 11.6 Financial Module Integration (Phase 6)
 
 * **Line Item Management**
   * Custom line item creation
@@ -940,7 +981,7 @@ This section outlines the chronological development stages of the Dryad Restorat
   * Labor and equipment roll-up
   * Formatted invoice preview
 
-### 10.7 UI/UX Refinement (Phase 7)
+### 11.7 UI/UX Refinement (Phase 7)
 
 * **Design System Enhancement**
   * Consistent component styling
@@ -960,27 +1001,27 @@ This section outlines the chronological development stages of the Dryad Restorat
   * Clearer error messages
   * Improved loading states
 
-### 10.8 Current Work & Recent Additions (Phase 8)
+### 11.8 Current Work & Recent Additions (Phase 8)
 
-* **Quote Management Enhancement**
-  * Quote to job conversion workflow
-  * Line item selection interface
-  * Quote item importing
-  * Cost adjustment capabilities
+* **Visual Design Overhaul**
+  * Parallax background implementation
+  * Teal gradient system for workflow visualization
+  * Card uniformity and consistent sizing
+  * Enhanced logo display
 
-* **Invoice Refinement**
-  * Professional invoice styling
-  * Company branding integration
-  * Printable invoice format
-  * Line item categorization
+* **Data Management Improvements**
+  * Auto-refresh functionality
+  * Safer job filtering with null checks
+  * Improved error handling
+  * Interval cleanup for better performance
 
-* **System Documentation**
-  * Comprehensive workflow documentation
-  * Architecture definition
-  * Data flow mapping
-  * Future module integration guidelines
+* **User Interface Refinement**
+  * Consistent button styling
+  * Uniform card sizing
+  * Improved contrast for selected elements
+  * More intuitive visual hierarchy
 
-### 10.9 Future Roadmap
+### 11.9 Future Roadmap
 
 * **API Integration**
   * Replace mock data with real API endpoints
