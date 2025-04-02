@@ -200,7 +200,7 @@
 
 <style>
   .category-card {
-    @apply bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 transition-all duration-300 h-full min-h-[140px];
+    @apply bg-gray-100 rounded-lg shadow-md overflow-hidden border border-gray-200 transition-all duration-300 h-full min-h-[140px];
   }
   
   .category-card-header {
@@ -322,7 +322,7 @@
                     <h3 class="text-lg font-semibold">{category.title}</h3>
                     <p class="text-3xl font-bold mt-1">{category.count}</p>
                   </div>
-                  <div class="p-3 bg-white/20 rounded-full {category.count > 0 ? 'animate-bounce' : ''}">
+                  <div class="p-3 bg-gray-100/20 rounded-full {category.count > 0 ? 'animate-bounce' : ''}">
                     <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={category.icon}/>
                     </svg>
@@ -352,11 +352,11 @@
       </div>
       
       <!-- Jobs Section with Status Filter -->
-      <div class="bg-white rounded-lg shadow-lg border border-gray-300 overflow-hidden">
+      <div class="bg-gray-100 rounded-lg shadow-lg border border-gray-300 overflow-hidden">
         <div class="p-4 bg-teal-gradient text-white">
           <div class="flex justify-between items-center">
             <h2 class="font-bold text-xl">Active Jobs</h2>
-            <a href="/jobs/new" class="px-4 py-2 bg-white text-teal-600 rounded-lg font-medium hover:bg-gray-100 transition-colors">
+            <a href="/jobs/new" class="px-4 py-2 bg-gray-100 text-teal-600 rounded-lg font-medium hover:bg-gray-200 transition-colors">
               + New Job
             </a>
           </div>
@@ -368,8 +368,8 @@
               <button 
                 class="whitespace-nowrap px-4 py-2 rounded-lg text-sm font-medium border-2 transition-colors duration-150
                 {selectedStatusFilter === status 
-                  ? 'bg-teal-gradient border-white text-white' 
-                  : 'bg-white/5 border-white/20 text-white/70 hover:bg-white/10 hover:border-white/40'}"
+                  ? 'bg-teal-gradient border-gray-100 text-white' 
+                  : 'bg-gray-100/5 border-white/20 text-white/70 hover:bg-gray-100/10 hover:border-white/40'}"
                 on:click={() => setStatusFilter(status)}
               >
                 {status.replace(/_/g, ' ')}
@@ -410,3 +410,4 @@
       </div>
     {/if}
   {/if} 
+</div> 
