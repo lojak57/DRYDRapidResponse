@@ -2,7 +2,7 @@
   "version": 2,
   "buildCommand": "npm run build",
   "devCommand": "npm run dev",
-  "outputDirectory": ".svelte-kit/vercel",
+  "outputDirectory": ".svelte-kit/output",
   "installCommand": "npm install",
   "framework": "sveltekit",
   "regions": ["sfo1"],
