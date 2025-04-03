@@ -1,0 +1,9 @@
+npm ERR! code ENOENT
+npm ERR! syscall open
+npm ERR! path /Users/mitchmechelay/Projects/DRYD Restoration V2/package.json
+npm ERR! errno -2
+npm ERR! enoent Could not read package.json: Error: ENOENT: no such file or directory, open '/Users/mitchmechelay/Projects/DRYD Restoration V2/package.json'
+npm ERR! enoent This is related to npm not being able to find a file.
+npm ERR! enoent 
+
+npm ERR! A complete log of this run can be found in: /Users/mitchmechelay/.npm/_logs/2025-03-30T03_26_46_539Z-debug-0.log
