@@ -1043,6 +1043,38 @@
     { label: 'Medium', desc: 'Multiple rooms' },
     { label: 'Large', desc: 'Entire property' }
   ];
+
+  // Wrap all the document.getElementById calls in browser context checks
+  function focusElement(id: string) {
+    if (typeof window === 'undefined') return; // Skip in SSR context
+    document.getElementById(id)?.focus();
+  }
+
+  // Update the existing focus calls to use the new function
+  
+  $: if (step === 1 && !newQuote.customerId) {
+    focusElement('customer');
+  }
+  
+  $: if (step === 2 && !newQuote.location.street) {
+    focusElement('street');
+  }
+  
+  $: if (step === 2 && !newQuote.location.city && newQuote.location.street) {
+    focusElement('city');
+  }
+  
+  $: if (step === 2 && !newQuote.location.state && newQuote.location.city) {
+    focusElement('state');
+  }
+  
+  $: if (step === 2 && !newQuote.location.zip && newQuote.location.state) {
+    focusElement('zip');
+  }
+  
+  $: if (step === 3 && !newQuote.scopeOfWork && created) {
+    focusElement('scopeOfWork');
+  }
 </script>
 
 <div class="container mx-auto px-4 py-8">

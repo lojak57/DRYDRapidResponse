@@ -27,6 +27,16 @@
     
     let currentBgIndex = 0;
     
+    // Fix browser API usage with browser check
+    $: scrollPercentage = 0;
+    
+    // Only access browser APIs on the client side
+    onMount(() => {
+        $: if (typeof window !== 'undefined') {
+            scrollPercentage = scrollY / (document.body.scrollHeight - innerHeight);
+        }
+    });
+    
     // Load data when the component mounts
     onMount(async () => {
         if (browser) {
@@ -58,7 +68,6 @@
     // Update background image based on scroll position
     $: {
         if (scrollY && innerHeight) {
-            const scrollPercentage = scrollY / (document.body.scrollHeight - innerHeight);
             currentBgIndex = Math.min(
                 backgroundImages.length - 1,
                 Math.floor(scrollPercentage * backgroundImages.length)

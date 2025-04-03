@@ -1,6 +1,0 @@
-{
-  "buildCommand": "cd dyrd && npm run build",
-  "outputDirectory": "dyrd/.svelte-kit/vercel",
-  "installCommand": "cd dyrd && npm install",
-  "framework": "sveltekit"
-} 

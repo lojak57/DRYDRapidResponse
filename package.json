@@ -1,11 +1,5 @@
 {
-  "name": "dryd-restoration-v2",
-  "private": true,
-  "version": "1.0.0",
-  "engines": {
-    "node": ">=18.0.0"
-  },
-  "scripts": {
-    "build": "cd dyrd && npm run build"
+  "dependencies": {
+    "lucide-svelte": "^0.487.0"
   }
 }

@@ -1715,6 +1715,75 @@
       importingQuoteData = false;
     }
   }
+
+  // Wrap browser DOM manipulation in SSR-safe checks
+  function showAdvanceStatusPrompt() {
+    if (typeof window === 'undefined') return; // Skip in SSR context
+    
+    const existingPrompt = document.getElementById('advance-status-prompt');
+    if (existingPrompt) {
+      existingPrompt.remove();
+    }
+    
+    const promptElement = document.createElement('div');
+    promptElement.id = 'advance-status-prompt';
+    promptElement.className = 'fixed bottom-4 right-4 bg-green-100 p-4 rounded-lg border-2 border-green-300 shadow-lg z-50 animate-pulse';
+    promptElement.innerHTML = `
+      <h3 class="text-lg font-bold text-green-800 mb-2">All Tasks Completed!</h3>
+      <p class="text-green-700 mb-4">All required tasks for the current stage are complete.</p>
+      <button
+        id="advance-to-completed-btn"
+        class="w-full py-2 px-4 bg-green-600 hover:bg-green-700 text-white font-bold rounded transition-colors"
+      >
+        Mark Job as COMPLETED
+      </button>
+    `;
+    
+    // Add the prompt to the DOM
+    document.body.appendChild(promptElement);
+    
+    // Add click event to the button
+    const advanceBtn = document.getElementById('advance-to-completed-btn');
+    if (advanceBtn) {
+      advanceBtn.addEventListener('click', () => {
+        console.log('Clicked to advance status to COMPLETED');
+        
+        // Update job status to COMPLETED
+        updateJobStatus($currentJob.id, JobStatus.COMPLETED)
+          .then(updatedJob => {
+            if (updatedJob) {
+              // Update the store
+              currentJob.set(updatedJob);
+              
+              // Add a log entry for the status change
+              addLogEntry({
+                jobId: updatedJob.id,
+                userId: $currentUser?.id || 'unknown-user',
+                timestamp: new Date(),
+                type: LogEntryType.NOTE,
+                content: `Job status changed from ${JobStatus.PENDING_COMPLETION} to ${JobStatus.COMPLETED}: All review tasks completed, job is now marked as complete`
+              });
+              
+              showSuccessToast('Job marked as completed');
+              
+              // Remove the prompt
+              const prompt = document.getElementById('advance-status-prompt');
+              if (prompt) {
+                prompt.remove();
+              }
+              
+              // FIXED: Use refreshJobData instead of reloading the page
+              // This prevents redirection issues
+              setTimeout(() => refreshJobData(), 500);
+            }
+          })
+          .catch(err => {
+            console.error('Error updating job status:', err);
+            showErrorToast('Failed to update job status. Please try again.');
+          });
+      });
+    }
+  }
 </script>
 
 <div class="max-w-6xl mx-auto">
