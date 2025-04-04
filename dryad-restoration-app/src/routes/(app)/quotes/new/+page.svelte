@@ -528,6 +528,52 @@
   // Common material quantities
   const commonMaterialQuantities = [1, 2, 5, 10, 25, 50, 100];
   
+  // Equipment preset items
+  const equipmentItems = [
+    { title: 'Air Mover', unit: 'day', unitPrice: 35.00, internalCost: 15.00, description: 'Industrial air mover/fan' },
+    { title: 'Dehumidifier', unit: 'day', unitPrice: 95.00, internalCost: 45.00, description: 'Commercial dehumidifier' },
+    { title: 'Air Scrubber', unit: 'day', unitPrice: 85.00, internalCost: 40.00, description: 'HEPA air filtration' },
+    { title: 'Water Extractor', unit: 'day', unitPrice: 125.00, internalCost: 60.00, description: 'Commercial water extractor' },
+    { title: 'Thermal Imaging Camera', unit: 'day', unitPrice: 75.00, internalCost: 35.00, description: 'For moisture detection' },
+    { title: 'Drying System', unit: 'day', unitPrice: 195.00, internalCost: 85.00, description: 'Complete drying system' }
+  ];
+  
+  // Supplies preset items
+  const suppliesItems = [
+    { title: 'PPE Kit', unit: 'kit', unitPrice: 25.00, internalCost: 12.00, description: 'Personal protective equipment' },
+    { title: 'Cleaning Supplies', unit: 'kit', unitPrice: 45.00, internalCost: 20.00, description: 'General cleaning supplies' },
+    { title: 'Plastic Sheeting', unit: 'roll', unitPrice: 35.00, internalCost: 18.00, description: '10\' x 100\' plastic sheeting' },
+    { title: 'Tape', unit: 'roll', unitPrice: 12.00, internalCost: 5.00, description: 'Heavy duty restoration tape' },
+    { title: 'Air Filters', unit: 'pack', unitPrice: 65.00, internalCost: 30.00, description: 'HEPA filter replacements' }
+  ];
+  
+  // Subcontractor preset items
+  const subcontractorItems = [
+    { title: 'Electrician', unit: 'hour', unitPrice: 95.00, internalCost: 75.00, description: 'Licensed electrical repairs' },
+    { title: 'Plumber', unit: 'hour', unitPrice: 95.00, internalCost: 75.00, description: 'Licensed plumbing repairs' },
+    { title: 'HVAC Specialist', unit: 'hour', unitPrice: 105.00, internalCost: 85.00, description: 'HVAC system repairs' },
+    { title: 'Roofing Contractor', unit: 'sq ft', unitPrice: 8.50, internalCost: 6.50, description: 'Roof repair specialists' },
+    { title: 'Asbestos Abatement', unit: 'sq ft', unitPrice: 25.00, internalCost: 18.00, description: 'Licensed asbestos removal' }
+  ];
+  
+  // Permit preset items
+  const permitItems = [
+    { title: 'Building Permit', unit: 'each', unitPrice: 250.00, internalCost: 250.00, description: 'General building permit' },
+    { title: 'Electrical Permit', unit: 'each', unitPrice: 150.00, internalCost: 150.00, description: 'Electrical work permit' },
+    { title: 'Plumbing Permit', unit: 'each', unitPrice: 150.00, internalCost: 150.00, description: 'Plumbing work permit' },
+    { title: 'Demolition Permit', unit: 'each', unitPrice: 200.00, internalCost: 200.00, description: 'Demolition work permit' },
+    { title: 'Inspection Fee', unit: 'each', unitPrice: 100.00, internalCost: 100.00, description: 'City inspection fees' }
+  ];
+  
+  // Disposal preset items
+  const disposalItems = [
+    { title: 'Dumpster - Small', unit: 'week', unitPrice: 350.00, internalCost: 275.00, description: '10 yard dumpster' },
+    { title: 'Dumpster - Medium', unit: 'week', unitPrice: 450.00, internalCost: 350.00, description: '20 yard dumpster' },
+    { title: 'Dumpster - Large', unit: 'week', unitPrice: 550.00, internalCost: 425.00, description: '30 yard dumpster' },
+    { title: 'Hazardous Material Disposal', unit: 'cubic yard', unitPrice: 95.00, internalCost: 65.00, description: 'Specialized disposal' },
+    { title: 'Disposal Fees', unit: 'ton', unitPrice: 75.00, internalCost: 60.00, description: 'Landfill/processing fees' }
+  ];
+  
   // Line item templates for quick add
   const lineItemTemplates = [
     { description: 'Labor - General', quantity: 1, unitPrice: 75, isEstimate: false, category: 'Labor' },
@@ -572,7 +618,7 @@
   function addLineItem() {
     lineItems = [
       ...lineItems,
-      { id: crypto.randomUUID(), description: '', quantity: 1, unitPrice: 0, total: 0, isEstimate: false, category: '' }
+      { id: crypto.randomUUID(), description: 'New Line Item', quantity: 1, unitPrice: 0, total: 0, isEstimate: false, category: 'Other' }
     ];
   }
   
@@ -986,6 +1032,41 @@
     lineItemWizard.description = `${material.title} - ${material.description}`;
     lineItemWizard.unitPrice = material.unitPrice;
     lineItemWizard.internalCost = material.internalCost;
+  }
+  
+  // Set equipment item
+  function setEquipmentItem(equipment: typeof equipmentItems[0]) {
+    lineItemWizard.description = `${equipment.title} - ${equipment.description}`;
+    lineItemWizard.unitPrice = equipment.unitPrice;
+    lineItemWizard.internalCost = equipment.internalCost;
+  }
+  
+  // Set supplies item
+  function setSuppliesItem(supplies: typeof suppliesItems[0]) {
+    lineItemWizard.description = `${supplies.title} - ${supplies.description}`;
+    lineItemWizard.unitPrice = supplies.unitPrice;
+    lineItemWizard.internalCost = supplies.internalCost;
+  }
+  
+  // Set subcontractor item
+  function setSubcontractorItem(subcontractor: typeof subcontractorItems[0]) {
+    lineItemWizard.description = `${subcontractor.title} - ${subcontractor.description}`;
+    lineItemWizard.unitPrice = subcontractor.unitPrice;
+    lineItemWizard.internalCost = subcontractor.internalCost;
+  }
+  
+  // Set permit item
+  function setPermitItem(permit: typeof permitItems[0]) {
+    lineItemWizard.description = `${permit.title} - ${permit.description}`;
+    lineItemWizard.unitPrice = permit.unitPrice;
+    lineItemWizard.internalCost = permit.internalCost;
+  }
+  
+  // Set disposal item
+  function setDisposalItem(disposal: typeof disposalItems[0]) {
+    lineItemWizard.description = `${disposal.title} - ${disposal.description}`;
+    lineItemWizard.unitPrice = disposal.unitPrice;
+    lineItemWizard.internalCost = disposal.internalCost;
   }
   
   // Add line item from wizard
@@ -1711,58 +1792,460 @@
                       {/if}
                     </div>
                   </div>
-                {:else}
-                  <!-- Description for non-labor/materials items -->
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                    <input 
-                      type="text"
-                      bind:value={lineItemWizard.description}
-                      placeholder="Enter a detailed description"
-                      class="w-full p-2 border border-gray-300 rounded-lg"
-                    />
-                  </div>
-                  
-                  <div class="grid grid-cols-2 gap-4">
-                    <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
-                      <input 
-                        type="number"
-                        bind:value={lineItemWizard.quantity}
-                        min="1"
-                        class="w-full p-2 border border-gray-300 rounded-lg"
-                      />
-                    </div>
-                    
-                    <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">Unit Price ($)</label>
-                      <div class="relative">
-                        <span class="absolute inset-y-0 left-0 flex items-center pl-2 pointer-events-none text-gray-500 text-sm">$</span>
-                        <input 
-                          type="number"
-                          bind:value={lineItemWizard.unitPrice}
-                          min="0"
-                          step="0.01"
-                          class="w-full p-2 pl-6 border border-gray-300 rounded-lg"
-                        />
+                {:else if lineItemWizard.category === 'Equipment'}
+                  <!-- Equipment section content -->
+                  <div class="border-t border-blue-200 pt-4">
+                    <div class="mb-4">
+                      <label class="block text-sm font-medium text-gray-700 mb-1">Common Equipment</label>
+                      <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        {#each equipmentItems as equipment}
+                          <button 
+                            type="button"
+                            class="p-2 border rounded text-left text-sm transition-all {lineItemWizard.description === `${equipment.title} - ${equipment.description}` ? 'bg-blue-100 border-blue-400 shadow-sm' : 'border-gray-300 hover:bg-gray-50'}"
+                            on:click={() => setEquipmentItem(equipment)}
+                          >
+                            <div class="font-medium">{equipment.title}</div>
+                            <div class="flex justify-between text-xs">
+                              <span class="text-gray-600">{equipment.description}</span>
+                              <span class="font-medium text-blue-700">
+                                ${equipment.unitPrice}/{equipment.unit}
+                                {#if $currentUser?.role === 'ADMIN' || $currentUser?.role === 'OFFICE'}
+                                  <span class="text-gray-500 ml-1">
+                                    (cost: ${equipment.internalCost})
+                                  </span>
+                                {/if}
+                              </span>
+                            </div>
+                          </button>
+                        {/each}
                       </div>
                     </div>
                     
-                    {#if $currentUser?.role === 'ADMIN' || $currentUser?.role === 'OFFICE'}
-                      <div class="col-span-2">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Internal Cost ($)</label>
+                    <div class="mb-4">
+                      <label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+                      <div class="flex items-center">
+                        <input 
+                          type="number"
+                          bind:value={lineItemWizard.quantity}
+                          min="1"
+                          class="w-24 p-2 border border-gray-300 rounded-lg text-center"
+                        />
+                        <span class="ml-2 text-sm text-gray-600">
+                          {#if lineItemWizard.description}
+                            {equipmentItems.find(e => lineItemWizard.description.startsWith(e.title))?.unit || 'units'}
+                          {:else}
+                            units
+                          {/if}
+                        </span>
+                      </div>
+                      <div class="flex flex-wrap gap-2 mt-2">
+                        {#each commonMaterialQuantities as qty}
+                          <button 
+                            type="button"
+                            class="px-2 py-1 text-xs {lineItemWizard.quantity === qty ? 'bg-blue-100 text-blue-700 font-medium rounded' : 'text-gray-600 hover:bg-gray-100 rounded'}"
+                            on:click={() => lineItemWizard.quantity = qty}
+                          >
+                            {qty}
+                          </button>
+                        {/each}
+                      </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Unit Price ($)</label>
                         <div class="relative">
                           <span class="absolute inset-y-0 left-0 flex items-center pl-2 pointer-events-none text-gray-500 text-sm">$</span>
                           <input 
                             type="number"
-                            bind:value={lineItemWizard.internalCost}
+                            bind:value={lineItemWizard.unitPrice}
                             min="0"
                             step="0.01"
                             class="w-full p-2 pl-6 border border-gray-300 rounded-lg"
                           />
                         </div>
                       </div>
-                    {/if}
+                      
+                      {#if $currentUser?.role === 'ADMIN' || $currentUser?.role === 'OFFICE'}
+                        <div>
+                          <label class="block text-sm font-medium text-gray-700 mb-1">Internal Cost ($)</label>
+                          <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-2 pointer-events-none text-gray-500 text-sm">$</span>
+                            <input 
+                              type="number"
+                              bind:value={lineItemWizard.internalCost}
+                              min="0"
+                              step="0.01"
+                              class="w-full p-2 pl-6 border border-gray-300 rounded-lg"
+                            />
+                          </div>
+                        </div>
+                      {/if}
+                    </div>
+                  </div>
+                {:else if lineItemWizard.category === 'Supplies'}
+                  <!-- Supplies section content -->
+                  <div class="border-t border-blue-200 pt-4">
+                    <div class="mb-4">
+                      <label class="block text-sm font-medium text-gray-700 mb-1">Common Supplies</label>
+                      <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        {#each suppliesItems as supplies}
+                          <button 
+                            type="button"
+                            class="p-2 border rounded text-left text-sm transition-all {lineItemWizard.description === `${supplies.title} - ${supplies.description}` ? 'bg-blue-100 border-blue-400 shadow-sm' : 'border-gray-300 hover:bg-gray-50'}"
+                            on:click={() => setSuppliesItem(supplies)}
+                          >
+                            <div class="font-medium">{supplies.title}</div>
+                            <div class="flex justify-between text-xs">
+                              <span class="text-gray-600">{supplies.description}</span>
+                              <span class="font-medium text-blue-700">
+                                ${supplies.unitPrice}/{supplies.unit}
+                                {#if $currentUser?.role === 'ADMIN' || $currentUser?.role === 'OFFICE'}
+                                  <span class="text-gray-500 ml-1">
+                                    (cost: ${supplies.internalCost})
+                                  </span>
+                                {/if}
+                              </span>
+                            </div>
+                          </button>
+                        {/each}
+                      </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                      <label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+                      <div class="flex items-center">
+                        <input 
+                          type="number"
+                          bind:value={lineItemWizard.quantity}
+                          min="1"
+                          class="w-24 p-2 border border-gray-300 rounded-lg text-center"
+                        />
+                        <span class="ml-2 text-sm text-gray-600">
+                          {#if lineItemWizard.description}
+                            {suppliesItems.find(s => lineItemWizard.description.startsWith(s.title))?.unit || 'units'}
+                          {:else}
+                            units
+                          {/if}
+                        </span>
+                      </div>
+                      <div class="flex flex-wrap gap-2 mt-2">
+                        {#each commonMaterialQuantities as qty}
+                          <button 
+                            type="button"
+                            class="px-2 py-1 text-xs {lineItemWizard.quantity === qty ? 'bg-blue-100 text-blue-700 font-medium rounded' : 'text-gray-600 hover:bg-gray-100 rounded'}"
+                            on:click={() => lineItemWizard.quantity = qty}
+                          >
+                            {qty}
+                          </button>
+                        {/each}
+                      </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Unit Price ($)</label>
+                        <div class="relative">
+                          <span class="absolute inset-y-0 left-0 flex items-center pl-2 pointer-events-none text-gray-500 text-sm">$</span>
+                          <input 
+                            type="number"
+                            bind:value={lineItemWizard.unitPrice}
+                            min="0"
+                            step="0.01"
+                            class="w-full p-2 pl-6 border border-gray-300 rounded-lg"
+                          />
+                        </div>
+                      </div>
+                      
+                      {#if $currentUser?.role === 'ADMIN' || $currentUser?.role === 'OFFICE'}
+                        <div>
+                          <label class="block text-sm font-medium text-gray-700 mb-1">Internal Cost ($)</label>
+                          <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-2 pointer-events-none text-gray-500 text-sm">$</span>
+                            <input 
+                              type="number"
+                              bind:value={lineItemWizard.internalCost}
+                              min="0"
+                              step="0.01"
+                              class="w-full p-2 pl-6 border border-gray-300 rounded-lg"
+                            />
+                          </div>
+                        </div>
+                      {/if}
+                    </div>
+                  </div>
+                {:else if lineItemWizard.category === 'Subcontractor'}
+                  <!-- Subcontractor section content -->
+                  <div class="border-t border-blue-200 pt-4">
+                    <div class="mb-4">
+                      <label class="block text-sm font-medium text-gray-700 mb-1">Common Subcontractors</label>
+                      <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        {#each subcontractorItems as subcontractor}
+                          <button 
+                            type="button"
+                            class="p-2 border rounded text-left text-sm transition-all {lineItemWizard.description === `${subcontractor.title} - ${subcontractor.description}` ? 'bg-blue-100 border-blue-400 shadow-sm' : 'border-gray-300 hover:bg-gray-50'}"
+                            on:click={() => setSubcontractorItem(subcontractor)}
+                          >
+                            <div class="font-medium">{subcontractor.title}</div>
+                            <div class="flex justify-between text-xs">
+                              <span class="text-gray-600">{subcontractor.description}</span>
+                              <span class="font-medium text-blue-700">
+                                ${subcontractor.unitPrice}/{subcontractor.unit}
+                                {#if $currentUser?.role === 'ADMIN' || $currentUser?.role === 'OFFICE'}
+                                  <span class="text-gray-500 ml-1">
+                                    (cost: ${subcontractor.internalCost})
+                                  </span>
+                                {/if}
+                              </span>
+                            </div>
+                          </button>
+                        {/each}
+                      </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                      <label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+                      <div class="flex items-center">
+                        <input 
+                          type="number"
+                          bind:value={lineItemWizard.quantity}
+                          min="1"
+                          class="w-24 p-2 border border-gray-300 rounded-lg text-center"
+                        />
+                        <span class="ml-2 text-sm text-gray-600">
+                          {#if lineItemWizard.description}
+                            {subcontractorItems.find(s => lineItemWizard.description.startsWith(s.title))?.unit || 'hours'}
+                          {:else}
+                            hours
+                          {/if}
+                        </span>
+                      </div>
+                      <div class="flex flex-wrap gap-2 mt-2">
+                        {#each commonMaterialQuantities as qty}
+                          <button 
+                            type="button"
+                            class="px-2 py-1 text-xs {lineItemWizard.quantity === qty ? 'bg-blue-100 text-blue-700 font-medium rounded' : 'text-gray-600 hover:bg-gray-100 rounded'}"
+                            on:click={() => lineItemWizard.quantity = qty}
+                          >
+                            {qty}
+                          </button>
+                        {/each}
+                      </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Unit Price ($)</label>
+                        <div class="relative">
+                          <span class="absolute inset-y-0 left-0 flex items-center pl-2 pointer-events-none text-gray-500 text-sm">$</span>
+                          <input 
+                            type="number"
+                            bind:value={lineItemWizard.unitPrice}
+                            min="0"
+                            step="0.01"
+                            class="w-full p-2 pl-6 border border-gray-300 rounded-lg"
+                          />
+                        </div>
+                      </div>
+                      
+                      {#if $currentUser?.role === 'ADMIN' || $currentUser?.role === 'OFFICE'}
+                        <div>
+                          <label class="block text-sm font-medium text-gray-700 mb-1">Internal Cost ($)</label>
+                          <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-2 pointer-events-none text-gray-500 text-sm">$</span>
+                            <input 
+                              type="number"
+                              bind:value={lineItemWizard.internalCost}
+                              min="0"
+                              step="0.01"
+                              class="w-full p-2 pl-6 border border-gray-300 rounded-lg"
+                            />
+                          </div>
+                        </div>
+                      {/if}
+                    </div>
+                  </div>
+                {:else if lineItemWizard.category === 'Permit'}
+                  <!-- Permit section content -->
+                  <div class="border-t border-blue-200 pt-4">
+                    <div class="mb-4">
+                      <label class="block text-sm font-medium text-gray-700 mb-1">Common Permits</label>
+                      <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        {#each permitItems as permit}
+                          <button 
+                            type="button"
+                            class="p-2 border rounded text-left text-sm transition-all {lineItemWizard.description === `${permit.title} - ${permit.description}` ? 'bg-blue-100 border-blue-400 shadow-sm' : 'border-gray-300 hover:bg-gray-50'}"
+                            on:click={() => setPermitItem(permit)}
+                          >
+                            <div class="font-medium">{permit.title}</div>
+                            <div class="flex justify-between text-xs">
+                              <span class="text-gray-600">{permit.description}</span>
+                              <span class="font-medium text-blue-700">
+                                ${permit.unitPrice}/{permit.unit}
+                                {#if $currentUser?.role === 'ADMIN' || $currentUser?.role === 'OFFICE'}
+                                  <span class="text-gray-500 ml-1">
+                                    (cost: ${permit.internalCost})
+                                  </span>
+                                {/if}
+                              </span>
+                            </div>
+                          </button>
+                        {/each}
+                      </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                      <label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+                      <div class="flex items-center">
+                        <input 
+                          type="number"
+                          bind:value={lineItemWizard.quantity}
+                          min="1"
+                          class="w-24 p-2 border border-gray-300 rounded-lg text-center"
+                        />
+                        <span class="ml-2 text-sm text-gray-600">
+                          {#if lineItemWizard.description}
+                            {permitItems.find(p => lineItemWizard.description.startsWith(p.title))?.unit || 'each'}
+                          {:else}
+                            each
+                          {/if}
+                        </span>
+                      </div>
+                      <div class="flex flex-wrap gap-2 mt-2">
+                        {#each commonMaterialQuantities as qty}
+                          <button 
+                            type="button"
+                            class="px-2 py-1 text-xs {lineItemWizard.quantity === qty ? 'bg-blue-100 text-blue-700 font-medium rounded' : 'text-gray-600 hover:bg-gray-100 rounded'}"
+                            on:click={() => lineItemWizard.quantity = qty}
+                          >
+                            {qty}
+                          </button>
+                        {/each}
+                      </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Unit Price ($)</label>
+                        <div class="relative">
+                          <span class="absolute inset-y-0 left-0 flex items-center pl-2 pointer-events-none text-gray-500 text-sm">$</span>
+                          <input 
+                            type="number"
+                            bind:value={lineItemWizard.unitPrice}
+                            min="0"
+                            step="0.01"
+                            class="w-full p-2 pl-6 border border-gray-300 rounded-lg"
+                          />
+                        </div>
+                      </div>
+                      
+                      {#if $currentUser?.role === 'ADMIN' || $currentUser?.role === 'OFFICE'}
+                        <div>
+                          <label class="block text-sm font-medium text-gray-700 mb-1">Internal Cost ($)</label>
+                          <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-2 pointer-events-none text-gray-500 text-sm">$</span>
+                            <input 
+                              type="number"
+                              bind:value={lineItemWizard.internalCost}
+                              min="0"
+                              step="0.01"
+                              class="w-full p-2 pl-6 border border-gray-300 rounded-lg"
+                            />
+                          </div>
+                        </div>
+                      {/if}
+                    </div>
+                  </div>
+                {:else if lineItemWizard.category === 'Disposal'}
+                  <!-- Disposal section content -->
+                  <div class="border-t border-blue-200 pt-4">
+                    <div class="mb-4">
+                      <label class="block text-sm font-medium text-gray-700 mb-1">Common Disposal</label>
+                      <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        {#each disposalItems as disposal}
+                          <button 
+                            type="button"
+                            class="p-2 border rounded text-left text-sm transition-all {lineItemWizard.description === `${disposal.title} - ${disposal.description}` ? 'bg-blue-100 border-blue-400 shadow-sm' : 'border-gray-300 hover:bg-gray-50'}"
+                            on:click={() => setDisposalItem(disposal)}
+                          >
+                            <div class="font-medium">{disposal.title}</div>
+                            <div class="flex justify-between text-xs">
+                              <span class="text-gray-600">{disposal.description}</span>
+                              <span class="font-medium text-blue-700">
+                                ${disposal.unitPrice}/{disposal.unit}
+                                {#if $currentUser?.role === 'ADMIN' || $currentUser?.role === 'OFFICE'}
+                                  <span class="text-gray-500 ml-1">
+                                    (cost: ${disposal.internalCost})
+                                  </span>
+                                {/if}
+                              </span>
+                            </div>
+                          </button>
+                        {/each}
+                      </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                      <label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+                      <div class="flex items-center">
+                        <input 
+                          type="number"
+                          bind:value={lineItemWizard.quantity}
+                          min="1"
+                          class="w-24 p-2 border border-gray-300 rounded-lg text-center"
+                        />
+                        <span class="ml-2 text-sm text-gray-600">
+                          {#if lineItemWizard.description}
+                            {disposalItems.find(d => lineItemWizard.description.startsWith(d.title))?.unit || 'weeks'}
+                          {:else}
+                            weeks
+                          {/if}
+                        </span>
+                      </div>
+                      <div class="flex flex-wrap gap-2 mt-2">
+                        {#each commonMaterialQuantities as qty}
+                          <button 
+                            type="button"
+                            class="px-2 py-1 text-xs {lineItemWizard.quantity === qty ? 'bg-blue-100 text-blue-700 font-medium rounded' : 'text-gray-600 hover:bg-gray-100 rounded'}"
+                            on:click={() => lineItemWizard.quantity = qty}
+                          >
+                            {qty}
+                          </button>
+                        {/each}
+                      </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Unit Price ($)</label>
+                        <div class="relative">
+                          <span class="absolute inset-y-0 left-0 flex items-center pl-2 pointer-events-none text-gray-500 text-sm">$</span>
+                          <input 
+                            type="number"
+                            bind:value={lineItemWizard.unitPrice}
+                            min="0"
+                            step="0.01"
+                            class="w-full p-2 pl-6 border border-gray-300 rounded-lg"
+                          />
+                        </div>
+                      </div>
+                      
+                      {#if $currentUser?.role === 'ADMIN' || $currentUser?.role === 'OFFICE'}
+                        <div>
+                          <label class="block text-sm font-medium text-gray-700 mb-1">Internal Cost ($)</label>
+                          <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-2 pointer-events-none text-gray-500 text-sm">$</span>
+                            <input 
+                              type="number"
+                              bind:value={lineItemWizard.internalCost}
+                              min="0"
+                              step="0.01"
+                              class="w-full p-2 pl-6 border border-gray-300 rounded-lg"
+                            />
+                          </div>
+                        </div>
+                      {/if}
+                    </div>
                   </div>
                 {/if}
                 

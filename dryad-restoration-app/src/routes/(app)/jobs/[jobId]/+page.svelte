@@ -606,80 +606,101 @@
     // Then process the task completion
     if (taskId === 'schedule_job' && data) {
       console.log('Schedule job task completed with data:', data);
-      if (data.scheduledStartDate || data.estimatedCompletionDate) {
-        // Extract the dates from the form data
-        const updateData: Partial<Job> = {};
-        
-        if (data.scheduledStartDate) {
-          const scheduledDate = new Date(data.scheduledStartDate);
-          updateData.scheduledStartDate = scheduledDate;
-          console.log('Setting scheduledStartDate:', scheduledDate);
-        }
-        
-        if (data.estimatedCompletionDate) {
-          updateData.estimatedCompletionDate = new Date(data.estimatedCompletionDate);
-        }
-        
-        // Update the job with the new dates
-        if ($currentJob) {
-          console.log('Updating job dates:', updateData);
-          updateJob($currentJob.id, updateData).then(updatedJob => {
-            if (updatedJob) {
-              console.log('Job updated with new dates:', updatedJob);
-              console.log('Updated scheduledStartDate:', updatedJob.scheduledStartDate);
-              
-              // Set the job in the store
-              currentJob.set(updatedJob);
-              
-              // Add a log entry for the schedule action
-              addLogEntry({
-                jobId: updatedJob.id,
-                userId: $currentUser?.id || 'unknown',
-                type: LogEntryType.TASK_COMPLETION,
-                content: {
-                  taskId: 'schedule_job',
-                  taskLabel: 'Schedule Job',
-                  completed: true,
-                  details: `Job scheduled for ${new Date(data.scheduledStartDate).toLocaleDateString()}${data.estimatedCompletionDate ? ` with estimated completion on ${new Date(data.estimatedCompletionDate).toLocaleDateString()}` : ''}`
-                },
-                timestamp: new Date()
-              });
-              
-              // Refresh job data
-              refreshJobData();
+      
+      // Extract the dates and assigned technicians from the form data
+      const updateData: Partial<Job> = {};
+      
+      // Process scheduling data
+      if (data.scheduledStartDate) {
+        updateData.scheduledStartDate = new Date(data.scheduledStartDate);
+        console.log('Setting scheduledStartDate:', updateData.scheduledStartDate);
+      }
+      
+      if (data.estimatedCompletionDate) {
+        updateData.estimatedCompletionDate = new Date(data.estimatedCompletionDate);
+      }
+      
+      // Process technician assignment data
+      if (data.assignedUserIds && Array.isArray(data.assignedUserIds)) {
+        updateData.assignedUserIds = data.assignedUserIds;
+        console.log('Setting assignedUserIds:', updateData.assignedUserIds);
+      }
+      
+      // Update the job with the new data
+      if (Object.keys(updateData).length > 0) {
+        updateJobWithData(updateData)
+          .then(updatedJob => {
+            // Check if we can advance the job to SCHEDULED status
+            if (updatedJob.scheduledStartDate && 
+                updatedJob.assignedUserIds && 
+                updatedJob.assignedUserIds.length > 0 &&
+                updatedJob.status === JobStatus.NEW) {
+              console.log('Both scheduling and assignment complete, advancing to SCHEDULED');
+              return updateJobStatus($currentJob.id, JobStatus.SCHEDULED);
             }
-          }).catch(err => console.error('Error updating job dates:', err));
-        }
+            return updatedJob;
+          })
+          .then(finalJob => {
+            if (finalJob) {
+              currentJob.set(finalJob);
+              addNotification({
+                type: 'success',
+                message: 'Job scheduling updated and added to Gantt chart',
+                duration: 3000
+              });
+            }
+          });
       }
-    } else if (taskId === 'confirm_dispatch') {
-      // Standardize the dispatch confirmation with our synchronization pattern
-      console.log('Confirming dispatch with data:', data);
-      // No actual task flag to set, but we need to record the activity
-      addLogEntry({
-        jobId: $currentJob?.id || '',
-        userId: $currentUser?.id || '',
-        type: LogEntryType.TASK_COMPLETION,
-        timestamp: new Date(),
-        content: {
-          taskId: 'confirm_dispatch',
-          taskLabel: 'Confirm Technician Dispatched',
-          completed: true,
-          details: data?.notes || 'Technician dispatch confirmed'
-        }
-      }).then(() => {
-        console.log('Dispatch confirmation recorded in activity log');
-        refreshJobData();
-      });
-    } else if (taskId === 'assign_techs') {
-      // Handle technician assignment
-      console.log('Technician assignment completed with data:', data);
-      if (data && data.assignedUserIds) {
-        handleTechnicianAssignment(new CustomEvent('save', { detail: { assignedUserIds: data.assignedUserIds } }));
+    } 
+    else if (taskId === 'assign_techs' && data) {
+      // This is handled similarly to schedule_job now
+      // since we're using the same component for both tasks
+      console.log('Assign techs task completed with data:', data);
+      
+      // Extract the data
+      const updateData: Partial<Job> = {};
+      
+      // Process scheduling data
+      if (data.scheduledStartDate) {
+        updateData.scheduledStartDate = new Date(data.scheduledStartDate);
       }
-    } else if (taskId === 'mark_ready_for_review') {
-      handleMarkReadyForReview(taskId, data);
-    } else if (taskId === 'log_final_readings') {
-      console.log('Moisture readings data from task modal:', data);
+      
+      if (data.estimatedCompletionDate) {
+        updateData.estimatedCompletionDate = new Date(data.estimatedCompletionDate);
+      }
+      
+      // Process technician assignment data
+      if (data.assignedUserIds && Array.isArray(data.assignedUserIds)) {
+        updateData.assignedUserIds = data.assignedUserIds;
+      }
+      
+      // Update the job with the new data
+      if (Object.keys(updateData).length > 0) {
+        updateJobWithData(updateData)
+          .then(updatedJob => {
+            // Check if we can advance the job to SCHEDULED status
+            if (updatedJob.scheduledStartDate && 
+                updatedJob.assignedUserIds && 
+                updatedJob.assignedUserIds.length > 0 &&
+                updatedJob.status === JobStatus.NEW) {
+              console.log('Both scheduling and assignment complete, advancing to SCHEDULED');
+              return updateJobStatus($currentJob.id, JobStatus.SCHEDULED);
+            }
+            return updatedJob;
+          })
+          .then(finalJob => {
+            if (finalJob) {
+              currentJob.set(finalJob);
+              addNotification({
+                type: 'success',
+                message: 'Job scheduling updated and added to Gantt chart',
+                duration: 3000
+              });
+            }
+          });
+      }
+    } else if (taskId === 'log_final_readings' && data) {
+      console.log('Log final readings task completed with data:', data);
       
       // FIXED: Always synchronize task data for proper completion
       if (!synchronizeTaskData('finalReadingsLogged', 'log_final_readings', 'Log Final Moisture Readings', 
@@ -1356,6 +1377,25 @@
           return false;
       }
     });
+  }
+
+  // Helper function to update job with provided data
+  async function updateJobWithData(updateData: Partial<Job>): Promise<Job> {
+    try {
+      const updatedJob = await updateJob($currentJob.id, updateData);
+      if (!updatedJob) {
+        throw new Error('Failed to update job');
+      }
+      return updatedJob;
+    } catch (err) {
+      console.error('Error updating job:', err);
+      addNotification({
+        type: 'error',
+        message: 'Failed to update job. Please try again.',
+        duration: 5000
+      });
+      return $currentJob;
+    }
   }
 </script>
 

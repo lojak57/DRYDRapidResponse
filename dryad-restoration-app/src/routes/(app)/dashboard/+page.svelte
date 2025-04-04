@@ -332,9 +332,10 @@
                     <span class="text-sm text-gray-500 mb-3">No jobs in this category</span>
                   {/if}
                   
+                  <!-- View all link with status filter -->
                   <a 
                     href="/jobs?status={category.status}" 
-                    class="action-link btn-teal text-sm mt-auto self-start"
+                    class="action-link {category.buttonClass || 'btn-teal'} text-sm mt-auto self-start"
                   >
                     View all {category.shortTitle || category.title.toLowerCase()}
                     <svg class="w-3 h-3 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">

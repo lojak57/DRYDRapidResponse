@@ -60,6 +60,13 @@
           Jobs
         </a>
         
+        {#if $currentUser && ($currentUser.role === Role.ADMIN || $currentUser.role === Role.OFFICE)}
+          <a href="/schedule" 
+            class="px-4 py-2 rounded-md text-sm font-medium transition-colors duration-150 border-2 {isActive('/schedule') ? 'bg-white border-white text-dryd-grayblue-dark font-bold' : 'bg-transparent border-transparent text-white hover:bg-white/20 hover:border-white/30'}">
+            Schedule
+          </a>
+        {/if}
+        
         <a href="/quotes" 
           class="px-4 py-2 rounded-md text-sm font-medium transition-colors duration-150 border-2 {isActive('/quotes') ? 'bg-white border-white text-dryd-grayblue-dark font-bold' : 'bg-transparent border-transparent text-white hover:bg-white/20 hover:border-white/30'}">
           Quotes
@@ -118,6 +125,13 @@
         class="block px-3 py-2 rounded-md text-base font-medium transition-colors duration-150 {isActive('/jobs') ? 'bg-dryd-gradient text-white' : 'text-gray-700 hover:bg-gray-100/70'}">
         Jobs
       </a>
+      
+      {#if $currentUser && ($currentUser.role === Role.ADMIN || $currentUser.role === Role.OFFICE)}
+        <a href="/schedule" 
+          class="block px-3 py-2 rounded-md text-base font-medium transition-colors duration-150 {isActive('/schedule') ? 'bg-dryd-gradient text-white' : 'text-gray-700 hover:bg-gray-100/70'}">
+          Schedule
+        </a>
+      {/if}
       
       <a href="/quotes" 
         class="block px-3 py-2 rounded-md text-base font-medium transition-colors duration-150 {isActive('/quotes') ? 'bg-dryd-gradient text-white' : 'text-gray-700 hover:bg-gray-100/70'}">

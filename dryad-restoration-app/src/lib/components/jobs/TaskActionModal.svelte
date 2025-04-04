@@ -30,6 +30,7 @@
   import type { InvoicePayment } from '$lib/types/Invoice';
   import { updateJobStatus } from '$lib/services/jobs';
   import PaymentForm from '../invoice/PaymentForm.svelte';
+  import ScheduleAndAssignForm from './ScheduleAndAssignForm.svelte';
   
   // Define field types
   interface TextField {
@@ -1051,70 +1052,34 @@
           {#if !task.requiredRole || task.requiredRole.includes(userInfo?.role || Role.CUSTOMER)}
             <!-- Render appropriate content based on task.id -->
             {#if task.id === 'schedule_job'}
-              <form on:submit|preventDefault={handleSubmit}>
-                <div class="space-y-4">
-                  {#each formContent.fields || [] as field}
-                    {#if field.type === 'date'}
-                      <div>
-                        <label for={field.id} class="block mb-1 font-medium text-gray-700">{field.label}</label>
-                        {#if field.description}
-                          <p class="text-sm text-gray-500 mb-1">{field.description}</p>
-                        {/if}
-                        <input 
-                          type="date" 
-                          id={field.id} 
-                          name={field.id} 
-                          class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
-                          value={field.value || ''} 
-                          required={field.required}
-                        />
-                      </div>
-                    {:else if field.type === 'checkbox'}
-                      <div class="flex items-start mt-4">
-                        <div class="flex items-center h-5">
-                          <input 
-                            type="checkbox" 
-                            id={field.id} 
-                            name={field.id} 
-                            class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" 
-                            required={field.required}
-                          />
-                        </div>
-                        <div class="ml-3 text-sm">
-                          <label for={field.id} class="font-medium text-gray-700">{field.label}</label>
-                          {#if field.description}
-                            <p class="text-gray-500">{field.description}</p>
-                          {/if}
-                        </div>
-                      </div>
-                    {/if}
-                  {/each}
-                  
-                  <div class="mt-6 flex justify-end space-x-3">
-                    <button
-                      type="button"
-                      on:click={closeModal}
-                      class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition-colors"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
-                    >
-                      Save
-                    </button>
-                  </div>
-                </div>
-              </form>
-            {:else if task.id === 'assign_techs'}
-              <AssignTechnicianForm
-                jobId={job.id}
-                userId={userInfo?.id || 'unknown-user'}
-                on:submit={event => {
-                  console.log('AssignTechnicianForm submit event received with data:', event.detail);
-                  handleTechnicianSubmit(event);
+              <ScheduleAndAssignForm
+                job={job}
+                on:submit={(event) => {
+                  console.log('ScheduleAndAssignForm submit event:', event.detail);
+                  // Just assign the event detail data directly, it already has the right shape
+                  const { assignedUserIds, scheduledStartDate, estimatedCompletionDate } = event.detail;
+                  completeTask({
+                    assignedUserIds,
+                    scheduledStartDate,
+                    estimatedCompletionDate
+                  });
                 }}
+                on:cancel={closeModal}
+              />
+            {:else if task.id === 'assign_techs'}
+              <ScheduleAndAssignForm
+                job={job}
+                on:submit={(event) => {
+                  console.log('ScheduleAndAssignForm submit event:', event.detail);
+                  // Just assign the event detail data directly, it already has the right shape
+                  const { assignedUserIds, scheduledStartDate, estimatedCompletionDate } = event.detail;
+                  completeTask({
+                    assignedUserIds,
+                    scheduledStartDate,
+                    estimatedCompletionDate
+                  });
+                }}
+                on:cancel={closeModal}
               />
             {:else if task.id === 'log_final_readings'}
               <ReadingForm 

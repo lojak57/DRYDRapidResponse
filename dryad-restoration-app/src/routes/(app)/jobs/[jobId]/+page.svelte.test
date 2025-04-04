@@ -4,10 +4,9 @@
   import { fade } from 'svelte/transition';
   import { page } from '$app/stores';
   import { goto } from '$app/navigation';
-  import { getJobById, updateJob, updateJobStatus, updateJobCompletionTask } from '$lib/services/jobs';
-  import { getCustomerById } from '$lib/services/customers';
-  import { getUserById } from '$lib/services/users';
-  import { addLogEntry, getLogEntriesByJobId } from '$lib/services/logEntries';
+  import { getJob, getJobLogs, updateJob, updateJobStatus, updateJobCompletionTask } from '$lib/services/jobs';
+  import { getTechnicians } from '$lib/services/users';
+  import { addLogEntry, deleteLogEntry, updateLogEntry } from '$lib/services/logEntries';
   import type { Job, CompletionTasks } from '$lib/types/Job';
   import { JobStatus } from '$lib/types/Job';
   import type { LogEntry } from '$lib/types/LogEntry';
@@ -32,7 +31,6 @@
   import JobInvoice from '$lib/components/jobs/JobInvoice.svelte';
   import PageHeader from '$lib/components/ui/PageHeader.svelte';
   import TechCompletionChecklist from '$lib/components/jobs/TechCompletionChecklist.svelte';
-  import { laborEntries } from '$lib/stores/laborStore';
 
   const currentJob = writable<Job | null>(null);
   const isLoading = writable<boolean>(true);
@@ -49,22 +47,10 @@
   // Reactive statement to get the current Job ID from the URL
   $: currentJobId = $page.params.jobId;
 
-  // Initialize an empty array for job log entries instead of using $allLogEntries
-  let jobLogEntries: LogEntry[] = [];
-  
-  // Function to load log entries for this job
-  async function loadJobLogs() {
-    try {
-      // Get log entries for this job
-      const entries = await getLogEntriesByJobId(currentJobId);
-      if (entries) {
-        // Sort the entries by timestamp in descending order (newest first)
-        jobLogEntries = entries.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
-      }
-    } catch (err) {
-      console.error(`Error loading job logs for job ${currentJobId}:`, err);
-    }
-  }
+  // Reactive statement to filter ALL log entries for the current job and sort them
+  $: jobLogEntries = $allLogEntries
+    .filter(entry => entry.jobId === currentJobId)
+    .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()); // Sort newest first
 
   // Reactive statement to apply the UI filter (NOTE, PHOTO, etc.) to the job's logs
   $: filteredLogEntries = jobLogEntries.filter(entry =>
@@ -378,37 +364,18 @@
 
   // Function to refresh job data
   async function refreshJobData() {
-    isLoading.set(true);
-    error.set(null);
+    if (!currentJobId) return;
     
     try {
       const updatedJob = await getJobById(currentJobId);
       if (updatedJob) {
         console.log('Refreshed job data:', updatedJob, 'scheduledStartDate:', updatedJob.scheduledStartDate);
+        
+        // No need to check for equipment removal as task has been removed
         currentJob.set(updatedJob);
-        
-        // Also refresh log entries
-        await loadJobLogs();
-        
-        // Check customer name
-        if (updatedJob.customerId) {
-          try {
-            const customer = await getCustomerById(updatedJob.customerId);
-            if (customer) {
-              customerName.set(customer.name);
-            }
-          } catch (customerErr) {
-            console.error('Error loading customer:', customerErr);
-          }
-        }
-      } else {
-        error.set('Job not found');
       }
     } catch (err) {
       console.error('Error refreshing job data:', err);
-      error.set('Error refreshing job data. Please try again.');
-    } finally {
-      isLoading.set(false);
     }
   }
 
@@ -835,6 +802,17 @@
     }
   }
   
+  // Function to show toast messages
+  function showSuccessToast(message: string) {
+    // In a real implementation, this would show a toast notification
+    console.log('SUCCESS:', message);
+  }
+  
+  function showErrorToast(message: string) {
+    // In a real implementation, this would show a toast notification
+    console.error('ERROR:', message);
+  }
+
   // Handle "Submit for Office Review" task completion
   async function handleMarkReadyForReview(taskId: string, data: any) {
     console.log('Handling mark_ready_for_review task completion with data:', data);
@@ -1236,9 +1214,6 @@
           }
         }
         
-        // Load job logs
-        await loadJobLogs();
-        
         // If job is completed, load labor data
         if (jobData.status === JobStatus.COMPLETED) {
           loadLaborData(jobData.id);
@@ -1443,6 +1418,18 @@
     showScheduleJobModal = false;
   }
 
+  // ... rest of existing code ...
+
+  // After the existing modals, add our new modal
+  {#if showScheduleJobModal && $currentJob}
+    <ScheduleJobWithTechnicianModal 
+      job={$currentJob}
+      on:close={closeScheduleJobModal}
+      on:submit={handleScheduleSubmit}
+    />
+  {/if}
+
+  // ... rest of existing code ...
 </script>
 
 <div class="max-w-6xl mx-auto">
