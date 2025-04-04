@@ -32,6 +32,7 @@
   import { TASKS_BY_STATUS, type WorkflowTask, WORKFLOW_ORDER } from '$lib/config/workflowConfig';
   import TaskActionModal from '$lib/components/jobs/TaskActionModal.svelte';
   import { fade } from 'svelte/transition';
+  import { addNotification } from '$lib/stores/notificationStore';
   
   const currentJob = writable<Job | null>(null);
   const isLoading = writable<boolean>(true);
@@ -224,10 +225,43 @@
   }
   
   // Handler for when all tasks for a status are completed
-  function handleStatusTasksCompleted(event: CustomEvent<{ status: JobStatus }>) {
+  async function handleStatusTasksCompleted(event: CustomEvent<{ status: JobStatus }>) {
     const { status } = event.detail;
-    console.log(`All tasks for status ${status} are completed!`);
+    console.log(`%c All tasks for status ${status} are completed! %c`, 'background: #4CAF50; color: white; padding: 2px 5px; border-radius: 3px;', '');
     allCompletedStatuses[status] = true;
+    
+    // Special handling for INVOICED status
+    if (status === JobStatus.INVOICED) {
+      console.log(`%c CRITICAL: Auto-advancing from INVOICED to PAID %c`, 'background: #FF5722; color: white; font-weight: bold; padding: 4px 8px; border-radius: 3px;', '');
+      
+      // Force update to PAID status regardless of payment details
+      try {
+        console.log('Attempting to update job status to PAID...');
+        const paidJob = await updateJobStatus($currentJob.id, JobStatus.PAID);
+        
+        if (paidJob) {
+          console.log('Job successfully updated to PAID status:', paidJob);
+          currentJob.set(paidJob);
+          
+          // Force a refresh of the job data to ensure the UI updates
+          setTimeout(async () => {
+            console.log('Triggering refresh for UI update...');
+            await refreshJobData();
+            console.log('Job data refreshed');
+            
+            addNotification({
+              type: 'success', 
+              message: 'Payment confirmed - job marked as PAID', 
+              duration: 3000
+            });
+          }, 500);
+        } else {
+          console.error('Failed to update job to PAID status - null result returned');
+        }
+      } catch (error) {
+        console.error('Error during auto-transition to PAID:', error);
+      }
+    }
     
     // Check if we should add a prompt to advance status
     addCompletedStatusPrompt(status);
@@ -1264,7 +1298,8 @@
     }
   }
 
-  function handleTaskCompletedFromModal(event: CustomEvent<{taskId: string, data?: any}>) {
+  // Handle task completions from the modal component
+  async function handleTaskCompletedFromModal(event: CustomEvent<{taskId: string, data?: any}>) {
     const { taskId, data } = event.detail;
     console.log('Task completed from modal:', taskId, 'Data:', data);
     
@@ -1310,73 +1345,135 @@
       }
     } else if (taskId === 'mark_ready_for_review') {
       handleMarkReadyForReview(taskId, data);
+    } else if (taskId === 'review_invoice') {
+      console.log('Invoice approved/generated, updating status to INVOICED.');
+      
+      let isUpdating = true;
+      try {
+        // Only update the status
+        updateJobStatus($currentJob.id, JobStatus.INVOICED)
+          .then(updatedJob => {
+            if (updatedJob) {
+              currentJob.set(updatedJob);
+              
+              // Add a log entry for the status change
+              addLogEntry({
+                jobId: updatedJob.id,
+                userId: $currentUser?.id || 'unknown-user',
+                timestamp: new Date(),
+                type: LogEntryType.NOTE,
+                content: `Invoice approved. Job status changed to ${JobStatus.INVOICED}.`
+              });
+              
+              showSuccessToast('Invoice approved. Ready for payment.');
+            }
+          })
+          .catch(error => {
+            console.error('Error updating job status to INVOICED:', error);
+            showErrorToast('Failed to update job status.');
+          })
+          .finally(() => {
+            isUpdating = false;
+            closeTaskModal(); // Close the modal that triggered this
+          });
+      } catch (error) {
+        console.error('Error in review_invoice task handler:', error);
+        showErrorToast('Failed to process invoice approval.');
+        isUpdating = false;
+        closeTaskModal();
+      }
+    } else if (taskId === 'apply_payment') {
+      // ---> ADD LOG HERE <---
+      console.log(`%c[PAGE HANDLER] Entered 'apply_payment' block. TaskId: ${taskId}`, 'color: blue; font-weight: bold;');
+
+      const paymentData = data;
+      console.log('[PAGE HANDLER] Payment data received:', paymentData);
+
+      if (!paymentData || !$currentUser || !$currentJob) {
+           // ---> ADD LOG HERE <---
+           console.error('[PAGE HANDLER] FAILED PRE-CHECK: Payment data, user, or job missing.', { paymentData, currentUser: $currentUser, currentJob: $currentJob });
+           addNotification({ type: 'error', message: 'Cannot record payment. Required data missing.', duration: 5000 });
+           return; // Stop processing
+      }
+
+      // ---> ADD LOG HERE <---
+      console.log('[PAGE HANDLER] Pre-checks passed. Setting isUpdating = true.');
+      let isUpdating = true;
+
+      try {
+        // Prepare the payment details object to store on the job
+        const newPaymentDetails = {
+            amount: paymentData.amount,
+            date: paymentData.date, // Already a string YYYY-MM-DD
+            method: paymentData.method,
+            referenceNumber: paymentData.referenceNumber,
+            notes: paymentData.notes,
+            recordedAt: new Date().toISOString(), // Add timestamp
+            recordedBy: $currentUser.id // Add user ID
+        };
+
+        // First update with payment details only
+        console.log('[PAGE HANDLER] 1. Updating payment details...');
+        const updatedWithPayment = await updateJob($currentJob.id, { 
+          paymentDetails: newPaymentDetails 
+        });
+        
+        if (!updatedWithPayment) {
+          throw new Error('Failed to update job with payment details');
+        }
+        
+        // Then explicitly update status to PAID as a separate step
+        console.log('[PAGE HANDLER] 2. Setting status to PAID...');
+        const paidJob = await updateJobStatus(updatedWithPayment.id, JobStatus.PAID);
+        
+        if (!paidJob) {
+          throw new Error('Failed to update job status to PAID');
+        }
+        
+        // Update local store with the updated job
+        console.log('[PAGE HANDLER] 3. Updating local stores...');
+        currentJob.set(paidJob);
+        
+        // Force a global refresh of the job
+        console.log('[PAGE HANDLER] 4. Forcing job data refresh...');
+        
+        // Update completion status flags to reflect in the UI
+        allCompletedStatuses[JobStatus.INVOICED] = true;
+        
+        // Force the UI to update by reloading the job data
+        await refreshJobData();
+        
+        console.log('[PAGE HANDLER] 5. Payment process complete. Job is now:', paidJob);
+        
+        // Show success notification
+        addNotification({
+          type: 'success',
+          message: 'Payment recorded successfully. Job marked as PAID.',
+          duration: 4000
+        });
+        
+        // Close the modal
+        closeTaskModal();
+        
+      } catch (error) {
+        console.error("[PAGE HANDLER] Error during payment processing:", error);
+        addNotification({ 
+          type: 'error', 
+          message: `Failed to record payment: ${error instanceof Error ? error.message : 'Unknown error'}`, 
+          duration: 5000 
+        });
+      } finally {
+        isUpdating = false;
+      }
+    } // End of 'apply_payment' block
+    // ---> ADD LOG HERE <---
+    else {
+      // Catch if the taskId doesn't match any known block
+      console.log(`[PAGE HANDLER] TaskId '${taskId}' did not match any specific handler block.`);
     }
     
     // Close modal
     closeTaskModal();
-  }
-
-  // Function to check if a specific status can be advanced to the next one
-  function canAdvanceBetweenStatuses(fromStatus: JobStatus, toStatus: JobStatus): boolean {
-    if (!$currentJob) return false;
-    
-    // Check if this is a valid workflow transition
-    const fromIndex = WORKFLOW_ORDER.indexOf(fromStatus);
-    const toIndex = WORKFLOW_ORDER.indexOf(toStatus);
-    
-    if (fromIndex === -1 || toIndex === -1 || toIndex !== fromIndex + 1) {
-      return false; // Not a valid sequential transition
-    }
-    
-    // Get the required tasks for the current status
-    const tasksForStatus = TASKS_BY_STATUS[fromStatus] || [];
-    
-    if (tasksForStatus.length === 0) return true; // No tasks to complete
-    
-    // Check each task if it's completed
-    return tasksForStatus.every(task => {
-      // Check task completion based on task ID
-      switch (task.id) {
-        case 'schedule_job':
-          return $currentJob.scheduledStartDate !== undefined;
-          
-        case 'assign_techs':
-          return $currentJob.assignedUserIds && $currentJob.assignedUserIds.length > 0;
-          
-        case 'confirm_dispatch':
-          return true; // If we're checking from SCHEDULED to IN_PROGRESS, this would be true
-          
-        case 'log_final_readings':
-          return $currentJob.completionTasks?.finalReadingsLogged === true;
-          
-        case 'upload_after_photos':
-          return $currentJob.completionTasks?.afterPhotosTaken === true;
-          
-        case 'mark_ready_for_review':
-          return $currentJob.completionTasks?.mark_ready_for_review === true;
-          
-        case 'review_checklist':
-          return true; // Manual check, assume completed if in the right stage
-          
-        case 'enter_labor':
-          return $laborEntries.length > 0;
-          
-        case 'finalize_job':
-          return true; // Manual check, assume completed if in the right stage
-          
-        case 'create_invoice':
-          return true; // Manual check, assume completed if checking for advance
-          
-        case 'review_invoice':
-          return true; // Manual check
-          
-        case 'record_payment':
-          return true; // Manual check
-          
-        default:
-          return false;
-      }
-    });
   }
 
   // Helper function to update job with provided data

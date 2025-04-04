@@ -289,7 +289,13 @@
   $: {
     const allComplete = checkAllTasksComplete();
     if (allComplete && job) {
-      console.log(`All tasks for status ${job.status} are complete!`);
+      console.log(`%c All tasks for status ${job.status} are complete! %c`, 'background: green; color: white; padding: 2px 5px; border-radius: 3px;', '');
+      
+      // For INVOICED status, this is a critical transition to PAID
+      if (job.status === JobStatus.INVOICED) {
+        console.log('CRITICAL WORKFLOW TRANSITION: All INVOICED tasks complete - should transition to PAID');
+      }
+      
       dispatch('statusTasksCompleted', { status: job.status, completedTaskIds });
     }
   }

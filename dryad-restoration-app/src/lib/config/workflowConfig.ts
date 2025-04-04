@@ -62,6 +62,6 @@ export const TASKS_BY_STATUS: { [key in JobStatus]?: WorkflowTask[] } = {
         { id: 'review_invoice', label: 'Review & Approve Invoice', requiredRole: [Role.OFFICE, Role.ADMIN], description: 'Review the invoice before sending it to the customer' }
     ],
     [JobStatus.INVOICED]: [
-        { id: 'record_payment', label: 'Record Payment', requiredRole: [Role.OFFICE, Role.ADMIN] }
+        { id: 'apply_payment', label: 'Apply Customer Payment', requiredRole: [Role.OFFICE, Role.ADMIN], description: 'Record payment received for the generated invoice.' }
     ]
 }; 

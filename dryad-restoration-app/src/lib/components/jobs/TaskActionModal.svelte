@@ -31,6 +31,7 @@
   import { updateJobStatus } from '$lib/services/jobs';
   import PaymentForm from '../invoice/PaymentForm.svelte';
   import ScheduleAndAssignForm from './ScheduleAndAssignForm.svelte';
+  import ApplyPaymentForm from '$lib/components/financials/ApplyPaymentForm.svelte';
   
   // Define field types
   interface TextField {
@@ -262,6 +263,13 @@
           title: 'Add Moisture Reading',
           description: 'Enter a new moisture reading',
           component: 'ReadingForm'
+        };
+        
+      case 'apply_payment':
+        return {
+          title: 'Apply Payment',
+          description: 'Apply payment to the job',
+          component: 'ApplyPaymentForm'
         };
         
       default:
@@ -528,11 +536,6 @@
         
         // Complete the task
         completeTask(data);
-        
-        // Reload the page after a short delay to refresh UI
-        setTimeout(() => {
-          window.location.reload();
-        }, 800);
       })
       .catch(error => {
         console.error('Error updating job status to INVOICED:', error);
@@ -952,55 +955,52 @@
     return addressStr;
   }
   
-  // Handle payment submission
-  function handlePaymentSubmit(event: CustomEvent<InvoicePayment>) {
-    console.log('Payment recorded with data:', event.detail);
-    
-    // Create a completion data object
-    const data = {
-      taskType: 'record_payment',
-      payment: event.detail,
-      notes: `Payment of $${event.detail.amount.toFixed(2)} received via ${event.detail.method}`,
-      timestamp: new Date()
+  // Handle apply payment submission (Revised)
+  async function handleApplyPaymentSubmit(event: CustomEvent) {
+    console.log('ApplyPaymentForm submit event detected in modal:', event.detail);
+    const formData = event.detail;
+
+    // Construct payment data object
+    const paymentData = {
+      amount: formData.amount,
+      date: formData.date, // Keep as string from form
+      method: formData.method,
+      referenceNumber: formData.referenceNumber || null,
+      notes: formData.notes || null,
+      // Add timestamp/user later on the page level if needed
     };
-    
-    // Add a log entry for payment
-    addLogEntry({
-      jobId: job.id,
-      userId: userInfo?.id || 'unknown-user',
-      timestamp: new Date(),
-      type: LogEntryType.PAYMENT,
-      content: {
-        amount: event.detail.amount,
-        method: event.detail.method,
-        referenceNumber: event.detail.referenceNumber,
-        notes: event.detail.notes
-      }
-    }).catch(err => {
-      console.error('Error logging payment:', err);
-    });
-    
-    // Update the job with payment data and status
-    updateJob(job.id, {
-      payment: event.detail,
-      status: JobStatus.PAID
-    }).then((updatedJob) => {
-      if (updatedJob) {
-        console.log('Job updated with payment data:', updatedJob);
-        job = updatedJob;
-      }
+
+    try {
+      // Add a log entry for payment (Optional but good practice)
+      // Ensure userInfo is available or handle null case
+      const userId = userInfo?.id || 'system';
+      await addLogEntry({
+        jobId: job.id,
+        userId: userId,
+        timestamp: new Date(),
+        type: LogEntryType.PAYMENT, // Ensure this type exists
+        content: {
+          message: `Payment data submitted: $${paymentData.amount.toFixed(2)} via ${paymentData.method}.`,
+          details: paymentData
+        }
+      });
+      console.log('Payment submission logged.');
+
+      // Only dispatch the data - let the parent page handle the update and status change
+      console.log('Dispatching taskCompleted for apply_payment with data:', paymentData);
+      completeTask(paymentData);
+
+      // Show success message
+      alert('Payment information submitted successfully!');
       
-      // Complete the task
-      completeTask(data);
-      
-      // Reload the page after a short delay to refresh UI
-      setTimeout(() => {
-        window.location.reload();
-      }, 800);
-    }).catch(error => {
-      console.error('Error updating job with payment data:', error);
-      alert('Failed to save payment data. Please try again.');
-    });
+      // Close the modal after submitting
+      closeModal();
+
+    } catch (err) {
+      console.error('Error logging payment or dispatching event:', err);
+      alert('Failed to process payment submission. Please try again.');
+      // Optionally dispatch an error event or handle differently
+    }
   }
 </script>
 
@@ -1155,7 +1155,13 @@
             {:else if task.id === 'record_payment'}
               <PaymentForm
                 job={job}
-                on:submit={handlePaymentSubmit}
+                on:submit={handleApplyPaymentSubmit}
+                on:cancel={closeModal}
+              />
+            {:else if task.id === 'apply_payment'}
+              <ApplyPaymentForm
+                job={job}
+                on:submit={handleApplyPaymentSubmit}
                 on:cancel={closeModal}
               />
             {:else}

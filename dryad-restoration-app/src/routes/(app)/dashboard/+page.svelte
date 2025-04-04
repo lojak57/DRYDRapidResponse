@@ -9,6 +9,7 @@
   import TechJobFocusWidget from '$lib/components/dashboard/TechJobFocusWidget.svelte';
   import TechnicianJobFilters from '$lib/components/dashboard/TechnicianJobFilters.svelte';
   import AdminControlsWidget from '$lib/components/dashboard/AdminControlsWidget.svelte';
+  import Collapsible from '$lib/components/ui/Collapsible.svelte';
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   
@@ -73,6 +74,10 @@
   // Calculate performance metrics safely
   $: totalActiveJobs = (inProgressJobs?.length || 0) + (pendingCompletionJobs?.length || 0) + (scheduledJobs?.length || 0);
   $: totalCompletedJobs = (completedJobs?.length || 0) + (invoiceApprovalJobs?.length || 0) + (invoicedJobs?.length || 0) + (paidJobs?.length || 0);
+  
+  // Collapsible state - default to open for sections with few items, closed for larger sections
+  let pendingCompletionOpen = pendingCompletionJobs?.length <= 3;
+  let paidJobsOpen = paidJobs?.length <= 2;
   
   // Job category configurations for the cards
   const jobCategories = [
@@ -414,88 +419,74 @@
     <!-- Pending Completion Jobs - Only visible to Admin/Office -->
     {#if isAuthorized && $jobStatusCounts[JobStatus.PENDING_COMPLETION] > 0}
       <div class="mb-6">
-        <div class="card-glass rounded-lg card-shadow overflow-hidden">
-          <div class="p-4 card-header-burgundy">
-            <div class="flex justify-between items-center">
-              <h2 class="font-bold text-xl flex items-center text-pink-800">
-                <div class="bg-burgundy-gradient text-white p-2 rounded-lg mr-3 shadow-sm">
-                  <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                  </svg>
-                </div>
-                Jobs Awaiting Final Completion
-              </h2>
-            </div>
-          </div>
-
-          <div class="p-6">
-            <p class="text-gray-700 mb-4">The following jobs have been marked as ready for completion by technicians and need your review:</p>
-            <div class="space-y-3">
-              {#each pendingCompletionJobs as job}
-                {#if job && job.id}
-                  <a href="/jobs/{job.id}" class="block p-4 bg-white border border-pink-200 rounded-lg transition-colors duration-150 hover:bg-pink-50/50">
-                    <div class="flex justify-between items-center">
-                      <div>
-                        <h3 class="font-semibold text-pink-800">{job.title}</h3>
-                        <p class="text-sm text-pink-600">#{job.jobNumber}</p>
-                      </div>
-                      <div class="bg-pink-100 text-pink-800 px-3 py-1 rounded-full text-sm font-medium">
-                        Ready for Review
-                      </div>
+        <Collapsible 
+          title="Jobs Awaiting Final Completion" 
+          open={pendingCompletionOpen}
+          count={pendingCompletionJobs.length}
+          icon="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+          headerClass="card-header-burgundy"
+          contentClass=""
+          on:toggle={(e) => pendingCompletionOpen = e.detail}
+        >
+          <p class="text-gray-700 mb-4">The following jobs have been marked as ready for completion by technicians and need your review:</p>
+          <div class="space-y-3">
+            {#each pendingCompletionJobs as job}
+              {#if job && job.id}
+                <a href="/jobs/{job.id}" class="block p-4 bg-white border border-pink-200 rounded-lg transition-colors duration-150 hover:bg-pink-50/50">
+                  <div class="flex justify-between items-center">
+                    <div>
+                      <h3 class="font-semibold text-pink-800">{job.title}</h3>
+                      <p class="text-sm text-pink-600">#{job.jobNumber}</p>
                     </div>
-                  </a>
-                {/if}
-              {/each}
-            </div>
+                    <div class="bg-pink-100 text-pink-800 px-3 py-1 rounded-full text-sm font-medium">
+                      Ready for Review
+                    </div>
+                  </div>
+                </a>
+              {/if}
+            {/each}
           </div>
-        </div>
+        </Collapsible>
       </div>
     {/if}
 
     <!-- Paid & Closed Jobs Section -->
     {#if isAuthorized && paidJobs && paidJobs.length > 0}
       <div class="mb-6">
-        <div class="card-glass rounded-lg card-shadow overflow-hidden">
-          <div class="p-4 card-header-emerald">
-            <div class="flex justify-between items-center">
-              <h2 class="font-bold text-xl flex items-center text-emerald-800">
-                <div class="bg-emerald-gradient text-white p-2 rounded-lg mr-3 shadow-sm">
-                  <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 8l3 5m0 0l3-5m-3 5v4m-3-5h6m-6 3h6m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                Paid & Closed Jobs
-              </h2>
-            </div>
-          </div>
-
-          <div class="p-6">
-            <p class="text-gray-700 mb-4">These jobs have been completed, invoiced, and payment has been received:</p>
-            <div class="space-y-3">
-              {#each paidJobs as job}
-                {#if job && job.id}
-                  <a href="/jobs/{job.id}" class="block p-4 bg-white border border-emerald-200 rounded-lg transition-colors duration-150 hover:bg-emerald-50/50">
-                    <div class="flex justify-between items-center">
-                      <div>
-                        <h3 class="font-semibold text-emerald-800">{job.title}</h3>
-                        <p class="text-sm text-emerald-600">#{job.jobNumber}</p>
-                      </div>
-                      <div class="bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full text-sm font-medium">
-                        Paid
-                      </div>
+        <Collapsible 
+          title="Paid & Closed Jobs" 
+          open={paidJobsOpen}
+          count={paidJobs.length}
+          icon="M9 8l3 5m0 0l3-5m-3 5v4m-3-5h6m-6 3h6m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+          headerClass="card-header-emerald"
+          contentClass=""
+          on:toggle={(e) => paidJobsOpen = e.detail}
+        >
+          <p class="text-gray-700 mb-4">These jobs have been completed, invoiced, and payment has been received:</p>
+          <div class="space-y-3">
+            {#each paidJobs as job}
+              {#if job && job.id}
+                <a href="/jobs/{job.id}" class="block p-4 bg-white border border-emerald-200 rounded-lg transition-colors duration-150 hover:bg-emerald-50/50">
+                  <div class="flex justify-between items-center">
+                    <div>
+                      <h3 class="font-semibold text-emerald-800">{job.title}</h3>
+                      <p class="text-sm text-emerald-600">#{job.jobNumber}</p>
                     </div>
-                    {#if job.payment}
-                      <div class="mt-2 text-sm text-emerald-700">
-                        <span class="font-medium">Paid:</span> ${job.payment.amount.toFixed(2)} via {job.payment.method} 
-                        on {new Date(job.payment.date).toLocaleDateString()}
-                      </div>
-                    {/if}
-                  </a>
-                {/if}
-              {/each}
-            </div>
+                    <div class="bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full text-sm font-medium">
+                      Paid
+                    </div>
+                  </div>
+                  {#if job.payment}
+                    <div class="mt-2 text-sm text-emerald-700">
+                      <span class="font-medium">Paid:</span> ${job.payment.amount.toFixed(2)} via {job.payment.method} 
+                      on {new Date(job.payment.date).toLocaleDateString()}
+                    </div>
+                  {/if}
+                </a>
+              {/if}
+            {/each}
           </div>
-        </div>
+        </Collapsible>
       </div>
     {/if}
 

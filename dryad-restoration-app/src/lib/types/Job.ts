@@ -131,6 +131,15 @@ export interface Job {
   total?: number;
   /** Payment information if the invoice has been paid */
   payment?: InvoicePayment;
+  /** Enhanced payment details with additional metadata */
+  paymentDetails?: {
+    amount: number;
+    date: string; // Keep as ISO string from date input
+    method: string;
+    notes?: string;
+    recordedAt: string; // Add timestamp when payment was recorded
+    recordedBy: string; // Add userId who recorded it
+  };
 }
 
 /** Represents a custom line item for a job invoice */

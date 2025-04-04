@@ -114,49 +114,64 @@ export async function getJobsByStatus(status: JobStatus): Promise<Job[]> {
  * @returns Promise resolving to the updated job
  */
 export async function updateJobStatus(jobId: string, status: JobStatus): Promise<Job | null> {
+  console.log(`%c updateJobStatus - Updating job ${jobId} to status: ${status} %c`, 
+    'background: #2196F3; color: white; padding: 2px 5px; border-radius: 3px;', '');
+  
+  // Enhanced logging for PAID status specifically
+  if (status === JobStatus.PAID) {
+    console.log(`%c CRITICAL: Setting job ${jobId} to PAID status %c`, 
+      'background: #E91E63; color: white; font-weight: bold; padding: 4px 8px; border-radius: 3px;', '');
+  }
+  
   // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 600));
+  await new Promise(resolve => setTimeout(resolve, 500));
   
-  // Find the job in the mock data
-  const jobsData = get(_jobs);
-  const jobIndex = jobsData.findIndex(job => job.id === jobId);
-  
-  if (jobIndex === -1) {
-    console.error(`Job with ID ${jobId} not found.`);
+  try {
+    // Find the job in the mock data
+    const jobsData = get(_jobs);
+    const jobIndex = jobsData.findIndex(job => job.id === jobId);
+    
+    if (jobIndex === -1) {
+      console.error(`Job with ID ${jobId} not found.`);
+      return null;
+    }
+    
+    // Create updated job with new status
+    const updatedJob = {
+      ...jobsData[jobIndex],
+      status,
+      // If setting to completed, set completion date
+      ...(status === JobStatus.COMPLETED ? { completedDate: new Date() } : {})
+    };
+    
+    console.log(`updateJobStatus - Created updated job with status ${status}:`, updatedJob);
+    
+    // Update our local mock data
+    mockJobs[jobIndex] = { ...mockJobs[jobIndex], status };
+    
+    // Update the store - THIS IS CRITICAL!
+    _jobs.update(currentJobs => {
+      const newJobs = [...currentJobs];
+      newJobs[jobIndex] = updatedJob;
+      console.log(`updateJobStatus - Updating job store with updated job (status: ${status})`);
+      return newJobs;
+    });
+    
+    // Force notification of subscribers that job data has changed
+    // This is important for reactive UI updates
+    setTimeout(() => {
+      _jobs.update(jobs => {
+        console.log('Forcing job store refresh to ensure UI updates');
+        return [...jobs];
+      });
+    }, 100);
+    
+    // Return a copy of the updated job
+    return JSON.parse(JSON.stringify(updatedJob));
+  } catch (error) {
+    console.error('Error in updateJobStatus:', error);
     return null;
   }
-  
-  // Create updated job with new status
-  const updatedJob = {
-    ...jobsData[jobIndex],
-    status,
-    // If setting to completed, set completion date
-    ...(status === JobStatus.COMPLETED ? { completedDate: new Date() } : {})
-  };
-  
-  // Dynamically get the latest mock jobs data
-  const jobsModule = await import('$lib/mock/jobs.json');
-  const mockJobsData = jobsModule.default as any[];
-  
-  // Update in the mock data
-  const mockIndex = mockJobsData.findIndex(job => job.id === jobId);
-  if (mockIndex !== -1) {
-    mockJobsData[mockIndex] = {
-      ...mockJobsData[mockIndex],
-      status,
-      ...(status === JobStatus.COMPLETED ? { completedDate: new Date().toISOString() } : {})
-    };
-  }
-  
-  // Update the store
-  _jobs.update(currentJobs => {
-    const newJobs = [...currentJobs];
-    newJobs[jobIndex] = updatedJob;
-    return newJobs;
-  });
-  
-  // Return a copy of the updated job
-  return JSON.parse(JSON.stringify(updatedJob));
 }
 
 /**

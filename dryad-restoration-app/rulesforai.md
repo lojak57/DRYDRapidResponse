@@ -236,475 +236,528 @@ The DRYD Restoration application implements a comprehensive workflow-driven arch
 1. **Presentation Layer**: UI Components
    - Job cards, forms, modals, and interactive elements
    - Task-specific components that interact with workflow-defined tasks
+   - GanttChart for visualizing scheduled jobs and assignments
 
 2. **Workflow Logic Layer**: 
    - `workflowConfig.ts`: Defines all possible tasks, transitions, and requirements
    - `JobWorkflowStepper.svelte`: Displays and manages workflow tasks
    - `TaskActionModal.svelte`: Orchestrates task-specific actions and forms
+   - Status-based stage progression with automated advancement rules
 
 3. **State Management Layer**:
    - Store modules with custom interfaces for workflow state
    - Derived stores that filter and transform data for specific workflows
+   - `jobStore.ts`: Manages job data and provides filtered views
 
 4. **Service Layer**:
    - Task-specific service functions that update job states
-   - Generic CRUD operations that maintain data integrity
+   - `updateJobStatus()`: Core function for advancing workflow stages
+   - `updateJob()`: Updates job fields while preserving structure
 
-5. **Data Persistence Layer**:
-   - Mock data with strict typing (future: real API endpoints)
-   - Data transformation utilities for converting between API and application formats
+#### 5.1.2 Workflow Stages and Job Statuses
 
-### 5.2 Job Workflow System
-
-#### 5.2.1 Core Workflow Definition
-
-The job workflow system is built around a state machine pattern defined in `workflowConfig.ts`:
+The job workflow is defined by a series of statuses that represent distinct stages in the job lifecycle:
 
 ```typescript
-// Simplified example of the workflow configuration
-export const jobWorkflow = {
-  steps: [
-    {
-      id: "job_created",
-      label: "Job Created",
-      tasks: [
-        {
-          id: "schedule_job",
-          label: "Schedule Job",
-          required: true,
-          requiredRoles: [Role.ADMIN, Role.OFFICE],
-          completeAction: (job) => ({
-            ...job,
-            status: JobStatus.SCHEDULED
-          })
-        },
-        {
-          id: "assign_techs",
-          label: "Assign Technicians",
-          required: true,
-          requiredRoles: [Role.ADMIN, Role.OFFICE]
-        }
-      ]
-    },
-    {
-      id: "job_scheduled",
-      label: "Job Scheduled",
-      tasks: [
-        {
-          id: "confirm_dispatch",
-          label: "Confirm Technician Dispatch",
-          required: true,
-          requiredRoles: [Role.ADMIN, Role.OFFICE],
-          completeAction: (job) => ({
-            ...job,
-            status: JobStatus.IN_PROGRESS
-          })
-        }
-      ]
-    },
-    // Additional workflow steps...
-  ]
-};
-```
-
-#### 5.2.2 Data Flow Through Workflow Stages
-
-The workflow system processes jobs through distinct stages with well-defined data transformations:
-
-1. **Job Creation**
-   - `MultiStepJobForm.svelte` collects data through multiple specialized steps
-   - Validation occurs at each step with type checking
-   - On submission, `createJob()` service function generates a new job with `JobStatus.NEW`
-   - Job is added to the `jobStore` which triggers derived store updates
-   - UI displays the new job with pending initial tasks
-
-2. **Job Progression**
-   - `JobWorkflowStepper.svelte` examines the job's status to determine available tasks
-   - User clicks on a task, triggering `TaskActionModal.svelte` with the task's ID
-   - Task-specific forms collect data (e.g., `AssignTechnicianForm.svelte`)
-   - On submission, service function updates job status and metadata
-   - Task is marked as complete in `completionTasks` object
-   - An activity log entry is created recording the action
-   - UI automatically updates to show next available tasks
-
-3. **Job Finalization**
-   - When all required tasks are complete, job can be finalized
-   - `JobFinalizeForm.svelte` collects cost information and line items
-   - Data is processed through the service layer and stored on the job object
-   - Job status is updated to `JobStatus.COMPLETED`
-   - Invoice data is generated from the job object with costs and line items
-
-4. **Invoice Creation**
-   - Invoice data flows from completed job object
-   - `InvoicePreview.svelte` pulls data directly from job properties
-   - Status updated to `JobStatus.INVOICED` on approval
-
-### 5.3 Component Interaction & Data Exchange
-
-#### 5.3.1 Key Data Interfaces
-
-```
-[User Interface] <-> [Svelte Stores] <-> [Service Layer] <-> [Mock Data]
-```
-
-This architecture ensures:
-- Components only access data through stores
-- Services handle all data mutation logic
-- Stores maintain application state
-- Mock data layer simulates API persistence
-
-#### 5.3.2 Data Flow Sequence
-
-1. **Component Initialization**
-   - Component mounts and subscribes to relevant stores
-   - `onMount()` lifecycle hook triggers data loading if needed
-   - Service functions fetch data and populate stores
-   - Component reactively renders based on store values
-
-2. **User Action Processing**
-   - User interacts with component (e.g., submits form)
-   - Component dispatches event or calls service directly
-   - Service function processes data, updates mock data
-   - Service updates store with new data
-   - All subscribed components reactive update
-
-3. **Cross-Component Communication**
-   - Components communicate via stores (primary method)
-   - Parent-child communication uses props and events
-   - Complex workflows use the TaskActionModal as orchestrator
-
-#### 5.3.3 Store Update Patterns
-
-The application follows specific patterns for store updates that maintain data integrity:
-
-```typescript
-// Example pattern from jobs.ts service
-export async function updateJob(jobId: string, updateData: Partial<Job>): Promise<Job | null> {
-  // 1. Find the job in store data
-  const jobsData = get(_jobs);
-  const jobIndex = jobsData.findIndex(j => j.id === jobId);
-  
-  if (jobIndex === -1) return null;
-  
-  // 2. Create updated job object with type safety
-  const updatedJob: Job = {
-    ...jobsData[jobIndex],
-    ...updateData
-  };
-  
-  // 3. Update mock data (simulates API)
-  const mockIndex = mockJobs.findIndex(j => j.id === jobId);
-  if (mockIndex !== -1) {
-    mockJobs[mockIndex] = { ...mockJobs[mockIndex], ...updateData };
-  }
-  
-  // 4. Update the store atomically
-  _jobs.update(currentJobs => {
-    const newJobs = [...currentJobs];
-    newJobs[jobIndex] = updatedJob;
-    return newJobs;
-  });
-  
-  // 5. Return updated entity for further processing
-  return JSON.parse(JSON.stringify(updatedJob));
+export enum JobStatus {
+  NEW = 'NEW',
+  SCHEDULED = 'SCHEDULED',
+  IN_PROGRESS = 'IN_PROGRESS',
+  PENDING_COMPLETION = 'PENDING_COMPLETION',
+  COMPLETED = 'COMPLETED',
+  INVOICE_APPROVAL = 'INVOICE_APPROVAL',
+  INVOICED = 'INVOICED',
+  PAID = 'PAID',
+  ON_HOLD = 'ON_HOLD',
+  CANCELLED = 'CANCELLED'
 }
 ```
 
-### 5.4 Detailed Component Interactions
-
-#### 5.4.1 Task Completion Flow
-
-The TaskActionModal handles task completion with a consistent pattern:
-
-1. User selects a task from JobWorkflowStepper
-2. TaskActionModal loads with task-specific form
-3. User completes form and submits
-4. `handleTaskSubmit()` processes form data
-5. Data flows to appropriate service function
-6. Job status and properties are updated
-7. Activity log entry is created
-8. UI refreshes to show completed task and next steps
-
-```
-JobWorkflowStepper -> TaskActionModal -> TaskSpecificForm -> 
-Service Function -> Store Update -> LogEntry Creation -> UI Update
-```
-
-#### 5.4.2 Job Finalization Data Flow
-
-The job finalization flow demonstrates complex data movement:
-
-1. **Finalize Job Task**
-   - JobWorkflowStepper shows "Finalize Job" task when prior tasks complete
-   - TaskActionModal loads JobFinalizeForm component
-   - Form presents costs and line item collection interface
-   - Quote data is loaded if job originated from quote
-
-2. **Cost Data Collection**
-   - User enters labor, materials, equipment costs
-   - User adds custom line items
-   - Form calculates totals and validates entries
-
-3. **Job Update & Invoice Preparation**
-   - On submission, job object is updated with:
-     - laborCost, materialsCost, equipmentCost properties
-     - lineItems array with custom items
-     - finalNotes for additional documentation
-   - Job status is updated to COMPLETED
-   - createInvoice task becomes available
-
-4. **Invoice Generation**
-   - Invoice preview displays data directly from job object
-   - Cost calculations use job properties and line items
-   - On approval, status updates to INVOICED
-
-This pattern ensures that all financial data is properly stored in the job object for consistency and future reporting.
-
-### 5.5 Integration Architecture for Future Modules
-
-#### 5.5.1 Data Analysis Workflow Integration
-
-The current architecture provides clear integration points for data analysis:
-
-1. **Job Data Extraction**
-   - Job entities contain all data needed for analysis
-   - Consistent status transitions provide reliable filtering
-   - TypeScript ensures data structure consistency
-
-2. **Analysis Module Interface**
-   - Future analysis modules should subscribe to job store
-   - Derived stores can filter jobs for analysis-specific views
-   - Service functions can be extended for analysis operations
-
-3. **Implementation Pattern**
-   ```typescript
-   // Example pattern for analysis integration
-   export const jobAnalysisData = derived(
-     [jobs, laborEntries, logEntries],
-     ([$jobs, $laborEntries, $logEntries]) => {
-       // Transform and correlate job data for analysis
-       return $jobs.map(job => {
-         // Job-specific labor entries
-         const jobLabor = $laborEntries.filter(entry => entry.jobId === job.id);
-         // Job-specific activity logs
-         const jobLogs = $logEntries.filter(entry => entry.jobId === job.id);
-         
-         // Calculate metrics
-         return {
-           jobId: job.id,
-           jobNumber: job.jobNumber,
-           duration: calculateJobDuration(job),
-           laborHours: calculateTotalLaborHours(jobLabor),
-           laborCost: job.laborCost || 0,
-           materialsCost: job.materialsCost || 0,
-           equipmentCost: job.equipmentCost || 0,
-           totalCost: calculateTotalCost(job),
-           profit: calculateProfit(job),
-           activityBreakdown: analyzeActivityLogs(jobLogs)
-         };
-       });
-     }
-   );
-   ```
-
-#### 5.5.2 Asset Tracking Integration
-
-The application is designed to extend to asset tracking:
-
-1. **Equipment-Job Relationship**
-   - Jobs record equipment IDs in `equipmentIds` array
-   - Equipment logs track placement/removal dates
-   - This data foundation supports asset tracking
-
-2. **Integration Points**
-   - Add equipmentStore derived values for availability
-   - Extend equipment service for maintenance tracking
-   - Create asset-specific components like maintenance schedules
-
-3. **Implementation Pattern**
-   ```typescript
-   // Example pattern for equipment availability
-   export const availableEquipment = derived(
-     [equipment, jobs],
-     ([$equipment, $jobs]) => {
-       // Find all currently deployed equipment
-       const deployedEquipmentIds = $jobs
-         .filter(job => job.status === JobStatus.IN_PROGRESS)
-         .flatMap(job => job.equipmentIds || []);
-       
-       // Return equipment not currently deployed
-       return $equipment.filter(item => 
-         !deployedEquipmentIds.includes(item.id)
-       );
-     }
-   );
-   ```
-
-#### 5.5.3 Inventory Management Integration
-
-Inventory management extends naturally from the existing architecture:
-
-1. **Materials Tracking**
-   - `materialsCost` already tracks cost summary
-   - Extend to track specific materials used
-   - Create inventory reduction when materials added to job
-
-2. **Integration Implementation**
-   ```typescript
-   // Add material usage tracking to job line items
-   interface MaterialLineItem extends CustomLineItem {
-     inventoryId: string;
-     quantityUnit: string;
-     inventoryReduction: boolean;
-   }
-   
-   // Inventory service function pattern
-   export async function reduceInventory(
-     inventoryId: string, 
-     quantity: number
-   ): Promise<Inventory | null> {
-     // Find inventory item
-     const inventoryData = get(_inventory);
-     const itemIndex = inventoryData.findIndex(i => i.id === inventoryId);
-     
-     if (itemIndex === -1) return null;
-     
-     // Create updated inventory with reduced quantity
-     const updatedItem = {
-       ...inventoryData[itemIndex],
-       quantity: inventoryData[itemIndex].quantity - quantity
-     };
-     
-     // Update store
-     _inventory.update(items => {
-       const newItems = [...items];
-       newItems[itemIndex] = updatedItem;
-       return newItems;
-     });
-     
-     return updatedItem;
-   }
-   ```
-
-#### 5.5.4 Employee Management Integration
-
-The application already incorporates the foundations for employee management:
-
-1. **Current Infrastructure**
-   - User entities with roles
-   - Labor entries tied to users
-   - Task assignments based on user IDs
-
-2. **Expansion Approach**
-   - Add specific user detail tracking (certifications, skills)
-   - Create timesheet view based on labor entries
-   - Implement schedule visualization from job assignments
-
-3. **Implementation Pattern**
-   ```typescript
-   // Example pattern for employee schedule derived store
-   export const technicianSchedule = derived(
-     [jobs, users],
-     ([$jobs, $users]) => {
-       // Create schedule data for each technician
-       return $users
-         .filter(user => user.role === Role.TECH)
-         .map(tech => {
-           // Find all jobs assigned to this technician
-           const assignedJobs = $jobs.filter(job => 
-             job.assignedUserIds?.includes(tech.id) &&
-             job.status !== JobStatus.COMPLETED &&
-             job.status !== JobStatus.CANCELLED
-           );
-           
-           // Group by date for calendar view
-           const scheduleByDate = groupJobsByDate(assignedJobs);
-           
-           return {
-             technicianId: tech.id,
-             name: `${tech.firstName} ${tech.lastName}`,
-             schedule: scheduleByDate
-           };
-         });
-     }
-   );
-   ```
-
-### 5.6 Critical Data Flow Points
-
-#### 5.6.1 Store Structure & Update Mechanisms
-
-The application uses a specific store architecture to ensure data consistency:
-
-1. **Internal Writable Stores**
-   - Private `_jobs` writable store holds raw data
-   - Exported public `jobs` readable store for components
-   - Derived stores for filtered views
-
-2. **Accessing vs. Updating Data**
-   ```typescript
-   // Internal writable store (for services)
-   const _jobs = writable<Job[]>([]);
-   
-   // Public readable store (for components)
-   export const jobs = readable(_jobs);
-   
-   // Service function pattern for updates
-   export function updateJobStatus(jobId: string, status: JobStatus) {
-     _jobs.update(currentJobs => {
-       // Find and update job
-       return currentJobs.map(job => 
-         job.id === jobId ? { ...job, status } : job
-       );
-     });
-   }
-   ```
-
-#### 5.6.2 Component Lifecycle & Data Loading
-
-Components follow a consistent pattern for data loading and lifecycle management:
+These statuses are organized into a sequential workflow defined in `workflowConfig.ts`:
 
 ```typescript
-// Component initialization pattern
-onMount(async () => {
-  isLoading = true;
-  
-  try {
-    // 1. Load primary data
-    if (!get(jobs).length) {
-      await loadJobs();
-    }
-    
-    // 2. Load related data
-    await loadCustomers();
-    
-    // 3. Begin component-specific operations
-    if (jobId) {
-      await loadJobDetails(jobId);
-    }
-    
-    isLoading = false;
-  } catch (err) {
-    console.error('Error loading data:', err);
-    errorMessage = 'Failed to load necessary data';
-    isLoading = false;
-  }
-});
+export const JOB_WORKFLOW_STEPS: { status: JobStatus, label: string }[] = [
+  { status: JobStatus.NEW, label: 'New Job' },
+  { status: JobStatus.SCHEDULED, label: 'Scheduled' },
+  { status: JobStatus.IN_PROGRESS, label: 'Work In Progress' },
+  { status: JobStatus.PENDING_COMPLETION, label: 'Review & Approval' },
+  { status: JobStatus.COMPLETED, label: 'Job Complete' },
+  { status: JobStatus.INVOICE_APPROVAL, label: 'Invoice Approval' },
+  { status: JobStatus.INVOICED, label: 'Invoiced' },
+  { status: JobStatus.PAID, label: 'Paid' }
+];
 ```
 
-#### 5.6.3 Multi-Component Data Sharing
+#### 5.1.3 Task-Based Progression System
 
-For complex screens with multiple components, data sharing follows these patterns:
+Each job status has associated tasks that must be completed before advancing to the next stage. This is defined in the `TASKS_BY_STATUS` configuration:
 
-1. **Parent Component State Management**
-   - Parent components load and distribute data to children
-   - Children report changes through events
-   - Parent updates shared state and pushes changes to services
+```typescript
+export const TASKS_BY_STATUS: { [key in JobStatus]?: WorkflowTask[] } = {
+  [JobStatus.NEW]: [
+    { id: 'schedule_job', label: 'Schedule Job Date', requiredRole: [Role.OFFICE, Role.ADMIN] },
+    { id: 'assign_techs', label: 'Assign Technician(s)', requiredRole: [Role.OFFICE, Role.ADMIN] },
+  ],
+  [JobStatus.SCHEDULED]: [
+    { id: 'confirm_dispatch', label: 'Confirm Technician Dispatched', requiredRole: [Role.OFFICE, Role.ADMIN] }
+  ],
+  [JobStatus.IN_PROGRESS]: [
+    { id: 'log_final_readings', label: 'Log Final Moisture Readings', requiredRole: [Role.TECH], checklistKey: 'finalReadingsLogged' },
+    { id: 'upload_after_photos', label: 'Upload "After" Photos', requiredRole: [Role.TECH], checklistKey: 'afterPhotosTaken' },
+    { id: 'mark_ready_for_review', label: 'Submit for Office Review', requiredRole: [Role.TECH], dependsOn: ['log_final_readings', 'upload_after_photos'] }
+  ],
+  // Additional statuses and tasks...
+};
+```
 
-2. **Store-Based Coordination**
-   - Components independently subscribe to stores
-   - Service actions update stores
-   - Components react to store changes
+### 5.2 Job Workflow Progression Logic
+
+#### 5.2.1 Status Advancement Mechanisms
+
+The application uses three main mechanisms to advance jobs through workflow stages:
+
+1. **Task-Driven Advancement**: Some tasks directly trigger status changes when completed.
+   ```typescript
+   // Example from job page
+   function handleTaskCompletedFromModal(event) {
+     const { taskId, data } = event.detail;
+     
+     if (taskId === 'mark_ready_for_review') {
+       // Explicitly change status when this task is completed
+       updateJobStatus($currentJob.id, JobStatus.PENDING_COMPLETION);
+     }
+     else if (taskId === 'confirm_dispatch') {
+       // Move to IN_PROGRESS when dispatch is confirmed
+       updateJobStatus($currentJob.id, JobStatus.IN_PROGRESS);
+     }
+     // Other tasks...
+   }
+   ```
+
+2. **Condition-Based Advancement**: When certain combinations of data or completed tasks are present, the job automatically advances.
+   ```typescript
+   // Example: Auto-advance to SCHEDULED when both scheduling and technician assignment are complete
+   updateJobWithData(updateData)
+     .then(updatedJob => {
+       // Check if we can advance the job to SCHEDULED status
+       if (updatedJob.scheduledStartDate && 
+           updatedJob.assignedUserIds && 
+           updatedJob.assignedUserIds.length > 0 &&
+           updatedJob.status === JobStatus.NEW) {
+         console.log('Both scheduling and assignment complete, advancing to SCHEDULED');
+         return updateJobStatus($currentJob.id, JobStatus.SCHEDULED);
+       }
+       return updatedJob;
+     });
+   ```
+
+3. **Dependency-Based Task Availability**: Tasks with dependencies check if prerequisites are complete before allowing activation.
+   ```typescript
+   // From JobWorkflowStepper.svelte
+   function handleTaskClick(task: WorkflowTask) {
+     // For the special case of mark_ready_for_review, ensure all tech tasks are done
+     if (task.id === 'mark_ready_for_review' && !areAllTechTasksComplete()) {
+       alert('You must complete all technician tasks before submitting for review');
+       return;
+     }
+     // Continue with task activation...
+   }
+   
+   // Check if all technician tasks are complete
+   function areAllTechTasksComplete() {
+     if (!job.completionTasks) return false;
+     return job.completionTasks.finalReadingsLogged && 
+            job.completionTasks.afterPhotosTaken;
+   }
+   ```
+
+#### 5.2.2 Task Completion Tracking
+
+The system tracks task completion using the `CompletionTasks` interface on each job:
+
+```typescript
+export interface CompletionTasks {
+  initialAssessmentComplete: boolean;
+  equipmentDeployed: boolean;
+  initialReadingsLogged: boolean;
+  beforePhotosTaken: boolean;
+  finalReadingsLogged: boolean;
+  afterPhotosTaken: boolean;
+  equipmentRetrieved: boolean;
+  // Other completion flags
+}
+```
+
+When a task is completed that has a `checklistKey`, the corresponding flag is set in the job's `completionTasks` object:
+
+```typescript
+// From the job page
+if (selectedTask?.checklistKey) {
+  updateData.completionTasks = {
+    ...($currentJob.completionTasks || {}),
+    [selectedTask.checklistKey]: true
+  };
+}
+```
+
+#### 5.2.3 Role-Based Task Access
+
+Tasks are restricted to specific user roles through the `requiredRole` property:
+
+```typescript
+{ id: 'schedule_job', label: 'Schedule Job Date', requiredRole: [Role.OFFICE, Role.ADMIN] }
+```
+
+The `JobWorkflowStepper` enforces these restrictions:
+
+```typescript
+function canPerformTask(task: WorkflowTask): boolean {
+  if (!task.requiredRole || task.requiredRole.length === 0) return true;
+  return currentUserRole ? task.requiredRole.includes(currentUserRole as Role) : false;
+}
+```
+
+### 5.3 Gantt Chart and Scheduling System
+
+#### 5.3.1 Gantt Chart Architecture
+
+The scheduling system centers around the `GanttChart.svelte` component, which visualizes job schedules by technician:
+
+```typescript
+// GanttChart.svelte
+// Core data structures
+let technicians: User[] = [];
+let jobs: Job[] = [];
+let viewType: 'daily' | 'weekly' = 'weekly';
+let selectedDate = new Date();
+```
+
+Jobs appear on the Gantt chart based on three criteria:
+1. The job has a valid `scheduledStartDate`
+2. The job has technicians assigned (`assignedUserIds`)
+3. The job is in a visible status (SCHEDULED or IN_PROGRESS)
+
+```typescript
+// Only show jobs with appropriate status
+const visibleStatuses = [JobStatus.SCHEDULED, JobStatus.IN_PROGRESS];
+
+// Filter jobs for each technician
+function mapJobsToTechnicians(techs: User[], allJobs: Job[], dates: Date[]): any[] {
+  return techs.map(tech => {
+    // Get jobs assigned to this technician
+    const techJobs = allJobs.filter(job => 
+      job && 
+      job.assignedUserIds && 
+      Array.isArray(job.assignedUserIds) &&
+      job.assignedUserIds.includes(tech.id) && 
+      job.status &&
+      visibleStatuses.includes(job.status)
+    );
+    
+    // Map jobs to dates
+    const dateJobs = dates.map(date => {
+      const jobsForDate = techJobs.filter(job => isJobScheduledForDate(job, date));
+      return { date, jobs: jobsForDate };
+    });
+    
+    return { technician: tech, dates: dateJobs };
+  });
+}
+```
+
+#### 5.3.2 Scheduling and Assignment Integration
+
+The `ScheduleAndAssignForm` component combines technician assignment and schedule date selection in a single flow:
+
+```typescript
+// ScheduleAndAssignForm.svelte
+export let job: Job;
+
+// Form state
+let step = 1; // 1: Select Technicians, 2: Schedule Date
+let technicians: User[] = [];
+let selectedTechnicians: string[] = [];
+let startDate = job.scheduledStartDate ? new Date(job.scheduledStartDate).toISOString().split('T')[0] : '';
+let estimatedCompletionDate = job.estimatedCompletionDate ? new Date(job.estimatedCompletionDate).toISOString().split('T')[0] : '';
+```
+
+When completed, this form dispatches a submission event:
+
+```typescript
+function handleSubmit() {
+  dispatch('submit', {
+    assignedUserIds: selectedTechnicians,
+    scheduledStartDate: startDate,
+    estimatedCompletionDate: estimatedCompletionDate || undefined
+  });
+}
+```
+
+The TaskActionModal handles this event to complete both scheduling and assignment tasks:
+
+```typescript
+// In TaskActionModal.svelte
+{#if task.id === 'schedule_job' || task.id === 'assign_techs'}
+  <ScheduleAndAssignForm
+    job={job}
+    on:submit={(event) => {
+      console.log('ScheduleAndAssignForm submit event:', event.detail);
+      // Just assign the event detail data directly, it already has the right shape
+      const { assignedUserIds, scheduledStartDate, estimatedCompletionDate } = event.detail;
+      completeTask({
+        assignedUserIds,
+        scheduledStartDate,
+        estimatedCompletionDate
+      });
+    }}
+    on:cancel={closeModal}
+  />
+{/if}
+```
+
+#### 5.3.3 Daily and Weekly Views
+
+The Gantt chart supports two view modes:
+- **Daily View**: Shows jobs for technicians on a specific date
+- **Weekly View**: Shows jobs across a 7-day period for all technicians
+
+```typescript
+// GanttChart.svelte
+// View type (daily or weekly)
+let viewType: 'daily' | 'weekly' = 'weekly';
+
+// Generate date range based on view type
+$: dateRange = generateDateRange(selectedDate, viewType === 'daily' ? 1 : daysInWeek);
+```
+
+The UI changes based on the selected view:
+
+```svelte
+<!-- Daily View (Grid) -->
+{#if viewType === 'daily' && dateRange.length > 0}
+  <div class="overflow-x-auto border rounded-lg">
+    <div class="bg-gray-50 px-4 py-3 border-b">
+      <h3 class="text-lg font-medium">Jobs Scheduled for {formatDate(dateRange[0], true)}</h3>
+    </div>
+    <table class="min-w-full border-collapse">
+      <!-- Daily view content -->
+    </table>
+  </div>
+<!-- Weekly View (Grid) -->
+{:else}
+  <div class="overflow-x-auto border rounded-lg">
+    <table class="min-w-full border-collapse">
+      <!-- Weekly view content -->
+    </table>
+  </div>
+{/if}
+```
+
+### 5.4 Component Interaction Flow
+
+The workflow system relies on several key component interactions:
+
+#### 5.4.1 Job Detail Page to WorkflowStepper
+
+The job detail page (`[jobId]/+page.svelte`) renders the `JobWorkflowStepper` and listens for task interactions:
+
+```svelte
+<JobWorkflowStepper 
+  currentStatus={$currentJob.status} 
+  job={$currentJob}
+  on:taskClick={handleTaskClick}
+  on:taskCompleted={handleTaskCompleted}
+  on:updateStatus={handleStatusUpdate}
+/>
+```
+
+#### 5.4.2 WorkflowStepper to TaskActionModal
+
+When a task is clicked in the WorkflowStepper, it shows the TaskActionModal:
+
+```typescript
+function handleTaskClick(task: WorkflowTask) {
+  // Set the selected task and show the modal
+  selectedTask = task;
+  showTaskModal = true;
+  
+  // Dispatch the click event with the task
+  dispatch('taskClick', { task, job });
+}
+```
+
+In the WorkflowStepper template:
+
+```svelte
+<!-- Task Modal -->
+{#if showTaskModal && selectedTask && job}
+  <div transition:fade={{ duration: 200 }}>
+    <TaskActionModal
+      bind:isOpen={showTaskModal}
+      task={selectedTask}
+      job={job}
+      logEntries={[]}
+      on:close={() => {
+        showTaskModal = false;
+        selectedTask = null;
+      }}
+      on:taskCompleted={handleTaskCompleted}
+    />
+  </div>
+{/if}
+```
+
+#### 5.4.3 TaskActionModal to Task-Specific Forms
+
+The TaskActionModal renders different forms based on the task type:
+
+```svelte
+{#if task.id === 'schedule_job' || task.id === 'assign_techs'}
+  <ScheduleAndAssignForm
+    job={job}
+    on:submit={(event) => completeTask(event.detail)}
+    on:cancel={closeModal}
+  />
+{:else if task.id === 'log_final_readings'}
+  <ReadingForm 
+    job={job}
+    on:submit={handleReadingSubmit}
+    on:cancel={closeModal}
+  />
+{:else if task.id === 'upload_after_photos'}
+  <PhotoUpload 
+    job={job}
+    on:submit={handlePhotoSubmit}
+    on:cancel={closeModal}
+  />
+{:else}
+  <!-- Generic task form -->
+{/if}
+```
+
+#### 5.4.4 TaskActionModal back to Job Page
+
+When a task is completed, the TaskActionModal dispatches a completion event:
+
+```typescript
+function completeTask(data?: any) {
+  // Create a content object with task information
+  const contentObject = {
+    taskId: task.id,
+    taskLabel: task.label,
+    completed: true,
+    timestamp: new Date(),
+    ...(data || {})
+  };
+  
+  // Record task completion in activity log
+  addLogEntry({
+    jobId: job.id,
+    userId: userInfo?.id || 'user-1',
+    type: LogEntryType.TASK_COMPLETION,
+    content: contentObject
+  });
+  
+  // Dispatch event to update UI
+  dispatch('taskCompleted', { taskId: task.id, data });
+}
+```
+
+The job page handles this event to update the job:
+
+```typescript
+function handleTaskCompletedFromModal(event) {
+  const { taskId, data } = event.detail;
+  
+  // Create update object for job
+  const updateData: Partial<Job> = {};
+  
+  // Handle specific task types
+  if (taskId === 'assign_techs' && data && data.assignedUserIds) {
+    updateData.assignedUserIds = data.assignedUserIds;
+  } 
+  else if (taskId === 'schedule_job' && data) {
+    if (data.scheduledStartDate) {
+      updateData.scheduledStartDate = new Date(data.scheduledStartDate);
+    }
+    if (data.estimatedCompletionDate) {
+      updateData.estimatedCompletionDate = new Date(data.estimatedCompletionDate);
+    }
+  }
+  
+  // Apply updates to job
+  updateJobWithData(updateData)
+    .then(/* handle result */);
+}
+```
+
+### 5.5. Role-Based Workflow Interactions
+
+The system behaves differently based on user roles:
+
+#### 5.5.1 Admin and Office Users
+
+Admin and Office users have access to all job management functions:
+- Can create new jobs
+- Can schedule jobs and assign technicians
+- Can confirm dispatch to advance jobs to IN_PROGRESS
+- Can review and approve completed jobs
+- Can create and approve invoices
+- Can manage all stages of the workflow
+
+```typescript
+// Role-specific task definitions
+{ id: 'schedule_job', label: 'Schedule Job Date', requiredRole: [Role.OFFICE, Role.ADMIN] }
+{ id: 'confirm_dispatch', label: 'Confirm Technician Dispatched', requiredRole: [Role.OFFICE, Role.ADMIN] }
+{ id: 'review_checklist', label: 'Review Technician Checklist', requiredRole: [Role.OFFICE, Role.ADMIN] }
+```
+
+#### 5.5.2 Technician Users
+
+Technicians have focused access to their assigned jobs:
+- Can view only jobs assigned to them
+- Can update job details during the IN_PROGRESS stage
+- Can log readings, photos, and equipment usage
+- Can mark jobs as ready for review
+
+```typescript
+// Technician-specific tasks
+{ id: 'log_final_readings', label: 'Log Final Moisture Readings', requiredRole: [Role.TECH], checklistKey: 'finalReadingsLogged' }
+{ id: 'upload_after_photos', label: 'Upload "After" Photos', requiredRole: [Role.TECH], checklistKey: 'afterPhotosTaken' }
+{ id: 'mark_ready_for_review', label: 'Submit for Office Review', requiredRole: [Role.TECH], dependsOn: ['log_final_readings', 'upload_after_photos'] }
+```
+
+#### 5.5.3 Role-Based Data Filtering
+
+All data is filtered based on user role:
+
+```typescript
+// Example from jobStore.ts
+export const dashboardJobs = derived(
+  [jobs, currentUser],
+  ([$jobs, $currentUser]) => {
+    if (!$currentUser) return [];
+    
+    let result = [...$jobs];
+    
+    // Role-specific filtering
+    if ($currentUser.role === Role.TECH) {
+      // Technicians see only jobs assigned to them
+      result = result.filter(job => 
+        job.assignedUserIds?.includes($currentUser.id)
+      );
+    } else {
+      // Office/Admin users see non-completed jobs
+      result = result.filter(job => 
+        job.status !== JobStatus.COMPLETED && 
+        job.status !== JobStatus.CANCELLED
+      );
+    }
+    
+    return result;
+  }
+);
+```
 
 ## 6. Future Module Integration Guidelines
 

@@ -6,6 +6,7 @@
   import type { Job } from '$lib/types/Job';
   import { JobStatus } from '$lib/types/Job';
   import GanttJobCard from './GanttJobCard.svelte';
+  import { goto } from '$app/navigation';
   
   // Chart data
   let technicians: User[] = [];
@@ -51,6 +52,20 @@
     }
     
     return dates;
+  }
+  
+  // Get style based on job status
+  function getStatusStyle(status: JobStatus): { bgClass: string; textClass: string } {
+    switch(status) {
+      case JobStatus.SCHEDULED:
+        return { bgClass: "bg-blue-100 border-blue-300", textClass: "text-blue-800" };
+      case JobStatus.IN_PROGRESS:
+        return { bgClass: "bg-green-100 border-green-300", textClass: "text-green-800" };
+      case JobStatus.ON_HOLD:
+        return { bgClass: "bg-yellow-100 border-yellow-300", textClass: "text-yellow-800" };
+      default:
+        return { bgClass: "bg-gray-100 border-gray-300", textClass: "text-gray-800" };
+    }
   }
   
   // Format date for display
@@ -213,11 +228,23 @@
     padding: 2px !important;
   }
   
+  /* Rectangular cells for daily view */
+  td.cell-daily {
+    height: 60px;
+    width: 100%;
+    padding: 2px !important;
+  }
+  
   /* Square header cells */
   th.header-square {
     width: 120px;
     min-width: 120px;
     max-width: 120px;
+  }
+  
+  /* Daily view header cell */
+  th.header-daily {
+    width: 100%;
   }
   
   /* Technician column width */
@@ -237,6 +264,20 @@
     display: flex !important;
     flex-direction: column !important;
     justify-content: space-between !important;
+  }
+  
+  /* Card styling for daily view */
+  :global(.gantt-card-wrapper .job-card-daily) {
+    padding: 0.25rem !important;
+    font-size: 0.75rem !important;
+    line-height: 1rem !important;
+    height: 100% !important;
+    width: 100% !important;
+    margin-bottom: 0 !important;
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: center !important;
   }
 </style>
 
@@ -291,35 +332,91 @@
     </div>
   </div>
   
-  <!-- Daily View -->
+  <!-- Daily View (Grid) -->
   {#if viewType === 'daily' && dateRange.length > 0}
-    <div class="border rounded-lg">
+    <div class="overflow-x-auto border rounded-lg">
       <div class="bg-gray-50 px-4 py-3 border-b">
         <h3 class="text-lg font-medium">Jobs Scheduled for {formatDate(dateRange[0], true)}</h3>
       </div>
-      
-      <!-- List of jobs for all technicians on this day -->
-      <div class="divide-y">
-        {#each technicianJobs as techData}
-          {#if techData.dates[0].jobs && techData.dates[0].jobs.length > 0}
-            <div class="p-3">
-              <h4 class="font-medium text-gray-900 mb-2">{techData.technician.firstName} {techData.technician.lastName}</h4>
-              <div class="space-y-2">
-                {#each techData.dates[0].jobs as job}
-                  <GanttJobCard {job} />
-                {/each}
-              </div>
-            </div>
+      <table class="min-w-full border-collapse">
+        <thead>
+          <tr class="bg-gray-50 border-b">
+            <!-- Header for technician column -->
+            <th class="tech-column px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r">
+              Technician
+            </th>
+            
+            <!-- Header for the single date column -->
+            <th class="header-daily px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Schedule
+            </th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <!-- Show loading state when technicians are not loaded yet -->
+          {#if technicians.length === 0}
+            {#each Array(3) as _, i}
+              <tr>
+                <td class="px-2 py-2 whitespace-nowrap border-r bg-gray-50 tech-column">
+                  <div class="h-6 bg-gray-200 rounded animate-pulse"></div>
+                </td>
+                <td class="px-2 py-2 cell-daily border-r border-dashed border-gray-100">
+                </td>
+              </tr>
+            {/each}
+          {:else}
+            <!-- Render rows for each technician -->
+            {#each technicianJobs as row}
+              <tr>
+                <td class="px-2 py-2 whitespace-nowrap border-r bg-gray-50 tech-column">
+                  <div class="text-sm font-medium text-gray-900 truncate">{row.technician.firstName} {row.technician.lastName}</div>
+                </td>
+                
+                <!-- Render cell for the single date -->
+                <td class="cell-daily border-r border-dashed border-gray-100 align-top overflow-hidden">
+                  <div class="h-full w-full">
+                    {#if row.dates[0].jobs && row.dates[0].jobs.length > 0}
+                      <div class="space-y-1 h-full">
+                        {#each row.dates[0].jobs as job}
+                          <div class="gantt-card-wrapper">
+                            <div 
+                              class="job-card-daily {getStatusStyle(job.status).bgClass} border rounded-md shadow-sm hover:shadow-md transition-shadow cursor-pointer flex"
+                              on:click={() => goto(`/jobs/${job.id}`)}
+                              on:keydown={(e: KeyboardEvent) => e.key === 'Enter' && goto(`/jobs/${job.id}`)}
+                              tabindex="0"
+                              role="button"
+                              aria-label="View job {job.jobNumber}"
+                            >
+                              <div class="text-xs font-bold {getStatusStyle(job.status).textClass} mr-2">{job.jobNumber}</div>
+                              <div class="text-xs {getStatusStyle(job.status).textClass} truncate flex-grow">{job.title || 'Untitled Job'}</div>
+                              <div class="text-xs {getStatusStyle(job.status).textClass} opacity-75">
+                                {job.status}
+                              </div>
+                            </div>
+                          </div>
+                        {/each}
+                      </div>
+                    {:else}
+                      <div class="h-full flex items-center justify-center text-gray-400 text-sm">
+                        No jobs scheduled
+                      </div>
+                    {/if}
+                  </div>
+                </td>
+              </tr>
+            {/each}
           {/if}
-        {/each}
-        
-        <!-- Empty state when no jobs are scheduled for this date -->
-        {#if technicianJobs.every(tech => !tech.dates[0].jobs || tech.dates[0].jobs.length === 0)}
-          <div class="p-6 text-center text-gray-500">
-            No jobs scheduled for this date.
-          </div>
-        {/if}
-      </div>
+          
+          <!-- Empty state row when no technicians have jobs on this date -->
+          {#if technicianJobs.length > 0 && technicianJobs.every(tech => !tech.dates[0].jobs || tech.dates[0].jobs.length === 0)}
+            <tr>
+              <td colspan="2" class="px-6 py-8 text-center text-gray-500">
+                No jobs scheduled for this date.
+              </td>
+            </tr>
+          {/if}
+        </tbody>
+      </table>
     </div>
   <!-- Weekly View (Grid) -->
   {:else}
