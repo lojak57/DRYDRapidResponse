@@ -88,19 +88,20 @@
   function isJobScheduledForDate(job: Job, date: Date): boolean {
     if (!job || !job.scheduledStartDate) return false;
     
-    const jobStartDate = new Date(job.scheduledStartDate);
-    jobStartDate.setHours(0, 0, 0, 0);
+    // Create new date objects to avoid modifying the originals
+    // Parse the job date and ensure we're normalizing to UTC to avoid timezone issues
+    const jobStartDateStr = new Date(job.scheduledStartDate).toISOString().split('T')[0];
+    const jobStartDate = new Date(jobStartDateStr + 'T00:00:00.000Z');
     
-    const dateToCheck = new Date(date);
-    dateToCheck.setHours(0, 0, 0, 0);
+    // Do the same with the calendar date we're checking against
+    const dateStr = new Date(date).toISOString().split('T')[0];
+    const dateToCheck = new Date(dateStr + 'T00:00:00.000Z');
     
-    // For daily view, we want an exact match
-    if (viewType === 'daily') {
-      return jobStartDate.getTime() === dateToCheck.getTime();
-    } 
+    // Debug log to check date comparisons
+    console.log(`Comparing job ${job.jobNumber} date: ${jobStartDate.toLocaleDateString()} with calendar date: ${dateToCheck.toLocaleDateString()}`);
+    console.log(`  Raw job date: ${new Date(job.scheduledStartDate).toISOString()}, Raw calendar date: ${date.toISOString()}`);
     
-    // For weekly view, we should check if this is the actual scheduled day
-    // rather than hardcoding a 3-day span for each job
+    // Compare the dates using their UTC time values
     return jobStartDate.getTime() === dateToCheck.getTime();
   }
   
