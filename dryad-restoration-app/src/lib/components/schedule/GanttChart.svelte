@@ -21,8 +21,8 @@
     console.log(`Jobs updated from store: ${jobs.length} jobs`);
   }
   
-  // Status to filter (only SCHEDULED and IN_PROGRESS will be shown)
-  const visibleStatuses = [JobStatus.SCHEDULED, JobStatus.IN_PROGRESS];
+  // Show all statuses except NEW (since those aren't scheduled yet)
+  const visibleStatuses = Object.values(JobStatus).filter(status => status !== JobStatus.NEW);
   
   // Date range for the chart
   const daysInWeek = 7;
@@ -99,9 +99,9 @@
       return jobStartDate.getTime() === dateToCheck.getTime();
     } 
     
-    // For weekly view, job could span multiple days
-    const dayDiff = Math.floor((dateToCheck.getTime() - jobStartDate.getTime()) / (1000 * 60 * 60 * 24));
-    return dayDiff >= 0 && dayDiff < 3; // Job appears on start date and 2 days after
+    // For weekly view, we should check if this is the actual scheduled day
+    // rather than hardcoding a 3-day span for each job
+    return jobStartDate.getTime() === dateToCheck.getTime();
   }
   
   // Map jobs to technicians for easier rendering
@@ -211,6 +211,20 @@
 </script>
 
 <style>
+  /* Mobile-first base styling */
+  .gantt-chart {
+    width: 100%;
+    overflow-x: auto;
+  }
+  
+  /* Schedule containers */
+  .schedule-container {
+    border-radius: 0.5rem;
+    border: 1px solid #e5e7eb;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
   /* Ensure consistent card spacing and appearance */
   .gantt-card-wrapper {
     margin-bottom: 2px;
@@ -219,13 +233,15 @@
     display: flex;
   }
   
-  /* Square cells for weekly view */
+  /* Square cells for weekly view - mobile first */
   td.cell-square {
-    height: 120px;
-    width: 120px;
-    min-width: 120px;
-    max-width: 120px;
+    height: 90px;
+    width: 90px;
+    min-width: 90px;
+    max-width: 90px;
     padding: 2px !important;
+    vertical-align: top;
+    position: relative;
   }
   
   /* Rectangular cells for daily view */
@@ -237,9 +253,10 @@
   
   /* Square header cells */
   th.header-square {
-    width: 120px;
-    min-width: 120px;
-    max-width: 120px;
+    width: 90px;
+    min-width: 90px;
+    max-width: 90px;
+    padding: 8px 4px !important;
   }
   
   /* Daily view header cell */
@@ -249,8 +266,10 @@
   
   /* Technician column width */
   .tech-column {
-    width: 120px;
-    min-width: 120px;
+    width: 90px;
+    min-width: 90px;
+    background-color: #f8fafc !important;
+    border-right: 1px solid #e2e8f0;
   }
   
   /* Card styling for compact squares */
@@ -279,64 +298,188 @@
     justify-content: space-between !important;
     align-items: center !important;
   }
+  
+  /* Date display styling */
+  .date-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .date-day {
+    font-weight: 600;
+  }
+  
+  .date-date {
+    font-size: 0.8rem;
+  }
+  
+  /* Today highlight */
+  .today-column {
+    background-color: rgba(59, 130, 246, 0.05);
+  }
+  
+  .today-header {
+    background-color: rgba(59, 130, 246, 0.1);
+  }
+  
+  /* Empty cell styling */
+  .empty-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #94a3b8;
+    font-size: 0.75rem;
+  }
+  
+  /* Responsive design for larger screens */
+  @media (min-width: 640px) {
+    td.cell-square {
+      height: 100px;
+      width: 100px;
+      min-width: 100px;
+      max-width: 100px;
+    }
+    
+    th.header-square {
+      width: 100px;
+      min-width: 100px;
+      max-width: 100px;
+    }
+    
+    .tech-column {
+      width: 100px;
+      min-width: 100px;
+    }
+  }
+  
+  @media (min-width: 768px) {
+    td.cell-square {
+      height: 110px;
+      width: 110px;
+      min-width: 110px;
+      max-width: 110px;
+    }
+    
+    th.header-square {
+      width: 110px;
+      min-width: 110px;
+      max-width: 110px;
+    }
+    
+    .tech-column {
+      width: 110px;
+      min-width: 110px;
+    }
+  }
+  
+  /* Large screens show more detail */
+  @media (min-width: 1024px) {
+    td.cell-square {
+      height: 130px;
+      width: 130px;
+      min-width: 130px;
+      max-width: 130px;
+    }
+    
+    th.header-square {
+      width: 130px;
+      min-width: 130px;
+      max-width: 130px;
+    }
+    
+    .tech-column {
+      width: 130px;
+      min-width: 130px;
+    }
+    
+    :global(.gantt-card-wrapper .job-card) {
+      font-size: 0.8rem !important;
+      line-height: 1.1rem !important;
+    }
+  }
+  
+  /* Extra large screens */
+  @media (min-width: 1280px) {
+    td.cell-square {
+      height: 140px;
+      width: 140px;
+      min-width: 140px;
+      max-width: 140px;
+    }
+    
+    th.header-square {
+      width: 140px;
+      min-width: 140px;
+      max-width: 140px;
+    }
+    
+    .tech-column {
+      width: 140px;
+      min-width: 140px;
+    }
+  }
 </style>
 
 <div class="gantt-chart">
-  <!-- Chart Header -->
-  <div class="flex justify-between items-center mb-4">
+  <!-- Chart Header - Mobile-first design -->
+  <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-4 space-y-2 md:space-y-0">
     <h2 class="text-xl font-bold">Schedule</h2>
     
     <!-- Navigation and view controls -->
-    <div class="flex gap-2 items-center">
-      <!-- Previous button -->
-      <button class="btn btn-sm" on:click={navigatePrevious} aria-label="Previous">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
-        </svg>
-      </button>
-      
-      <!-- Today button -->
-      <button class="btn btn-sm" on:click={goToToday}>Today</button>
-      
-      <!-- Next button -->
-      <button class="btn btn-sm" on:click={navigateNext} aria-label="Next">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
-        </svg>
-      </button>
+    <div class="flex flex-wrap gap-2 items-center">
+      <!-- Navigation controls - simplified on mobile -->
+      <div class="flex items-center space-x-1">
+        <button class="btn btn-sm bg-white shadow-sm border border-gray-300 hover:bg-gray-50" on:click={navigatePrevious} aria-label="Previous">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+          </svg>
+        </button>
+        
+        <button class="btn btn-sm bg-white shadow-sm border border-gray-300 hover:bg-gray-50" on:click={goToToday}>Today</button>
+        
+        <button class="btn btn-sm bg-white shadow-sm border border-gray-300 hover:bg-gray-50" on:click={navigateNext} aria-label="Next">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+          </svg>
+        </button>
+      </div>
       
       <!-- Current date display -->
-      <div class="px-2 font-medium">
+      <div class="px-2 font-medium text-sm md:text-base whitespace-nowrap">
         {#if viewType === 'daily'}
-          {formatDate(selectedDate, true)}
+          <span class="font-bold">{formatDate(selectedDate, true)}</span>
         {:else}
-          {formatDate(dateRange[0], false)} - {formatDate(dateRange[dateRange.length - 1], false)}
+          <span class="font-bold">{formatDate(dateRange[0], false)} - {formatDate(dateRange[dateRange.length - 1], false)}</span>
         {/if}
       </div>
       
       <!-- View type toggles -->
-      <div class="ml-4 border-l pl-4">
-        <button 
-          class="btn btn-sm {viewType === 'daily' ? 'bg-blue-100 text-blue-700' : ''}"
-          on:click={setDailyView}
-        >
-          Daily
-        </button>
-        <button 
-          class="btn btn-sm {viewType === 'weekly' ? 'bg-blue-100 text-blue-700' : ''}"
-          on:click={setWeeklyView}
-        >
-          Weekly
-        </button>
+      <div class="md:ml-4 md:border-l md:pl-4">
+        <div class="inline-flex rounded-md shadow-sm" role="group">
+          <button 
+            class="px-3 py-1 text-sm border {viewType === 'daily' ? 'bg-blue-100 text-blue-700 border-blue-300' : 'bg-white border-gray-300 text-gray-700'} rounded-l-md"
+            on:click={setDailyView}
+          >
+            Daily
+          </button>
+          <button 
+            class="px-3 py-1 text-sm border {viewType === 'weekly' ? 'bg-blue-100 text-blue-700 border-blue-300' : 'bg-white border-gray-300 text-gray-700'} rounded-r-md border-l-0"
+            on:click={setWeeklyView}
+          >
+            Weekly
+          </button>
+        </div>
       </div>
     </div>
   </div>
   
   <!-- Daily View (Grid) -->
   {#if viewType === 'daily' && dateRange.length > 0}
-    <div class="overflow-x-auto border rounded-lg">
+    <div class="schedule-container">
       <div class="bg-gray-50 px-4 py-3 border-b">
-        <h3 class="text-lg font-medium">Jobs Scheduled for {formatDate(dateRange[0], true)}</h3>
+        <h3 class="text-lg font-medium">Jobs Scheduled for <span class="font-semibold">{formatDate(dateRange[0], true)}</span></h3>
       </div>
       <table class="min-w-full border-collapse">
         <thead>
@@ -397,7 +540,7 @@
                         {/each}
                       </div>
                     {:else}
-                      <div class="h-full flex items-center justify-center text-gray-400 text-sm">
+                      <div class="empty-cell">
                         No jobs scheduled
                       </div>
                     {/if}
@@ -420,19 +563,23 @@
     </div>
   <!-- Weekly View (Grid) -->
   {:else}
-    <div class="overflow-x-auto border rounded-lg">
+    <div class="schedule-container">
       <table class="min-w-full border-collapse">
         <thead>
-          <tr class="bg-gray-50">
+          <tr class="bg-gray-50 border-b">
             <!-- Header for technician column -->
             <th class="tech-column px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-r">
               Technician
             </th>
             
             <!-- Headers for date columns -->
-            {#each dateRange as date}
-              <th class="header-square px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
-                {formatDate(date)}
+            {#each dateRange as date, i}
+              {@const isToday = new Date().toDateString() === date.toDateString()}
+              <th class="header-square px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b {isToday ? 'today-header' : ''}">
+                <div class="date-display">
+                  <span class="date-day">{date.toLocaleDateString('en-US', { weekday: 'short' })}</span>
+                  <span class="date-date">{date.getMonth() + 1}/{date.getDate()}</span>
+                </div>
               </th>
             {/each}
           </tr>
@@ -460,8 +607,9 @@
                 </td>
                 
                 <!-- Render cells for each date -->
-                {#each row.dates as dateData}
-                  <td class="cell-square border-r border-dashed border-gray-100 align-top overflow-hidden">
+                {#each row.dates as dateData, i}
+                  {@const isToday = new Date().toDateString() === dateData.date.toDateString()}
+                  <td class="cell-square border-r border-dashed border-gray-100 align-top overflow-hidden {isToday ? 'today-column' : ''}">
                     <div class="h-full w-full">
                       {#if dateData.jobs && dateData.jobs.length > 0}
                         {#if dateData.jobs.length === 1}
@@ -479,6 +627,10 @@
                             {/each}
                           </div>
                         {/if}
+                      {:else}
+                        <div class="empty-cell">
+                          No jobs
+                        </div>
                       {/if}
                     </div>
                   </td>
