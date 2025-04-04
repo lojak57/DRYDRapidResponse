@@ -1,5 +1,5 @@
 {
-	"name": "dryad-restoration-app",
+	"name": "dryad-app",
 	"private": true,
 	"version": "0.0.1",
 	"type": "module",
@@ -14,7 +14,8 @@
 		"lint": "prettier --check . && eslint .",
 		"test:unit": "vitest",
 		"test": "npm run test:unit -- --run && npm run test:e2e",
-		"test:e2e": "playwright test"
+		"test:e2e": "playwright test",
+		"deploy": "vercel deploy --prod"
 	},
 	"devDependencies": {
 		"@eslint/compat": "^1.2.5",

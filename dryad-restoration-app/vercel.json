@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "name": "dryad-app",
   "buildCommand": "npm run build",
   "devCommand": "npm run dev",
   "outputDirectory": ".svelte-kit/output",
