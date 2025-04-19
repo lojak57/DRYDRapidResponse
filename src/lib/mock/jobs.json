@@ -1,0 +1,201 @@
+[
+  {
+    "id": "j001",
+    "jobNumber": "WD-2024-0001",
+    "status": "IN_PROGRESS",
+    "jobType": "WATER",
+    "title": "Basement Flood Remediation",
+    "description": "Water damage in basement from broken water heater. Approximately 2 inches of standing water affecting finished basement with carpet and drywall damage.",
+    "incidentDate": "2024-03-25T08:30:00Z",
+    "createdAt": "2024-03-25T10:15:00Z",
+    "scheduledStartDate": "2024-03-25T13:00:00Z",
+    "estimatedCompletionDate": "2024-04-01T17:00:00Z",
+    "customerId": "c001",
+    "siteAddress": {
+      "street": "123 Oak Street",
+      "city": "Portland",
+      "state": "OR",
+      "zip": "97214"
+    },
+    "insuranceInfo": {
+      "company": "State Farm",
+      "policyNumber": "SF-45678-HO",
+      "claimNumber": "SF-2024-W-78901",
+      "adjustorName": "Mike Johnson",
+      "adjustorPhone": "503-555-1234",
+      "adjustorEmail": "mike.johnson@statefarm.example.com",
+      "isInsuranceClaim": true
+    },
+    "assignedUserIds": ["u002", "u003"],
+    "equipmentIds": ["e001", "e002", "e005"],
+    "priority": 3,
+    "estimatedCost": 3800,
+    "accessInstructions": "Lockbox code: 1234. Dog in backyard, please ensure gate is closed.",
+    "tags": ["basement", "water heater", "carpet"]
+  },
+  {
+    "id": "j002",
+    "jobNumber": "FD-2024-0002",
+    "status": "SCHEDULED",
+    "jobType": "FIRE",
+    "title": "Kitchen Fire Damage Restoration",
+    "description": "Kitchen fire damage from stovetop grease fire. Damage limited to kitchen area but smoke damage throughout main floor. Needs cleaning, deodorizing, and some cabinet replacement.",
+    "incidentDate": "2024-03-27T19:45:00Z",
+    "createdAt": "2024-03-28T09:20:00Z",
+    "scheduledStartDate": "2024-03-30T08:00:00Z",
+    "estimatedCompletionDate": "2024-04-10T17:00:00Z",
+    "customerId": "c002",
+    "siteAddress": {
+      "street": "456 Pine Avenue",
+      "city": "Portland",
+      "state": "OR",
+      "zip": "97209"
+    },
+    "insuranceInfo": {
+      "company": "Allstate",
+      "policyNumber": "AL-91234-HO",
+      "claimNumber": "AL-2024-F-12345",
+      "adjustorName": "Sarah Williams",
+      "adjustorPhone": "503-555-6789",
+      "adjustorEmail": "sarah.w@allstate.example.com",
+      "isInsuranceClaim": true
+    },
+    "assignedUserIds": ["u001", "u003"],
+    "equipmentIds": ["e003", "e006"],
+    "priority": 4,
+    "estimatedCost": 7500,
+    "accessInstructions": "Customer will be home. Call 30 minutes before arrival.",
+    "tags": ["kitchen", "fire", "smoke", "cabinets"]
+  },
+  {
+    "id": "j003",
+    "jobNumber": "MD-2024-0003",
+    "status": "NEW",
+    "jobType": "MOLD",
+    "title": "Bathroom Mold Remediation",
+    "description": "Black mold discovered in master bathroom during renovation. Appears to be from long-term shower leak behind wall. Area approximately 4x6 feet.",
+    "createdAt": "2024-03-29T11:30:00Z",
+    "customerId": "c003",
+    "siteAddress": {
+      "street": "789 Maple Drive",
+      "city": "Beaverton",
+      "state": "OR",
+      "zip": "97005"
+    },
+    "insuranceInfo": {
+      "company": "Liberty Mutual",
+      "policyNumber": "LM-56789-HO",
+      "claimNumber": "LM-2024-M-45678",
+      "isInsuranceClaim": true
+    },
+    "assignedUserIds": ["u002"],
+    "equipmentIds": [],
+    "priority": 2,
+    "tags": ["bathroom", "mold", "renovation"]
+  },
+  {
+    "id": "j004",
+    "jobNumber": "WD-2024-0004",
+    "status": "COMPLETED",
+    "jobType": "WATER",
+    "title": "Washing Machine Overflow",
+    "description": "Washing machine hose burst causing water damage in laundry room and adjacent hallway. Affected flooring and baseboards.",
+    "incidentDate": "2024-03-20T14:15:00Z",
+    "createdAt": "2024-03-20T15:45:00Z",
+    "scheduledStartDate": "2024-03-21T09:00:00Z",
+    "estimatedCompletionDate": "2024-03-25T17:00:00Z",
+    "completedDate": "2024-03-24T16:30:00Z",
+    "customerId": "c004",
+    "siteAddress": {
+      "street": "321 Cedar Lane",
+      "city": "Lake Oswego",
+      "state": "OR",
+      "zip": "97034"
+    },
+    "insuranceInfo": {
+      "company": "Progressive",
+      "policyNumber": "PG-12345-HO",
+      "claimNumber": "PG-2024-W-34567",
+      "adjustorName": "David Chen",
+      "adjustorPhone": "503-555-9876",
+      "adjustorEmail": "d.chen@progressive.example.com",
+      "isInsuranceClaim": true
+    },
+    "assignedUserIds": ["u003", "u004"],
+    "equipmentIds": ["e001", "e004", "e007"],
+    "priority": 3,
+    "estimatedCost": 2700,
+    "accessInstructions": "Garage code: 4321",
+    "tags": ["laundry", "washing machine", "flooring"]
+  },
+  {
+    "id": "j005",
+    "jobNumber": "ST-2024-0005",
+    "status": "ON_HOLD",
+    "jobType": "STORM",
+    "title": "Roof Damage from Windstorm",
+    "description": "Wind damage to roof resulting in water intrusion in attic and upper floor. Multiple rooms affected. Temporary tarp in place.",
+    "incidentDate": "2024-03-15T23:00:00Z",
+    "createdAt": "2024-03-16T10:00:00Z",
+    "scheduledStartDate": "2024-03-17T08:00:00Z",
+    "customerId": "c005",
+    "siteAddress": {
+      "street": "555 Birch Boulevard",
+      "city": "Portland",
+      "state": "OR",
+      "zip": "97219"
+    },
+    "insuranceInfo": {
+      "company": "Farmers Insurance",
+      "policyNumber": "FI-67890-HO",
+      "claimNumber": "FI-2024-S-56789",
+      "adjustorName": "Jennifer Lopez",
+      "adjustorPhone": "503-555-5432",
+      "adjustorEmail": "j.lopez@farmers.example.com",
+      "isInsuranceClaim": true
+    },
+    "assignedUserIds": ["u001", "u004"],
+    "equipmentIds": ["e008", "e009"],
+    "priority": 5,
+    "estimatedCost": 12000,
+    "accessInstructions": "Key under flowerpot on front porch. Nervous cat inside - do not let out.",
+    "tags": ["roof", "storm", "water intrusion", "attic"]
+  },
+  {
+    "id": "job-123",
+    "jobNumber": "J-2023-001",
+    "status": "COMPLETED",
+    "jobType": "WATER_DAMAGE",
+    "customerId": "cust-456",
+    "siteAddress": {
+      "street": "123 Main St",
+      "city": "San Francisco",
+      "state": "CA",
+      "zip": "94105"
+    },
+    "assignedUserIds": [
+      "tech-789",
+      "tech-101"
+    ],
+    "incidentDate": "2023-06-15T00:00:00Z",
+    "createdAt": "2023-06-15T14:30:00Z",
+    "scheduledStartDate": "2023-06-16T09:00:00Z",
+    "estimatedCompletionDate": "2023-06-25T17:00:00Z",
+    "completedDate": "2023-06-23T15:45:00Z",
+    "title": "Residential Water Damage",
+    "description": "Pipe burst in the kitchen, affecting kitchen and living room.",
+    "insuranceInfo": {
+      "company": "AllState",
+      "policyNumber": "AS-12345-B",
+      "claimNumber": "CLM-9876",
+      "adjustorName": "Jane Wilson",
+      "adjustorPhone": "555-987-6543",
+      "adjustorEmail": "j.wilson@allstate.example.com",
+      "deductible": 500,
+      "isInsuranceClaim": true
+    },
+    "equipmentIds": [],
+    "priority": 3,
+    "accessInstructions": "Key under doormat."
+  }
+]
